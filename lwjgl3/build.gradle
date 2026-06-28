@@ -1,0 +1,97 @@
+buildscript {
+  repositories {
+    gradlePluginPortal()
+  }
+}
+
+plugins {
+  id "io.github.fourlastor.construo" version "1.4.1"
+  id 'application'
+}
+
+sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
+
+def mainClassName = 'com.git.bs.test.BsControlsLauncher'
+application.setMainClass(mainClassName)
+eclipse.project.name = appName + '-lwjgl3'
+java.sourceCompatibility = JavaVersion.VERSION_25
+java.targetCompatibility = JavaVersion.VERSION_25
+if (JavaVersion.current().isJava9Compatible()) {
+  compileJava.options.release.set(25)
+}
+
+dependencies {
+  implementation project(':core')
+  implementation project(':common')
+  implementation project(':demo')
+
+  implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+  implementation "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+  implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+  implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+
+  // DeskPlatform 用 nativefilechooser-desktop-lwjgl 变体
+  implementation "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:$gdxNativefilechooserVersion"
+
+  // Bootstrap Icons SVG → PNG+atlas 转换工具（Batik）：iconpkg 用
+  // exclude xpp3 + pull-parser：它们注册的 SAXParserFactory 不识别 external-general-entities
+  // feature，会让 Batik 在 JDK 21 上抛 SAXNotRecognizedException
+  implementation("org.apache.xmlgraphics:batik-all:$xmlGraphicsBatik") {
+    exclude group: 'xpp3', module: 'xpp3'
+    exclude group: 'pull-parser', module: 'pull-parser'
+  }
+  implementation "org.apache.xmlgraphics:xmlgraphics-commons:$xmlGraphicsCommons"
+  implementation "org.slf4j:slf4j-api:$slf4jVersion"
+  implementation "org.projectlombok:lombok:$lombokVersion"
+  annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+  implementation "com.alibaba.fastjson2:fastjson2:$fastjson2Version"
+}
+
+def os = System.properties['os.name'].toLowerCase()
+
+tasks.withType(JavaCompile).configureEach {
+  options.compilerArgs += ['--add-modules', 'java.desktop']
+}
+
+run {
+  workingDir = rootProject.file('assets').path
+  setIgnoreExitValue(true)
+
+  if (os.contains('mac')) jvmArgs += "-XstartOnFirstThread"
+}
+
+jar {
+  archiveFileName.set("${appName}-${projectVersion}.jar")
+  duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+  dependsOn configurations.runtimeClasspath
+  from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+  exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+  dependencies {
+    exclude('META-INF/INDEX.LIST', 'META-INF/maven/**')
+  }
+  manifest {
+    attributes 'Main-Class': mainClassName
+  }
+  doLast {
+    file(archiveFile).setExecutable(true, false)
+  }
+}
+
+construo {
+  name.set(appName)
+  humanName.set(appName)
+  version.set("$projectVersion")
+  targets.configure {
+    create("linuxX64", io.github.fourlastor.construo.Target.Linux) {
+      architecture.set(io.github.fourlastor.construo.Target.Architecture.X86_64)
+    }
+    create("winX64", io.github.fourlastor.construo.Target.Windows) {
+      architecture.set(io.github.fourlastor.construo.Target.Architecture.X86_64)
+    }
+  }
+}
+
+// Equivalent to the jar task; here for compatibility with gdx-setup.
+tasks.register('dist') {
+  dependsOn 'jar'
+}

@@ -1,0 +1,56 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org' }
+    gradlePluginPortal()
+    google()
+    maven {url 'https://maven.aliyun.com/repository/central'}
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://teavm.org/maven/repository/' }
+  }
+}
+
+allprojects {
+  apply plugin: 'eclipse'
+  apply plugin: 'idea'
+
+  // This allows you to "Build and run using IntelliJ IDEA", an option in IDEA's Settings.
+  idea {
+    module {
+      outputDir file('build/classes/java/main')
+      testOutputDir file('build/classes/java/test')
+    }
+  }
+}
+
+// bs-ui 子项目通用配置：移除 generateAssetList（assets 由用户自行管理）
+configure(subprojects) {
+  apply plugin: 'java-library'
+
+  compileJava {
+    options.incremental = true
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+  }
+}
+
+subprojects {
+  version = '$projectVersion'
+  ext.appName = 'bs-ui'
+  repositories {
+    mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org' }
+    mavenLocal()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://jitpack.io' }
+  }
+
+  test {
+    //onlyIf { false } // 默认不执行测试
+  }
+}
+
+eclipse.project.name = 'bs-ui' + '-parent'

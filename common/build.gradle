@@ -1,0 +1,20 @@
+plugins { id 'java-library' }
+
+group = 'com.git.bs'
+version = '0.1.0'
+
+eclipse.project.name = appName + '-common'
+
+dependencies {
+
+  implementation "org.projectlombok:lombok:$lombokVersion"
+  // Platform 接口签名引用了 NativeFileChooser，必须 api 传递
+  implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+  implementation "org.slf4j:slf4j-api:$slf4jVersion"
+  implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+
+  //implementation "games.spooky.gdx:gdx-nativefilechooser:$gdxNativefilechooserVersion"
+
+  compileOnly "org.projectlombok:lombok:$lombokVersion"
+  annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+}

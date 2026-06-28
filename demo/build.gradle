@@ -1,0 +1,15 @@
+plugins { id 'java-library' }
+
+group = 'com.git.bs'
+version = '0.1.0'
+
+eclipse.project.name = appName + '-demo'
+
+dependencies {
+  api project(':core')
+
+  implementation "org.slf4j:slf4j-api:$slf4jVersion"
+
+  compileOnly "org.projectlombok:lombok:$lombokVersion"
+  annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+}

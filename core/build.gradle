@@ -1,0 +1,16 @@
+plugins { id 'java-library' }
+
+group = 'com.git.bs'
+version = '0.1.0'
+
+eclipse.project.name = appName + '-core'
+
+dependencies {
+  api project(':common')
+  api "com.badlogicgames.gdx:gdx:$gdxVersion"
+  api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"   // BsSkinLoader 用 FreeTypeFontGenerator
+  implementation "org.slf4j:slf4j-api:$slf4jVersion"
+
+  compileOnly "org.projectlombok:lombok:$lombokVersion"
+  annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+}

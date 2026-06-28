@@ -1,0 +1,2474 @@
+{
+  "reflection": [
+    {
+      "type": "XConnection",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "startApp",
+          "parameterTypes": []
+        },
+          {
+            "name": "pauseApp",
+            "parameterTypes": []
+          }
+        ]
+    },
+    {
+      "type": "byte[]",
+      "serializable": true
+    },
+    {
+      "type": "com.badlogic.gdx.backends.lwjgl3.audio.OpenALMusic[]"
+    },
+    {
+      "type": "com.badlogic.gdx.graphics.Pixmap",
+      "fields": [
+        {
+          "name": "color"
+        }
+      ]
+    },
+    {
+      "type": "com.badlogic.gdx.graphics.g2d.GlyphLayout$GlyphRun",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.git.mota.j2me.MidiPlayer",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "javax.microedition.lcdui.impl.GdxPlayer",
+            "java.io.InputStream"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.git.platform.DeskPlatform",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.git.test.Main",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "main",
+          "parameterTypes": [
+            "java.lang.String[]"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.sun.media.sound.DirectAudioDevice",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "addFormat",
+          "parameterTypes": [
+            "java.util.Vector",
+            "int",
+            "int",
+            "int",
+            "float",
+            "int",
+            "boolean",
+            "boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.sun.media.sound.DirectAudioDeviceProvider$DirectAudioDeviceInfo",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "int",
+            "int",
+            "int",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.sun.media.sound.PortMixerProvider$PortMixerInfo",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "int",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Boolean",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "getBoolean",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Integer",
+      "serializable": true
+    },
+    {
+      "type": "java.lang.Number",
+      "serializable": true
+    },
+    {
+      "type": "java.lang.Object[]"
+    },
+    {
+      "type": "java.lang.String",
+      "serializable": true
+    },
+    {
+      "type": "java.lang.String[]"
+    },
+    {
+      "type": "java.nio.Buffer",
+      "fields": [
+        {
+          "name": "address"
+        },
+        {
+          "name": "capacity"
+        },
+        {
+          "name": "limit"
+        },
+        {
+          "name": "mark"
+        },
+        {
+          "name": "position"
+        }
+      ]
+    },
+    {
+      "type": "java.nio.ByteBuffer",
+      "fields": [
+        {
+          "name": "offset"
+        }
+      ]
+    },
+    {
+      "type": "java.nio.DirectByteBuffer",
+      "unsafeAllocated": true,
+      "fields": [
+        {
+          "name": "att"
+        }
+      ]
+    },
+    {
+      "type": "java.nio.DirectCharBufferU",
+      "unsafeAllocated": true,
+      "fields": [
+        {
+          "name": "att"
+        }
+      ]
+    },
+    {
+      "type": "java.nio.DirectDoubleBufferU",
+      "fields": [
+        {
+          "name": "att"
+        }
+      ]
+    },
+    {
+      "type": "java.nio.DirectFloatBufferU",
+      "fields": [
+        {
+          "name": "att"
+        }
+      ]
+    },
+    {
+      "type": "java.nio.DirectIntBufferU",
+      "unsafeAllocated": true,
+      "fields": [
+        {
+          "name": "att"
+        }
+      ]
+    },
+    {
+      "type": "java.nio.DirectLongBufferU",
+      "fields": [
+        {
+          "name": "att"
+        }
+      ]
+    },
+    {
+      "type": "java.nio.DirectShortBufferU",
+      "fields": [
+        {
+          "name": "att"
+        }
+      ]
+    },
+    {
+      "type": "java.nio.MappedByteBuffer"
+    },
+    {
+      "type": "java.util.concurrent.ConcurrentHashMap",
+      "serializable": true
+    },
+    {
+      "type": "java.util.concurrent.ConcurrentHashMap$Segment",
+      "serializable": true
+    },
+    {
+      "type": "java.util.concurrent.ConcurrentHashMap$Segment[]",
+      "serializable": true
+    },
+    {
+      "type": "java.util.concurrent.atomic.AtomicInteger",
+      "serializable": true
+    },
+    {
+      "type": "java.util.concurrent.locks.AbstractOwnableSynchronizer",
+      "serializable": true
+    },
+    {
+      "type": "java.util.concurrent.locks.AbstractQueuedSynchronizer",
+      "serializable": true
+    },
+    {
+      "type": "java.util.concurrent.locks.ReentrantLock",
+      "serializable": true
+    },
+    {
+      "type": "java.util.concurrent.locks.ReentrantLock$NonfairSync",
+      "serializable": true
+    },
+    {
+      "type": "java.util.concurrent.locks.ReentrantLock$Sync",
+      "serializable": true
+    },
+    {
+      "type": "javax.microedition.rms.impl.FileRecord",
+      "serializable": true
+    },
+    {
+      "type": "org.lwjgl.glfw.GLFW",
+      "fields": [
+        {
+          "name": "GLFW_ACCUM_ALPHA_BITS"
+        },
+        {
+          "name": "GLFW_ACCUM_BLUE_BITS"
+        },
+        {
+          "name": "GLFW_ACCUM_GREEN_BITS"
+        },
+        {
+          "name": "GLFW_ACCUM_RED_BITS"
+        },
+        {
+          "name": "GLFW_ALPHA_BITS"
+        },
+        {
+          "name": "GLFW_ANGLE_PLATFORM_TYPE"
+        },
+        {
+          "name": "GLFW_ANGLE_PLATFORM_TYPE_D3D11"
+        },
+        {
+          "name": "GLFW_ANGLE_PLATFORM_TYPE_D3D9"
+        },
+        {
+          "name": "GLFW_ANGLE_PLATFORM_TYPE_METAL"
+        },
+        {
+          "name": "GLFW_ANGLE_PLATFORM_TYPE_NONE"
+        },
+        {
+          "name": "GLFW_ANGLE_PLATFORM_TYPE_OPENGL"
+        },
+        {
+          "name": "GLFW_ANGLE_PLATFORM_TYPE_OPENGLES"
+        },
+        {
+          "name": "GLFW_ANGLE_PLATFORM_TYPE_VULKAN"
+        },
+        {
+          "name": "GLFW_ANY_PLATFORM"
+        },
+        {
+          "name": "GLFW_ANY_POSITION"
+        },
+        {
+          "name": "GLFW_ANY_RELEASE_BEHAVIOR"
+        },
+        {
+          "name": "GLFW_API_UNAVAILABLE"
+        },
+        {
+          "name": "GLFW_ARROW_CURSOR"
+        },
+        {
+          "name": "GLFW_AUTO_ICONIFY"
+        },
+        {
+          "name": "GLFW_AUX_BUFFERS"
+        },
+        {
+          "name": "GLFW_BLUE_BITS"
+        },
+        {
+          "name": "GLFW_CENTER_CURSOR"
+        },
+        {
+          "name": "GLFW_CLIENT_API"
+        },
+        {
+          "name": "GLFW_COCOA_CHDIR_RESOURCES"
+        },
+        {
+          "name": "GLFW_COCOA_FRAME_NAME"
+        },
+        {
+          "name": "GLFW_COCOA_GRAPHICS_SWITCHING"
+        },
+        {
+          "name": "GLFW_COCOA_MENUBAR"
+        },
+        {
+          "name": "GLFW_COCOA_RETINA_FRAMEBUFFER"
+        },
+        {
+          "name": "GLFW_CONNECTED"
+        },
+        {
+          "name": "GLFW_CONTEXT_CREATION_API"
+        },
+        {
+          "name": "GLFW_CONTEXT_DEBUG"
+        },
+        {
+          "name": "GLFW_CONTEXT_NO_ERROR"
+        },
+        {
+          "name": "GLFW_CONTEXT_RELEASE_BEHAVIOR"
+        },
+        {
+          "name": "GLFW_CONTEXT_REVISION"
+        },
+        {
+          "name": "GLFW_CONTEXT_ROBUSTNESS"
+        },
+        {
+          "name": "GLFW_CONTEXT_VERSION_MAJOR"
+        },
+        {
+          "name": "GLFW_CONTEXT_VERSION_MINOR"
+        },
+        {
+          "name": "GLFW_CROSSHAIR_CURSOR"
+        },
+        {
+          "name": "GLFW_CURSOR"
+        },
+        {
+          "name": "GLFW_CURSOR_CAPTURED"
+        },
+        {
+          "name": "GLFW_CURSOR_DISABLED"
+        },
+        {
+          "name": "GLFW_CURSOR_HIDDEN"
+        },
+        {
+          "name": "GLFW_CURSOR_NORMAL"
+        },
+        {
+          "name": "GLFW_CURSOR_UNAVAILABLE"
+        },
+        {
+          "name": "GLFW_DECORATED"
+        },
+        {
+          "name": "GLFW_DEPTH_BITS"
+        },
+        {
+          "name": "GLFW_DISCONNECTED"
+        },
+        {
+          "name": "GLFW_DONT_CARE"
+        },
+        {
+          "name": "GLFW_DOUBLEBUFFER"
+        },
+        {
+          "name": "GLFW_EGL_CONTEXT_API"
+        },
+        {
+          "name": "GLFW_FALSE"
+        },
+        {
+          "name": "GLFW_FEATURE_UNAVAILABLE"
+        },
+        {
+          "name": "GLFW_FEATURE_UNIMPLEMENTED"
+        },
+        {
+          "name": "GLFW_FLOATING"
+        },
+        {
+          "name": "GLFW_FOCUSED"
+        },
+        {
+          "name": "GLFW_FOCUS_ON_SHOW"
+        },
+        {
+          "name": "GLFW_FORMAT_UNAVAILABLE"
+        },
+        {
+          "name": "GLFW_GAMEPAD_AXIS_LAST"
+        },
+        {
+          "name": "GLFW_GAMEPAD_AXIS_LEFT_TRIGGER"
+        },
+        {
+          "name": "GLFW_GAMEPAD_AXIS_LEFT_X"
+        },
+        {
+          "name": "GLFW_GAMEPAD_AXIS_LEFT_Y"
+        },
+        {
+          "name": "GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER"
+        },
+        {
+          "name": "GLFW_GAMEPAD_AXIS_RIGHT_X"
+        },
+        {
+          "name": "GLFW_GAMEPAD_AXIS_RIGHT_Y"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_A"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_B"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_BACK"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_CIRCLE"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_CROSS"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_DPAD_DOWN"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_DPAD_LEFT"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_DPAD_RIGHT"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_DPAD_UP"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_GUIDE"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_LAST"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_LEFT_BUMPER"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_LEFT_THUMB"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_RIGHT_THUMB"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_SQUARE"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_START"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_TRIANGLE"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_X"
+        },
+        {
+          "name": "GLFW_GAMEPAD_BUTTON_Y"
+        },
+        {
+          "name": "GLFW_GREEN_BITS"
+        },
+        {
+          "name": "GLFW_HAND_CURSOR"
+        },
+        {
+          "name": "GLFW_HAT_CENTERED"
+        },
+        {
+          "name": "GLFW_HAT_DOWN"
+        },
+        {
+          "name": "GLFW_HAT_LEFT"
+        },
+        {
+          "name": "GLFW_HAT_LEFT_DOWN"
+        },
+        {
+          "name": "GLFW_HAT_LEFT_UP"
+        },
+        {
+          "name": "GLFW_HAT_RIGHT"
+        },
+        {
+          "name": "GLFW_HAT_RIGHT_DOWN"
+        },
+        {
+          "name": "GLFW_HAT_RIGHT_UP"
+        },
+        {
+          "name": "GLFW_HAT_UP"
+        },
+        {
+          "name": "GLFW_HOVERED"
+        },
+        {
+          "name": "GLFW_HRESIZE_CURSOR"
+        },
+        {
+          "name": "GLFW_IBEAM_CURSOR"
+        },
+        {
+          "name": "GLFW_ICONIFIED"
+        },
+        {
+          "name": "GLFW_IME"
+        },
+        {
+          "name": "GLFW_INVALID_ENUM"
+        },
+        {
+          "name": "GLFW_INVALID_VALUE"
+        },
+        {
+          "name": "GLFW_JOYSTICK_1"
+        },
+        {
+          "name": "GLFW_JOYSTICK_10"
+        },
+        {
+          "name": "GLFW_JOYSTICK_11"
+        },
+        {
+          "name": "GLFW_JOYSTICK_12"
+        },
+        {
+          "name": "GLFW_JOYSTICK_13"
+        },
+        {
+          "name": "GLFW_JOYSTICK_14"
+        },
+        {
+          "name": "GLFW_JOYSTICK_15"
+        },
+        {
+          "name": "GLFW_JOYSTICK_16"
+        },
+        {
+          "name": "GLFW_JOYSTICK_2"
+        },
+        {
+          "name": "GLFW_JOYSTICK_3"
+        },
+        {
+          "name": "GLFW_JOYSTICK_4"
+        },
+        {
+          "name": "GLFW_JOYSTICK_5"
+        },
+        {
+          "name": "GLFW_JOYSTICK_6"
+        },
+        {
+          "name": "GLFW_JOYSTICK_7"
+        },
+        {
+          "name": "GLFW_JOYSTICK_8"
+        },
+        {
+          "name": "GLFW_JOYSTICK_9"
+        },
+        {
+          "name": "GLFW_JOYSTICK_HAT_BUTTONS"
+        },
+        {
+          "name": "GLFW_JOYSTICK_LAST"
+        },
+        {
+          "name": "GLFW_KEY_0"
+        },
+        {
+          "name": "GLFW_KEY_1"
+        },
+        {
+          "name": "GLFW_KEY_2"
+        },
+        {
+          "name": "GLFW_KEY_3"
+        },
+        {
+          "name": "GLFW_KEY_4"
+        },
+        {
+          "name": "GLFW_KEY_5"
+        },
+        {
+          "name": "GLFW_KEY_6"
+        },
+        {
+          "name": "GLFW_KEY_7"
+        },
+        {
+          "name": "GLFW_KEY_8"
+        },
+        {
+          "name": "GLFW_KEY_9"
+        },
+        {
+          "name": "GLFW_KEY_A"
+        },
+        {
+          "name": "GLFW_KEY_APOSTROPHE"
+        },
+        {
+          "name": "GLFW_KEY_B"
+        },
+        {
+          "name": "GLFW_KEY_BACKSLASH"
+        },
+        {
+          "name": "GLFW_KEY_BACKSPACE"
+        },
+        {
+          "name": "GLFW_KEY_C"
+        },
+        {
+          "name": "GLFW_KEY_CAPS_LOCK"
+        },
+        {
+          "name": "GLFW_KEY_COMMA"
+        },
+        {
+          "name": "GLFW_KEY_D"
+        },
+        {
+          "name": "GLFW_KEY_DELETE"
+        },
+        {
+          "name": "GLFW_KEY_DOWN"
+        },
+        {
+          "name": "GLFW_KEY_E"
+        },
+        {
+          "name": "GLFW_KEY_END"
+        },
+        {
+          "name": "GLFW_KEY_ENTER"
+        },
+        {
+          "name": "GLFW_KEY_EQUAL"
+        },
+        {
+          "name": "GLFW_KEY_ESCAPE"
+        },
+        {
+          "name": "GLFW_KEY_F"
+        },
+        {
+          "name": "GLFW_KEY_F1"
+        },
+        {
+          "name": "GLFW_KEY_F10"
+        },
+        {
+          "name": "GLFW_KEY_F11"
+        },
+        {
+          "name": "GLFW_KEY_F12"
+        },
+        {
+          "name": "GLFW_KEY_F13"
+        },
+        {
+          "name": "GLFW_KEY_F14"
+        },
+        {
+          "name": "GLFW_KEY_F15"
+        },
+        {
+          "name": "GLFW_KEY_F16"
+        },
+        {
+          "name": "GLFW_KEY_F17"
+        },
+        {
+          "name": "GLFW_KEY_F18"
+        },
+        {
+          "name": "GLFW_KEY_F19"
+        },
+        {
+          "name": "GLFW_KEY_F2"
+        },
+        {
+          "name": "GLFW_KEY_F20"
+        },
+        {
+          "name": "GLFW_KEY_F21"
+        },
+        {
+          "name": "GLFW_KEY_F22"
+        },
+        {
+          "name": "GLFW_KEY_F23"
+        },
+        {
+          "name": "GLFW_KEY_F24"
+        },
+        {
+          "name": "GLFW_KEY_F25"
+        },
+        {
+          "name": "GLFW_KEY_F3"
+        },
+        {
+          "name": "GLFW_KEY_F4"
+        },
+        {
+          "name": "GLFW_KEY_F5"
+        },
+        {
+          "name": "GLFW_KEY_F6"
+        },
+        {
+          "name": "GLFW_KEY_F7"
+        },
+        {
+          "name": "GLFW_KEY_F8"
+        },
+        {
+          "name": "GLFW_KEY_F9"
+        },
+        {
+          "name": "GLFW_KEY_G"
+        },
+        {
+          "name": "GLFW_KEY_GRAVE_ACCENT"
+        },
+        {
+          "name": "GLFW_KEY_H"
+        },
+        {
+          "name": "GLFW_KEY_HOME"
+        },
+        {
+          "name": "GLFW_KEY_I"
+        },
+        {
+          "name": "GLFW_KEY_INSERT"
+        },
+        {
+          "name": "GLFW_KEY_J"
+        },
+        {
+          "name": "GLFW_KEY_K"
+        },
+        {
+          "name": "GLFW_KEY_KP_0"
+        },
+        {
+          "name": "GLFW_KEY_KP_1"
+        },
+        {
+          "name": "GLFW_KEY_KP_2"
+        },
+        {
+          "name": "GLFW_KEY_KP_3"
+        },
+        {
+          "name": "GLFW_KEY_KP_4"
+        },
+        {
+          "name": "GLFW_KEY_KP_5"
+        },
+        {
+          "name": "GLFW_KEY_KP_6"
+        },
+        {
+          "name": "GLFW_KEY_KP_7"
+        },
+        {
+          "name": "GLFW_KEY_KP_8"
+        },
+        {
+          "name": "GLFW_KEY_KP_9"
+        },
+        {
+          "name": "GLFW_KEY_KP_ADD"
+        },
+        {
+          "name": "GLFW_KEY_KP_DECIMAL"
+        },
+        {
+          "name": "GLFW_KEY_KP_DIVIDE"
+        },
+        {
+          "name": "GLFW_KEY_KP_ENTER"
+        },
+        {
+          "name": "GLFW_KEY_KP_EQUAL"
+        },
+        {
+          "name": "GLFW_KEY_KP_MULTIPLY"
+        },
+        {
+          "name": "GLFW_KEY_KP_SUBTRACT"
+        },
+        {
+          "name": "GLFW_KEY_L"
+        },
+        {
+          "name": "GLFW_KEY_LAST"
+        },
+        {
+          "name": "GLFW_KEY_LEFT"
+        },
+        {
+          "name": "GLFW_KEY_LEFT_ALT"
+        },
+        {
+          "name": "GLFW_KEY_LEFT_BRACKET"
+        },
+        {
+          "name": "GLFW_KEY_LEFT_CONTROL"
+        },
+        {
+          "name": "GLFW_KEY_LEFT_SHIFT"
+        },
+        {
+          "name": "GLFW_KEY_LEFT_SUPER"
+        },
+        {
+          "name": "GLFW_KEY_M"
+        },
+        {
+          "name": "GLFW_KEY_MENU"
+        },
+        {
+          "name": "GLFW_KEY_MINUS"
+        },
+        {
+          "name": "GLFW_KEY_N"
+        },
+        {
+          "name": "GLFW_KEY_NUM_LOCK"
+        },
+        {
+          "name": "GLFW_KEY_O"
+        },
+        {
+          "name": "GLFW_KEY_P"
+        },
+        {
+          "name": "GLFW_KEY_PAGE_DOWN"
+        },
+        {
+          "name": "GLFW_KEY_PAGE_UP"
+        },
+        {
+          "name": "GLFW_KEY_PAUSE"
+        },
+        {
+          "name": "GLFW_KEY_PERIOD"
+        },
+        {
+          "name": "GLFW_KEY_PRINT_SCREEN"
+        },
+        {
+          "name": "GLFW_KEY_Q"
+        },
+        {
+          "name": "GLFW_KEY_R"
+        },
+        {
+          "name": "GLFW_KEY_RIGHT"
+        },
+        {
+          "name": "GLFW_KEY_RIGHT_ALT"
+        },
+        {
+          "name": "GLFW_KEY_RIGHT_BRACKET"
+        },
+        {
+          "name": "GLFW_KEY_RIGHT_CONTROL"
+        },
+        {
+          "name": "GLFW_KEY_RIGHT_SHIFT"
+        },
+        {
+          "name": "GLFW_KEY_RIGHT_SUPER"
+        },
+        {
+          "name": "GLFW_KEY_S"
+        },
+        {
+          "name": "GLFW_KEY_SCROLL_LOCK"
+        },
+        {
+          "name": "GLFW_KEY_SEMICOLON"
+        },
+        {
+          "name": "GLFW_KEY_SLASH"
+        },
+        {
+          "name": "GLFW_KEY_SPACE"
+        },
+        {
+          "name": "GLFW_KEY_T"
+        },
+        {
+          "name": "GLFW_KEY_TAB"
+        },
+        {
+          "name": "GLFW_KEY_U"
+        },
+        {
+          "name": "GLFW_KEY_UNKNOWN"
+        },
+        {
+          "name": "GLFW_KEY_UP"
+        },
+        {
+          "name": "GLFW_KEY_V"
+        },
+        {
+          "name": "GLFW_KEY_W"
+        },
+        {
+          "name": "GLFW_KEY_WORLD_1"
+        },
+        {
+          "name": "GLFW_KEY_WORLD_2"
+        },
+        {
+          "name": "GLFW_KEY_X"
+        },
+        {
+          "name": "GLFW_KEY_Y"
+        },
+        {
+          "name": "GLFW_KEY_Z"
+        },
+        {
+          "name": "GLFW_LOCK_KEY_MODS"
+        },
+        {
+          "name": "GLFW_LOSE_CONTEXT_ON_RESET"
+        },
+        {
+          "name": "GLFW_MANAGE_PREEDIT_CANDIDATE"
+        },
+        {
+          "name": "GLFW_MAXIMIZED"
+        },
+        {
+          "name": "GLFW_MOD_ALT"
+        },
+        {
+          "name": "GLFW_MOD_CAPS_LOCK"
+        },
+        {
+          "name": "GLFW_MOD_CONTROL"
+        },
+        {
+          "name": "GLFW_MOD_NUM_LOCK"
+        },
+        {
+          "name": "GLFW_MOD_SHIFT"
+        },
+        {
+          "name": "GLFW_MOD_SUPER"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_1"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_2"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_3"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_4"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_5"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_6"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_7"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_8"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_LAST"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_LEFT"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_MIDDLE"
+        },
+        {
+          "name": "GLFW_MOUSE_BUTTON_RIGHT"
+        },
+        {
+          "name": "GLFW_MOUSE_PASSTHROUGH"
+        },
+        {
+          "name": "GLFW_NATIVE_CONTEXT_API"
+        },
+        {
+          "name": "GLFW_NOT_ALLOWED_CURSOR"
+        },
+        {
+          "name": "GLFW_NOT_INITIALIZED"
+        },
+        {
+          "name": "GLFW_NO_API"
+        },
+        {
+          "name": "GLFW_NO_CURRENT_CONTEXT"
+        },
+        {
+          "name": "GLFW_NO_ERROR"
+        },
+        {
+          "name": "GLFW_NO_RESET_NOTIFICATION"
+        },
+        {
+          "name": "GLFW_NO_ROBUSTNESS"
+        },
+        {
+          "name": "GLFW_NO_WINDOW_CONTEXT"
+        },
+        {
+          "name": "GLFW_OPENGL_ANY_PROFILE"
+        },
+        {
+          "name": "GLFW_OPENGL_API"
+        },
+        {
+          "name": "GLFW_OPENGL_COMPAT_PROFILE"
+        },
+        {
+          "name": "GLFW_OPENGL_CORE_PROFILE"
+        },
+        {
+          "name": "GLFW_OPENGL_DEBUG_CONTEXT"
+        },
+        {
+          "name": "GLFW_OPENGL_ES_API"
+        },
+        {
+          "name": "GLFW_OPENGL_FORWARD_COMPAT"
+        },
+        {
+          "name": "GLFW_OPENGL_PROFILE"
+        },
+        {
+          "name": "GLFW_OSMESA_CONTEXT_API"
+        },
+        {
+          "name": "GLFW_OUT_OF_MEMORY"
+        },
+        {
+          "name": "GLFW_PLATFORM"
+        },
+        {
+          "name": "GLFW_PLATFORM_COCOA"
+        },
+        {
+          "name": "GLFW_PLATFORM_ERROR"
+        },
+        {
+          "name": "GLFW_PLATFORM_NULL"
+        },
+        {
+          "name": "GLFW_PLATFORM_UNAVAILABLE"
+        },
+        {
+          "name": "GLFW_PLATFORM_WAYLAND"
+        },
+        {
+          "name": "GLFW_PLATFORM_WIN32"
+        },
+        {
+          "name": "GLFW_PLATFORM_X11"
+        },
+        {
+          "name": "GLFW_POINTING_HAND_CURSOR"
+        },
+        {
+          "name": "GLFW_POSITION_X"
+        },
+        {
+          "name": "GLFW_POSITION_Y"
+        },
+        {
+          "name": "GLFW_PRESS"
+        },
+        {
+          "name": "GLFW_RAW_MOUSE_MOTION"
+        },
+        {
+          "name": "GLFW_RED_BITS"
+        },
+        {
+          "name": "GLFW_REFRESH_RATE"
+        },
+        {
+          "name": "GLFW_RELEASE"
+        },
+        {
+          "name": "GLFW_RELEASE_BEHAVIOR_FLUSH"
+        },
+        {
+          "name": "GLFW_RELEASE_BEHAVIOR_NONE"
+        },
+        {
+          "name": "GLFW_REPEAT"
+        },
+        {
+          "name": "GLFW_RESIZABLE"
+        },
+        {
+          "name": "GLFW_RESIZE_ALL_CURSOR"
+        },
+        {
+          "name": "GLFW_RESIZE_EW_CURSOR"
+        },
+        {
+          "name": "GLFW_RESIZE_NESW_CURSOR"
+        },
+        {
+          "name": "GLFW_RESIZE_NS_CURSOR"
+        },
+        {
+          "name": "GLFW_RESIZE_NWSE_CURSOR"
+        },
+        {
+          "name": "GLFW_SAMPLES"
+        },
+        {
+          "name": "GLFW_SCALE_FRAMEBUFFER"
+        },
+        {
+          "name": "GLFW_SCALE_TO_MONITOR"
+        },
+        {
+          "name": "GLFW_SOFT_FULLSCREEN"
+        },
+        {
+          "name": "GLFW_SRGB_CAPABLE"
+        },
+        {
+          "name": "GLFW_STENCIL_BITS"
+        },
+        {
+          "name": "GLFW_STEREO"
+        },
+        {
+          "name": "GLFW_STICKY_KEYS"
+        },
+        {
+          "name": "GLFW_STICKY_MOUSE_BUTTONS"
+        },
+        {
+          "name": "GLFW_TRANSPARENT_FRAMEBUFFER"
+        },
+        {
+          "name": "GLFW_TRUE"
+        },
+        {
+          "name": "GLFW_UNLIMITED_MOUSE_BUTTONS"
+        },
+        {
+          "name": "GLFW_VERSION_MAJOR"
+        },
+        {
+          "name": "GLFW_VERSION_MINOR"
+        },
+        {
+          "name": "GLFW_VERSION_REVISION"
+        },
+        {
+          "name": "GLFW_VERSION_UNAVAILABLE"
+        },
+        {
+          "name": "GLFW_VISIBLE"
+        },
+        {
+          "name": "GLFW_VRESIZE_CURSOR"
+        },
+        {
+          "name": "GLFW_WAYLAND_APP_ID"
+        },
+        {
+          "name": "GLFW_WAYLAND_DISABLE_LIBDECOR"
+        },
+        {
+          "name": "GLFW_WAYLAND_LIBDECOR"
+        },
+        {
+          "name": "GLFW_WAYLAND_PREFER_LIBDECOR"
+        },
+        {
+          "name": "GLFW_WIN32_KEYBOARD_MENU"
+        },
+        {
+          "name": "GLFW_WIN32_SHOWDEFAULT"
+        },
+        {
+          "name": "GLFW_X11_CLASS_NAME"
+        },
+        {
+          "name": "GLFW_X11_INSTANCE_NAME"
+        },
+        {
+          "name": "GLFW_X11_ONTHESPOT"
+        },
+        {
+          "name": "GLFW_X11_XCB_VULKAN_SURFACE"
+        }
+      ]
+    },
+    {
+      "type": "org.lwjgl.system.CallbackI",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "callback",
+          "parameterTypes": [
+            "long",
+            "long"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "org.lwjgl.system.CustomBuffer",
+      "fields": [
+        {
+          "name": "capacity"
+        },
+        {
+          "name": "container"
+        },
+        {
+          "name": "limit"
+        },
+        {
+          "name": "mark"
+        },
+        {
+          "name": "position"
+        }
+      ]
+    },
+    {
+      "type": "org.lwjgl.system.Pointer$Default",
+      "fields": [
+        {
+          "name": "address"
+        }
+      ]
+    },
+    {
+      "type": "org.lwjgl.system.ThreadLocalUtil",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "setupEnvData",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.lwjgl.system.jemalloc.JEmallocAllocator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.launcher.LauncherHelper",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "isStaticMain"
+        },
+        {
+          "name": "noArgMain"
+        }
+      ],
+      "methods": [
+        {
+          "name": "getApplicationClass",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.misc.Unsafe",
+      "fields": [
+        {
+          "name": "theUnsafe"
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "glob": "3.png"
+    },
+    {
+      "glob": "4"
+    },
+    {
+      "glob": "META-INF/MANIFEST.MF"
+    },
+    {
+      "glob": "META-INF/services/java.util.prefs.PreferencesFactory"
+    },
+    {
+      "glob": "META-INF/services/javax.sound.midi.spi.MidiDeviceProvider"
+    },
+    {
+      "glob": "META-INF/services/javax.sound.midi.spi.MidiFileReader"
+    },
+    {
+      "glob": "META-INF/services/javax.sound.midi.spi.SoundbankReader"
+    },
+    {
+      "glob": "META-INF/services/javax.sound.sampled.spi.MixerProvider"
+    },
+    {
+      "glob": "META-INF/windows/x64/org/lwjgl/glfw/glfw.dll.sha1"
+    },
+    {
+      "glob": "META-INF/windows/x64/org/lwjgl/jemalloc/jemalloc.dll.sha1"
+    },
+    {
+      "glob": "META-INF/windows/x64/org/lwjgl/lwjgl.dll.sha1"
+    },
+    {
+      "glob": "META-INF/windows/x64/org/lwjgl/openal/OpenAL.dll.sha1"
+    },
+    {
+      "glob": "META-INF/windows/x64/org/lwjgl/opengl/lwjgl_opengl.dll.sha1"
+    },
+    {
+      "glob": "cpid.txt"
+    },
+    {
+      "glob": "cwa.png"
+    },
+    {
+      "glob": "data/ball.png"
+    },
+    {
+      "glob": "data/battle/0.png"
+    },
+    {
+      "glob": "data/battle/1.png"
+    },
+    {
+      "glob": "data/battle/boss.d"
+    },
+    {
+      "glob": "data/battle/s0.data"
+    },
+    {
+      "glob": "data/battle/s0.png"
+    },
+    {
+      "glob": "data/battle/s2.data"
+    },
+    {
+      "glob": "data/battle/s2.png"
+    },
+    {
+      "glob": "data/battle/s4.data"
+    },
+    {
+      "glob": "data/battle/s4.png"
+    },
+    {
+      "glob": "data/battle/s5.data"
+    },
+    {
+      "glob": "data/battle/s5.png"
+    },
+    {
+      "glob": "data/box.d"
+    },
+    {
+      "glob": "data/brow/0.png"
+    },
+    {
+      "glob": "data/brow/1.png"
+    },
+    {
+      "glob": "data/brow/10.png"
+    },
+    {
+      "glob": "data/brow/11.png"
+    },
+    {
+      "glob": "data/brow/12.png"
+    },
+    {
+      "glob": "data/brow/13.png"
+    },
+    {
+      "glob": "data/brow/2.png"
+    },
+    {
+      "glob": "data/brow/3.png"
+    },
+    {
+      "glob": "data/brow/4.png"
+    },
+    {
+      "glob": "data/brow/5.png"
+    },
+    {
+      "glob": "data/brow/6.png"
+    },
+    {
+      "glob": "data/brow/7.png"
+    },
+    {
+      "glob": "data/brow/8.png"
+    },
+    {
+      "glob": "data/brow/9.png"
+    },
+    {
+      "glob": "data/brow/e0.png"
+    },
+    {
+      "glob": "data/brow/e1.png"
+    },
+    {
+      "glob": "data/brow/e2.png"
+    },
+    {
+      "glob": "data/brow/e3.png"
+    },
+    {
+      "glob": "data/brow/e4.png"
+    },
+    {
+      "glob": "data/brow/e5.png"
+    },
+    {
+      "glob": "data/cg/0.png"
+    },
+    {
+      "glob": "data/cg/1.png"
+    },
+    {
+      "glob": "data/data.d"
+    },
+    {
+      "glob": "data/face/0.png"
+    },
+    {
+      "glob": "data/face/1.png"
+    },
+    {
+      "glob": "data/face/6.png"
+    },
+    {
+      "glob": "data/ff.png"
+    },
+    {
+      "glob": "data/item.png"
+    },
+    {
+      "glob": "data/item_m.d"
+    },
+    {
+      "glob": "data/ll.png"
+    },
+    {
+      "glob": "data/map.d"
+    },
+    {
+      "glob": "data/map/0.data"
+    },
+    {
+      "glob": "data/map/0.mid"
+    },
+    {
+      "glob": "data/map/0.png"
+    },
+    {
+      "glob": "data/map/1.data"
+    },
+    {
+      "glob": "data/map/1.mid"
+    },
+    {
+      "glob": "data/map/1.png"
+    },
+    {
+      "glob": "data/map/2.data"
+    },
+    {
+      "glob": "data/map/2.mid"
+    },
+    {
+      "glob": "data/map/2.png"
+    },
+    {
+      "glob": "data/map/3.mid"
+    },
+    {
+      "glob": "data/map/4.mid"
+    },
+    {
+      "glob": "data/map/5.data"
+    },
+    {
+      "glob": "data/map/5.png"
+    },
+    {
+      "glob": "data/map/54.mid"
+    },
+    {
+      "glob": "data/map/56.mid"
+    },
+    {
+      "glob": "data/map/77.mid"
+    },
+    {
+      "glob": "data/map/78.mid"
+    },
+    {
+      "glob": "data/map/area.dat"
+    },
+    {
+      "glob": "data/map/m0.d"
+    },
+    {
+      "glob": "data/map/m1.d"
+    },
+    {
+      "glob": "data/map/m2.d"
+    },
+    {
+      "glob": "data/map/m3.d"
+    },
+    {
+      "glob": "data/map/m4.d"
+    },
+    {
+      "glob": "data/map/m54.d"
+    },
+    {
+      "glob": "data/map/m56.d"
+    },
+    {
+      "glob": "data/map/m77.d"
+    },
+    {
+      "glob": "data/map/m78.d"
+    },
+    {
+      "glob": "data/mission0.t"
+    },
+    {
+      "glob": "data/mission1.t"
+    },
+    {
+      "glob": "data/npc0/1.data"
+    },
+    {
+      "glob": "data/npc0/1.png"
+    },
+    {
+      "glob": "data/npc0/12.data"
+    },
+    {
+      "glob": "data/npc0/12.png"
+    },
+    {
+      "glob": "data/npc0/13.data"
+    },
+    {
+      "glob": "data/npc0/13.png"
+    },
+    {
+      "glob": "data/npc0/14.data"
+    },
+    {
+      "glob": "data/npc0/14.png"
+    },
+    {
+      "glob": "data/npc0/15.data"
+    },
+    {
+      "glob": "data/npc0/15.png"
+    },
+    {
+      "glob": "data/npc0/17.data"
+    },
+    {
+      "glob": "data/npc0/17.png"
+    },
+    {
+      "glob": "data/npc0/2.data"
+    },
+    {
+      "glob": "data/npc0/2.png"
+    },
+    {
+      "glob": "data/npc0/28.data"
+    },
+    {
+      "glob": "data/npc0/28.png"
+    },
+    {
+      "glob": "data/npc0/29.data"
+    },
+    {
+      "glob": "data/npc0/29.png"
+    },
+    {
+      "glob": "data/npc0/3.data"
+    },
+    {
+      "glob": "data/npc0/3.png"
+    },
+    {
+      "glob": "data/npc0/31.data"
+    },
+    {
+      "glob": "data/npc0/31.png"
+    },
+    {
+      "glob": "data/npc0/4.data"
+    },
+    {
+      "glob": "data/npc0/4.png"
+    },
+    {
+      "glob": "data/npc0/5.data"
+    },
+    {
+      "glob": "data/npc0/5.png"
+    },
+    {
+      "glob": "data/npc0/6.data"
+    },
+    {
+      "glob": "data/npc0/6.png"
+    },
+    {
+      "glob": "data/npc0/9.data"
+    },
+    {
+      "glob": "data/npc0/9.png"
+    },
+    {
+      "glob": "data/npc1/0.data"
+    },
+    {
+      "glob": "data/npc1/0.png"
+    },
+    {
+      "glob": "data/npc1/1.data"
+    },
+    {
+      "glob": "data/npc1/1.png"
+    },
+    {
+      "glob": "data/npc1/10.data"
+    },
+    {
+      "glob": "data/npc1/10.png"
+    },
+    {
+      "glob": "data/npc1/12.data"
+    },
+    {
+      "glob": "data/npc1/12.png"
+    },
+    {
+      "glob": "data/npc1/13.data"
+    },
+    {
+      "glob": "data/npc1/13.png"
+    },
+    {
+      "glob": "data/npc1/19.data"
+    },
+    {
+      "glob": "data/npc1/19.png"
+    },
+    {
+      "glob": "data/npc1/2.data"
+    },
+    {
+      "glob": "data/npc1/2.png"
+    },
+    {
+      "glob": "data/npc1/20.data"
+    },
+    {
+      "glob": "data/npc1/20.png"
+    },
+    {
+      "glob": "data/npc1/21.data"
+    },
+    {
+      "glob": "data/npc1/21.png"
+    },
+    {
+      "glob": "data/npc1/22.data"
+    },
+    {
+      "glob": "data/npc1/22.png"
+    },
+    {
+      "glob": "data/npc1/24.data"
+    },
+    {
+      "glob": "data/npc1/24.png"
+    },
+    {
+      "glob": "data/npc1/5.data"
+    },
+    {
+      "glob": "data/npc1/5.png"
+    },
+    {
+      "glob": "data/npc1/6.data"
+    },
+    {
+      "glob": "data/npc1/6.png"
+    },
+    {
+      "glob": "data/npc1/7.data"
+    },
+    {
+      "glob": "data/npc1/7.png"
+    },
+    {
+      "glob": "data/npc1/8.data"
+    },
+    {
+      "glob": "data/npc1/8.png"
+    },
+    {
+      "glob": "data/npc1/r0.data"
+    },
+    {
+      "glob": "data/npc1/r0.png"
+    },
+    {
+      "glob": "data/npc2/11.data"
+    },
+    {
+      "glob": "data/npc2/11.png"
+    },
+    {
+      "glob": "data/npc2/15.data"
+    },
+    {
+      "glob": "data/npc2/15.png"
+    },
+    {
+      "glob": "data/npc2/3.data"
+    },
+    {
+      "glob": "data/npc2/3.png"
+    },
+    {
+      "glob": "data/npc2/30.data"
+    },
+    {
+      "glob": "data/npc2/30.png"
+    },
+    {
+      "glob": "data/npc2/34.data"
+    },
+    {
+      "glob": "data/npc2/34.png"
+    },
+    {
+      "glob": "data/npc2/40.data"
+    },
+    {
+      "glob": "data/npc2/40.png"
+    },
+    {
+      "glob": "data/npc2/5.data"
+    },
+    {
+      "glob": "data/npc2/5.png"
+    },
+    {
+      "glob": "data/npc2/6.data"
+    },
+    {
+      "glob": "data/npc2/6.png"
+    },
+    {
+      "glob": "data/shadow.png"
+    },
+    {
+      "glob": "data/shop.d"
+    },
+    {
+      "glob": "data/sms.t"
+    },
+    {
+      "glob": "data/ui.png"
+    },
+    {
+      "glob": "data/ui_m.d"
+    },
+    {
+      "glob": "event"
+    },
+    {
+      "glob": "fengmian.data"
+    },
+    {
+      "glob": "fengmian.png"
+    },
+    {
+      "glob": "font/LXGWWenKaiMonoLite-Light.ttf"
+    },
+    {
+      "glob": "font/chinese.txt"
+    },
+    {
+      "glob": "gdx-freetype64.dll"
+    },
+    {
+      "glob": "gdx64.dll"
+    },
+    {
+      "glob": "libgdx128.png"
+    },
+    {
+      "glob": "libgdx16.png"
+    },
+    {
+      "glob": "libgdx32.png"
+    },
+    {
+      "glob": "libgdx64.png"
+    },
+    {
+      "glob": "logo.png"
+    },
+    {
+      "glob": "music/0.mid"
+    },
+    {
+      "glob": "music/1.mid"
+    },
+    {
+      "glob": "music/2.mid"
+    },
+    {
+      "glob": "music/3.mid"
+    },
+    {
+      "glob": "music/4.mid"
+    },
+    {
+      "glob": "music/8.mid"
+    },
+    {
+      "glob": "opengl32.dll"
+    },
+    {
+      "glob": "org/lwjgl/Version.class"
+    },
+    {
+      "glob": "org/slf4j/impl/StaticLoggerBinder.class"
+    },
+    {
+      "glob": "windows/x64/org/lwjgl/glfw/glfw.dll"
+    },
+    {
+      "glob": "windows/x64/org/lwjgl/jemalloc/jemalloc.dll"
+    },
+    {
+      "glob": "windows/x64/org/lwjgl/lwjgl.dll"
+    },
+    {
+      "glob": "windows/x64/org/lwjgl/openal/OpenAL.dll"
+    },
+    {
+      "glob": "windows/x64/org/lwjgl/opengl/lwjgl_opengl.dll"
+    },
+    {"glob": "ball.png"},
+  {"glob": "battle/0.png"},
+  {"glob": "battle/1.png"},
+  {"glob": "battle/2.png"},
+  {"glob": "battle/3.png"},
+  {"glob": "battle/4.png"},
+  {"glob": "battle/boss.d"},
+  {"glob": "battle/s0.data"},
+  {"glob": "battle/s0.png"},
+  {"glob": "battle/s1.data"},
+  {"glob": "battle/s1.png"},
+  {"glob": "battle/s2.data"},
+  {"glob": "battle/s2.png"},
+  {"glob": "battle/s3.data"},
+  {"glob": "battle/s3.png"},
+  {"glob": "battle/s4.data"},
+  {"glob": "battle/s4.png"},
+  {"glob": "battle/s5.data"},
+  {"glob": "battle/s5.png"},
+  {"glob": "book.d"},
+  {"glob": "box.d"},
+  {"glob": "brow/0.png"},
+  {"glob": "brow/1.png"},
+  {"glob": "brow/10.png"},
+  {"glob": "brow/11.png"},
+  {"glob": "brow/12.png"},
+  {"glob": "brow/13.png"},
+  {"glob": "brow/2.png"},
+  {"glob": "brow/3.png"},
+  {"glob": "brow/4.png"},
+  {"glob": "brow/5.png"},
+  {"glob": "brow/6.png"},
+  {"glob": "brow/7.png"},
+  {"glob": "brow/8.png"},
+  {"glob": "brow/9.png"},
+  {"glob": "brow/e0.png"},
+  {"glob": "brow/e1.png"},
+  {"glob": "brow/e2.png"},
+  {"glob": "brow/e3.png"},
+  {"glob": "brow/e4.png"},
+  {"glob": "brow/e5.png"},
+  {"glob": "brow/m0.png"},
+  {"glob": "brow/m1.png"},
+  {"glob": "cg/0.png"},
+  {"glob": "cg/1.png"},
+  {"glob": "cloud.png"},
+  {"glob": "cwwg2_z.jar"},
+  {"glob": "data.d"},
+  {"glob": "face/0.png"},
+  {"glob": "face/1.png"},
+  {"glob": "face/2.png"},
+  {"glob": "face/3.png"},
+  {"glob": "face/4.png"},
+  {"glob": "face/5.png"},
+  {"glob": "face/6.png"},
+  {"glob": "face/7.png"},
+  {"glob": "ff.png"},
+  {"glob": "gameb.d"},
+  {"glob": "gamec.d"},
+  {"glob": "gamed.d"},
+  {"glob": "gamee.d"},
+  {"glob": "gamee.data"},
+  {"glob": "help.t"},
+  {"glob": "help_d.t"},
+  {"glob": "item.png"},
+  {"glob": "item_m.d"},
+  {"glob": "j2me/rms/rms.conf"},
+  {"glob": "j2me/rms/store/baijinSMS.data"},
+  {"glob": "j2me/rms/store/pk4_baijin.data"},
+  {"glob": "lib/TaskbarIcon.dll"},
+  {"glob": "libgdx.png"},
+  {"glob": "ll.png"},
+  {"glob": "map.d"},
+  {"glob": "map/0.data"},
+  {"glob": "map/0.mid"},
+  {"glob": "map/0.png"},
+  {"glob": "map/1.data"},
+  {"glob": "map/1.mid"},
+  {"glob": "map/1.png"},
+  {"glob": "map/10.mid"},
+  {"glob": "map/11.mid"},
+  {"glob": "map/12.mid"},
+  {"glob": "map/13.mid"},
+  {"glob": "map/14.mid"},
+  {"glob": "map/15.mid"},
+  {"glob": "map/16.mid"},
+  {"glob": "map/17.mid"},
+  {"glob": "map/18.mid"},
+  {"glob": "map/19.mid"},
+  {"glob": "map/2.data"},
+  {"glob": "map/2.mid"},
+  {"glob": "map/2.png"},
+  {"glob": "map/20.mid"},
+  {"glob": "map/21.mid"},
+  {"glob": "map/22.mid"},
+  {"glob": "map/23.mid"},
+  {"glob": "map/24.mid"},
+  {"glob": "map/25.mid"},
+  {"glob": "map/26.mid"},
+  {"glob": "map/27.mid"},
+  {"glob": "map/28.mid"},
+  {"glob": "map/29.mid"},
+  {"glob": "map/3.data"},
+  {"glob": "map/3.mid"},
+  {"glob": "map/3.png"},
+  {"glob": "map/30.mid"},
+  {"glob": "map/31.mid"},
+  {"glob": "map/32.mid"},
+  {"glob": "map/33.mid"},
+  {"glob": "map/34.mid"},
+  {"glob": "map/35.mid"},
+  {"glob": "map/36.mid"},
+  {"glob": "map/37.mid"},
+  {"glob": "map/38.mid"},
+  {"glob": "map/39.mid"},
+  {"glob": "map/4.data"},
+  {"glob": "map/4.mid"},
+  {"glob": "map/4.png"},
+  {"glob": "map/40.mid"},
+  {"glob": "map/41.mid"},
+  {"glob": "map/42.mid"},
+  {"glob": "map/43.mid"},
+  {"glob": "map/44.mid"},
+  {"glob": "map/45.mid"},
+  {"glob": "map/46.mid"},
+  {"glob": "map/47.mid"},
+  {"glob": "map/48.mid"},
+  {"glob": "map/49.mid"},
+  {"glob": "map/5.data"},
+  {"glob": "map/5.mid"},
+  {"glob": "map/5.png"},
+  {"glob": "map/50.mid"},
+  {"glob": "map/51.mid"},
+  {"glob": "map/52.mid"},
+  {"glob": "map/53.mid"},
+  {"glob": "map/54.mid"},
+  {"glob": "map/55.mid"},
+  {"glob": "map/56.mid"},
+  {"glob": "map/57.mid"},
+  {"glob": "map/58.mid"},
+  {"glob": "map/59.mid"},
+  {"glob": "map/6.data"},
+  {"glob": "map/6.mid"},
+  {"glob": "map/6.png"},
+  {"glob": "map/60.mid"},
+  {"glob": "map/61.mid"},
+  {"glob": "map/62.mid"},
+  {"glob": "map/63.mid"},
+  {"glob": "map/64.mid"},
+  {"glob": "map/65.mid"},
+  {"glob": "map/66.mid"},
+  {"glob": "map/67.mid"},
+  {"glob": "map/68.mid"},
+  {"glob": "map/69.mid"},
+  {"glob": "map/7.data"},
+  {"glob": "map/7.mid"},
+  {"glob": "map/7.png"},
+  {"glob": "map/70.mid"},
+  {"glob": "map/71.mid"},
+  {"glob": "map/72.mid"},
+  {"glob": "map/73.mid"},
+  {"glob": "map/74.mid"},
+  {"glob": "map/75.mid"},
+  {"glob": "map/76.mid"},
+  {"glob": "map/77.mid"},
+  {"glob": "map/78.mid"},
+  {"glob": "map/8.data"},
+  {"glob": "map/8.mid"},
+  {"glob": "map/8.png"},
+  {"glob": "map/9.data"},
+  {"glob": "map/9.mid"},
+  {"glob": "map/area.dat"},
+  {"glob": "map/m0.d"},
+  {"glob": "map/m1.d"},
+  {"glob": "map/m10.d"},
+  {"glob": "map/m11.d"},
+  {"glob": "map/m12.d"},
+  {"glob": "map/m13.d"},
+  {"glob": "map/m14.d"},
+  {"glob": "map/m15.d"},
+  {"glob": "map/m16.d"},
+  {"glob": "map/m17.d"},
+  {"glob": "map/m18.d"},
+  {"glob": "map/m19.d"},
+  {"glob": "map/m2.d"},
+  {"glob": "map/m20.d"},
+  {"glob": "map/m21.d"},
+  {"glob": "map/m22.d"},
+  {"glob": "map/m23.d"},
+  {"glob": "map/m24.d"},
+  {"glob": "map/m25.d"},
+  {"glob": "map/m26.d"},
+  {"glob": "map/m27.d"},
+  {"glob": "map/m28.d"},
+  {"glob": "map/m29.d"},
+  {"glob": "map/m3.d"},
+  {"glob": "map/m30.d"},
+  {"glob": "map/m31.d"},
+  {"glob": "map/m32.d"},
+  {"glob": "map/m33.d"},
+  {"glob": "map/m34.d"},
+  {"glob": "map/m35.d"},
+  {"glob": "map/m36.d"},
+  {"glob": "map/m37.d"},
+  {"glob": "map/m38.d"},
+  {"glob": "map/m39.d"},
+  {"glob": "map/m4.d"},
+  {"glob": "map/m40.d"},
+  {"glob": "map/m41.d"},
+  {"glob": "map/m42.d"},
+  {"glob": "map/m43.d"},
+  {"glob": "map/m44.d"},
+  {"glob": "map/m45.d"},
+  {"glob": "map/m46.d"},
+  {"glob": "map/m47.d"},
+  {"glob": "map/m48.d"},
+  {"glob": "map/m49.d"},
+  {"glob": "map/m5.d"},
+  {"glob": "map/m50.d"},
+  {"glob": "map/m51.d"},
+  {"glob": "map/m52.d"},
+  {"glob": "map/m53.d"},
+  {"glob": "map/m54.d"},
+  {"glob": "map/m55.d"},
+  {"glob": "map/m56.d"},
+  {"glob": "map/m57.d"},
+  {"glob": "map/m58.d"},
+  {"glob": "map/m59.d"},
+  {"glob": "map/m6.d"},
+  {"glob": "map/m60.d"},
+  {"glob": "map/m61.d"},
+  {"glob": "map/m62.d"},
+  {"glob": "map/m63.d"},
+  {"glob": "map/m64.d"},
+  {"glob": "map/m65.d"},
+  {"glob": "map/m66.d"},
+  {"glob": "map/m67.d"},
+  {"glob": "map/m68.d"},
+  {"glob": "map/m69.d"},
+  {"glob": "map/m7.d"},
+  {"glob": "map/m70.d"},
+  {"glob": "map/m71.d"},
+  {"glob": "map/m72.d"},
+  {"glob": "map/m73.d"},
+  {"glob": "map/m74.d"},
+  {"glob": "map/m75.d"},
+  {"glob": "map/m76.d"},
+  {"glob": "map/m77.d"},
+  {"glob": "map/m78.d"},
+  {"glob": "map/m8.d"},
+  {"glob": "map/m9.d"},
+  {"glob": "mdoSms.t"},
+  {"glob": "mission0.t"},
+  {"glob": "mission1.t"},
+  {"glob": "monN.d"},
+  {"glob": "monType.d"},
+  {"glob": "mypro.d"},
+  {"glob": "npc0/1.data"},
+  {"glob": "npc0/1.png"},
+  {"glob": "npc0/10.data"},
+  {"glob": "npc0/10.png"},
+  {"glob": "npc0/11.data"},
+  {"glob": "npc0/11.png"},
+  {"glob": "npc0/12.data"},
+  {"glob": "npc0/12.png"},
+  {"glob": "npc0/13.data"},
+  {"glob": "npc0/13.png"},
+  {"glob": "npc0/14.data"},
+  {"glob": "npc0/14.png"},
+  {"glob": "npc0/15.data"},
+  {"glob": "npc0/15.png"},
+  {"glob": "npc0/16.data"},
+  {"glob": "npc0/16.png"},
+  {"glob": "npc0/17.data"},
+  {"glob": "npc0/17.png"},
+  {"glob": "npc0/18.data"},
+  {"glob": "npc0/18.png"},
+  {"glob": "npc0/19.data"},
+  {"glob": "npc0/19.png"},
+  {"glob": "npc0/2.data"},
+  {"glob": "npc0/2.png"},
+  {"glob": "npc0/20.data"},
+  {"glob": "npc0/20.png"},
+  {"glob": "npc0/21.data"},
+  {"glob": "npc0/21.png"},
+  {"glob": "npc0/22.data"},
+  {"glob": "npc0/22.png"},
+  {"glob": "npc0/23.data"},
+  {"glob": "npc0/23.png"},
+  {"glob": "npc0/24.data"},
+  {"glob": "npc0/24.png"},
+  {"glob": "npc0/25.data"},
+  {"glob": "npc0/25.png"},
+  {"glob": "npc0/25.xml"},
+  {"glob": "npc0/26.data"},
+  {"glob": "npc0/26.png"},
+  {"glob": "npc0/27.data"},
+  {"glob": "npc0/27.png"},
+  {"glob": "npc0/28.data"},
+  {"glob": "npc0/28.png"},
+  {"glob": "npc0/29.data"},
+  {"glob": "npc0/29.png"},
+  {"glob": "npc0/3.data"},
+  {"glob": "npc0/3.png"},
+  {"glob": "npc0/30.data"},
+  {"glob": "npc0/30.png"},
+  {"glob": "npc0/31.data"},
+  {"glob": "npc0/31.png"},
+  {"glob": "npc0/32.data"},
+  {"glob": "npc0/32.png"},
+  {"glob": "npc0/33.data"},
+  {"glob": "npc0/33.png"},
+  {"glob": "npc0/34.data"},
+  {"glob": "npc0/34.png"},
+  {"glob": "npc0/4.data"},
+  {"glob": "npc0/4.png"},
+  {"glob": "npc0/5.data"},
+  {"glob": "npc0/5.png"},
+  {"glob": "npc0/6.data"},
+  {"glob": "npc0/6.png"},
+  {"glob": "npc0/7.data"},
+  {"glob": "npc0/7.png"},
+  {"glob": "npc0/8.data"},
+  {"glob": "npc0/8.png"},
+  {"glob": "npc0/9.data"},
+  {"glob": "npc0/9.png"},
+  {"glob": "npc1/0.data"},
+  {"glob": "npc1/0.png"},
+  {"glob": "npc1/1.data"},
+  {"glob": "npc1/1.png"},
+  {"glob": "npc1/10.data"},
+  {"glob": "npc1/10.png"},
+  {"glob": "npc1/11.data"},
+  {"glob": "npc1/11.png"},
+  {"glob": "npc1/12.data"},
+  {"glob": "npc1/12.png"},
+  {"glob": "npc1/13.data"},
+  {"glob": "npc1/13.png"},
+  {"glob": "npc1/14.data"},
+  {"glob": "npc1/14.png"},
+  {"glob": "npc1/15.data"},
+  {"glob": "npc1/15.png"},
+  {"glob": "npc1/16.data"},
+  {"glob": "npc1/16.png"},
+  {"glob": "npc1/17.data"},
+  {"glob": "npc1/17.png"},
+  {"glob": "npc1/18.data"},
+  {"glob": "npc1/18.png"},
+  {"glob": "npc1/19.data"},
+  {"glob": "npc1/19.png"},
+  {"glob": "npc1/2.data"},
+  {"glob": "npc1/2.png"},
+  {"glob": "npc1/20.data"},
+  {"glob": "npc1/20.png"},
+  {"glob": "npc1/21.data"},
+  {"glob": "npc1/21.png"},
+  {"glob": "npc1/22.data"},
+  {"glob": "npc1/22.png"},
+  {"glob": "npc1/23.data"},
+  {"glob": "npc1/23.png"},
+  {"glob": "npc1/24.data"},
+  {"glob": "npc1/24.png"},
+  {"glob": "npc1/3.data"},
+  {"glob": "npc1/3.png"},
+  {"glob": "npc1/4.data"},
+  {"glob": "npc1/4.png"},
+  {"glob": "npc1/5.data"},
+  {"glob": "npc1/5.png"},
+  {"glob": "npc1/6.data"},
+  {"glob": "npc1/6.png"},
+  {"glob": "npc1/7.data"},
+  {"glob": "npc1/7.png"},
+  {"glob": "npc1/8.data"},
+  {"glob": "npc1/8.png"},
+  {"glob": "npc1/9.data"},
+  {"glob": "npc1/9.png"},
+  {"glob": "npc1/r0.data"},
+  {"glob": "npc1/r0.png"},
+  {"glob": "npc2/1.data"},
+  {"glob": "npc2/1.png"},
+  {"glob": "npc2/10.data"},
+  {"glob": "npc2/10.png"},
+  {"glob": "npc2/11.data"},
+  {"glob": "npc2/11.png"},
+  {"glob": "npc2/12.data"},
+  {"glob": "npc2/12.png"},
+  {"glob": "npc2/13.data"},
+  {"glob": "npc2/13.png"},
+  {"glob": "npc2/14.data"},
+  {"glob": "npc2/14.png"},
+  {"glob": "npc2/15.data"},
+  {"glob": "npc2/15.png"},
+  {"glob": "npc2/16.data"},
+  {"glob": "npc2/16.png"},
+  {"glob": "npc2/17.data"},
+  {"glob": "npc2/17.png"},
+  {"glob": "npc2/18.data"},
+  {"glob": "npc2/18.png"},
+  {"glob": "npc2/19.data"},
+  {"glob": "npc2/19.png"},
+  {"glob": "npc2/2.data"},
+  {"glob": "npc2/2.png"},
+  {"glob": "npc2/20.data"},
+  {"glob": "npc2/20.png"},
+  {"glob": "npc2/21.data"},
+  {"glob": "npc2/21.png"},
+  {"glob": "npc2/22.data"},
+  {"glob": "npc2/22.png"},
+  {"glob": "npc2/23.data"},
+  {"glob": "npc2/23.png"},
+  {"glob": "npc2/24.data"},
+  {"glob": "npc2/24.png"},
+  {"glob": "npc2/25.data"},
+  {"glob": "npc2/25.png"},
+  {"glob": "npc2/26.data"},
+  {"glob": "npc2/26.png"},
+  {"glob": "npc2/27.data"},
+  {"glob": "npc2/27.png"},
+  {"glob": "npc2/28.data"},
+  {"glob": "npc2/28.png"},
+  {"glob": "npc2/29.data"},
+  {"glob": "npc2/29.png"},
+  {"glob": "npc2/3.data"},
+  {"glob": "npc2/3.png"},
+  {"glob": "npc2/30.data"},
+  {"glob": "npc2/30.png"},
+  {"glob": "npc2/31.data"},
+  {"glob": "npc2/31.png"},
+  {"glob": "npc2/32.data"},
+  {"glob": "npc2/32.png"},
+  {"glob": "npc2/33.data"},
+  {"glob": "npc2/33.png"},
+  {"glob": "npc2/34.data"},
+  {"glob": "npc2/34.png"},
+  {"glob": "npc2/35.data"},
+  {"glob": "npc2/35.png"},
+  {"glob": "npc2/36.data"},
+  {"glob": "npc2/36.png"},
+  {"glob": "npc2/37.data"},
+  {"glob": "npc2/37.png"},
+  {"glob": "npc2/37old.png"},
+  {"glob": "npc2/38.data"},
+  {"glob": "npc2/38.png"},
+  {"glob": "npc2/39.data"},
+  {"glob": "npc2/39.png"},
+  {"glob": "npc2/4.data"},
+  {"glob": "npc2/4.png"},
+  {"glob": "npc2/40.data"},
+  {"glob": "npc2/40.png"},
+  {"glob": "npc2/41.data"},
+  {"glob": "npc2/41.png"},
+  {"glob": "npc2/42.data"},
+  {"glob": "npc2/42.png"},
+  {"glob": "npc2/43.data"},
+  {"glob": "npc2/43.png"},
+  {"glob": "npc2/44.data"},
+  {"glob": "npc2/44.png"},
+  {"glob": "npc2/45.data"},
+  {"glob": "npc2/45.png"},
+  {"glob": "npc2/5.data"},
+  {"glob": "npc2/5.png"},
+  {"glob": "npc2/6.data"},
+  {"glob": "npc2/6.png"},
+  {"glob": "npc2/7.data"},
+  {"glob": "npc2/7.png"},
+  {"glob": "npc2/8.data"},
+  {"glob": "npc2/8.png"},
+  {"glob": "npc2/9.data"},
+  {"glob": "npc2/9.png"},
+  {"glob": "shadow.png"},
+  {"glob": "shop.d"},
+  {"glob": "skin/default.fnt"},
+  {"glob": "skin/default.png"},
+  {"glob": "skin/uiskin.atlas"},
+  {"glob": "skin/uiskin.json"},
+  {"glob": "skin/uiskin.png"},
+  {"glob": "sms.t"},
+  {"glob": "ui.png"},
+  {"glob": "ui_m.d"}
+  ]
+}
