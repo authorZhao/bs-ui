@@ -22,6 +22,7 @@ public class BsSkinLauncher {
         config.setSamples(4);
         config.setIdleFPS(60);
         config.setForegroundFPS(20);
+        config.setWindowIcon("icons/logo.png");
         PlatformStatic.registerImpl(DeskPlatform.class);
         new Lwjgl3Application(new BsSkinApp(), config);
     }

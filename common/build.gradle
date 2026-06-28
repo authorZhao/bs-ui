@@ -1,4 +1,7 @@
-plugins { id 'java-library' }
+plugins {
+  id 'java-library'
+  id 'maven-publish'
+}
 
 group = 'com.git.bs'
 version = '0.1.0'
@@ -18,3 +21,8 @@ dependencies {
   compileOnly "org.projectlombok:lombok:$lombokVersion"
   annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }
+
+// 发布配置（发布到 mavenLocal；远程仓库见 gradle/publish.gradle 的注释段）
+ext.publishArtifactId  = 'bs-ui-common'
+ext.publishDescription = 'bs-ui: platform-agnostic interfaces (Platform, file-chooser signatures)'
+apply from: "$rootDir/gradle/publish.gradle"

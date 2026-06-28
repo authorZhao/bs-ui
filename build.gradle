@@ -54,3 +54,9 @@ subprojects {
 }
 
 eclipse.project.name = 'bs-ui' + '-parent'
+
+// ============================================================================
+// Maven 发布：core / common 等需要被外部引用的 library 模块在自己的 build.gradle
+// 里加一行 `apply from: "$rootDir/gradle/publish.gradle"`，并在 plugins{} 块声明
+// `id 'maven-publish'` 即可（详见 gradle/publish.gradle 顶部注释）。
+// ============================================================================

@@ -1,0 +1,119 @@
+// ============================================================================
+// bs-ui library 模块公共 Maven 发布配置
+//
+// 用法（在 core / common 等子模块的 build.gradle 里）：
+//
+//   plugins {
+//     id 'java-library'
+//     id 'maven-publish'          // ← 必须在 plugins{} 块声明，不能 apply
+//   }
+//
+//   ext.publishArtifactId    = 'bs-ui-core'
+//   ext.publishDescription   = 'bs-ui core library'
+//   apply from: "$rootDir/gradle/publish.gradle"
+//
+// 坐标：group = 项目 group（com.git.bs），version = 项目 version（0.1.0）
+// 产物：主 jar + sources jar + javadoc jar
+// 仓库：mavenLocal（默认启用）；远程仓库见下方注释段
+// ============================================================================
+
+// javadoc 容错：项目里部分历史 javadoc 注释有 @link 引用缺失 / HTML 字符问题，
+// 不阻塞发布。javadocJar 仍会生成（内容可能不完整，但 jar 结构合法，满足 Maven Central 要求）。
+javadoc {
+    options {
+        encoding = 'UTF-8'
+        charSet = 'UTF-8'
+        // 关闭超严检查：忽略 @link 引用不到、HTML 不规整等问题
+        addStringOption('Xdoclint:none', '-quiet')
+    }
+    failOnError = false
+}
+
+// sources jar（Maven Central 强制要求；本地用也有助于 IDE 调试跳转）
+tasks.register('sourcesJar', Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier.set('sources')
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+// javadoc jar（Maven Central 强制要求）
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    from javadoc.destinationDir
+    archiveClassifier.set('javadoc')
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            artifactId = project.ext.has('publishArtifactId')
+                    ? project.ext.publishArtifactId : project.name
+
+            pom {
+                name = project.ext.has('publishArtifactId')
+                        ? project.ext.publishArtifactId : project.name
+                description = project.ext.has('publishDescription')
+                        ? project.ext.publishDescription : 'bs-ui library'
+                url = 'https://github.com/bs-ui/bs-ui'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                        // 关键：在 POM 元数据里也声明附加条款，
+                        // 使用方看依赖元数据就能知道义务（不必打开 LICENSE 文件）。
+                        comments = 'Additional Attribution Condition applies: any product ' +
+                                '(verbatim or modified) distributed to end-users MUST display ' +
+                                'an About/Credits screen crediting "bs-ui" and stating whether ' +
+                                'it was modified. See project LICENSE for full text.'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'bs-ui'
+                        name = 'bs-ui contributors'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/bs-ui/bs-ui.git'
+                    developerConnection = 'scm:git:ssh://github.com/bs-ui/bs-ui.git'
+                    url = 'https://github.com/bs-ui/bs-ui'
+                }
+            }
+        }
+    }
+
+    repositories {
+        // 本地：发布到 ~/.m2/repository
+        // 其他项目可直接 implementation 'com.git.bs:bs-ui-core:0.1.0' 引用
+        mavenLocal()
+
+        // ============================================================
+        // 远程仓库（暂未启用）
+        // 配置好 url + credentials 后取消注释即可。credentials 推荐用
+        // gradle.properties（bsUiRepoUser / bsUiRepoPass）或环境变量，避免硬编码。
+        // ============================================================
+        // maven {
+        //   name = 'releases'
+        //   url = 'https://your-nexus-or-maven-host/repository/maven-releases/'
+        //   credentials {
+        //     username = findProperty('bsUiRepoUser') ?: System.getenv('BS_UI_REPO_USER')
+        //     password = findProperty('bsUiRepoPass') ?: System.getenv('BS_UI_REPO_PASS')
+        //   }
+        // }
+        // maven {
+        //   name = 'snapshots'
+        //   url = 'https://your-nexus-or-maven-host/repository/maven-snapshots/'
+        //   credentials {
+        //     username = findProperty('bsUiRepoUser') ?: System.getenv('BS_UI_REPO_USER')
+        //     password = findProperty('bsUiRepoPass') ?: System.getenv('BS_UI_REPO_PASS')
+        //   }
+        // }
+    }
+}
