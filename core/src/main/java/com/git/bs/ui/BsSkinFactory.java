@@ -464,7 +464,8 @@ public final class BsSkinFactory {
 
     // =================== 圆角 NinePatch 生成 ===================
 
-    private static NinePatchDrawable roundRect(Color fillColor, Color borderColor, int corner, int borderPx) {
+    /** 包内可见：圆角 NinePatchDrawable 生成（供 BsLayoutAdmin 等同包类复用，避免重复算法）。 */
+    static NinePatchDrawable roundRect(Color fillColor, Color borderColor, int corner, int borderPx) {
         int fillHex = colorToHex(fillColor);
         int borderHex = colorToHex(borderColor);
         int size = Math.max(8, corner * 3 + borderPx * 2);

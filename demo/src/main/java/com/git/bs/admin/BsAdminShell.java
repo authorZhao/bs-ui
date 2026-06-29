@@ -24,6 +24,7 @@ import com.git.bs.ui.BsTheme;
 import com.git.bs.ui.BsToast;
 import com.git.bs.ui.BsAdminTheme;
 import com.git.bs.ui.BsDarkTheme;
+import com.git.bs.ui.BsLightTheme;
 import com.git.bs.ui.BsUI;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -87,45 +88,48 @@ public class BsAdminShell extends ScreenAdapter {
 
         scrollWrap = new Container<>();
         scrollWrap.fill(true, true);
-        // 内容区背景走主题 bg-body（admin.json 为 #f0f2f5 浅灰）
-        scrollWrap.setBackground(com.git.bs.ui.BsUI.drawableOf(BsTheme.bb()));
+        // scrollWrap 不设背景，让 BsLayoutAdmin 的 contentWrap 圆角卡片背景透出来
+        // （之前设 bg-body 平铺色会盖住 contentWrap 的圆角 NinePatch，看不出卡片风格）
 
         // 布局骨架
         layout = new BsLayoutAdmin(skin);
         layout.setLogo("bs-ui Admin");
         layout.setFillParent(true);
-        // 放大侧边栏宽度（默认 180 偏窄，三层菜单缩进+长文字会截断）—— 280 容下"图形UI/Hover 数据查看"
-        layout.setSidebarWidth(280);
-        // 启用深色侧边栏风格（菜单字色走 text-on-dark 白字，配 admin 主题深蓝灰侧边栏）
-        layout.setSidebarDarkStyle(true);
-        // 放大顶部栏高度（默认 48 偏矮，字挤）
-        layout.getCells().get(0).height(60);
+        // 放大侧边栏宽度：默认 280 + sidebarWrap 圆角 pad 后有效区约 270；
+        // 提到 296 补偿 pad 吃掉的宽度，避免长菜单名截断
+        layout.setSidebarWidth(296);
+        // 深色侧边栏风格：仅暗色主题（admin/dark）用白字，亮色主题用正常深色字
+        // 否则 light 主题下侧栏背景变浅，白字看不清
+        com.git.bs.ui.BsTheme theme = BsUI.currentTheme();
+        boolean sidebarDark = theme != null && theme.isDark();
+        layout.setSidebarDarkStyle(sidebarDark);
+        // 放大顶部栏高度（默认 48 偏矮，字挤），同时记录到 layout 的展开高度
+        layout.setTopBarExpandedHeight(60);
 
-        // 面包屑（插到 topBar 中：logo 之后、topMenuRow 之前由 cell 顺序决定，
-        // 这里直接 add 到 topBar 末尾会落在 topMenuRow 之后，仍可见且简单可靠）
+        // 面包屑（插到 topBar 中）
         breadcrumb = new BsBreadcrumb(skin);
 
-        // 组装：topBar 顺序是 toggleBtn / logoLabel / topMenuRow(growX) / userInfoRow
-        // 我们把 breadcrumb 插在 topMenuRow 之前：先清掉 topMenuRow 占位再重建顺序较麻烦，
-        // 简单做法 —— 直接复用 topMenuRow 作为面包屑容器（topMenuRow 默认 growX 左对齐）
-        Table topMenuRow = layout.getTopBar().getChildren().size >= 4
-                ? (Table) layout.getTopBar().getChildren().get(2)
-                : null;
+        // 通过命名查找 topMenuRow（新增 hideTopBtn 后 cell 索引会偏移，统一用 findActor）
+        Table topMenuRow = (Table) layout.getTopBar().findActor("topMenuRow");
         if (topMenuRow != null) {
             topMenuRow.add(breadcrumb).left().padLeft(8);
         }
+        // 顶栏菜单搜索框：输入实时过滤 sidebar 菜单
+        layout.addMenuSearchBox();
 
-        // 内容区：把 scrollWrap 作为内容（contentPadding=0 避免露出 contentWrap 的白边）
+        // 内容区：把 scrollWrap 放进 contentWrap（圆角卡片），留 8px 内边距让内容不贴卡片边缘
         layout.setContent(scrollWrap);
-        layout.contentPadding(0);
+        layout.contentPadding(8);
 
         // 用户区
         layout.setUserInfo(AdminContext.get().getCurrentUser(), null);
         layout.addUserMenuItem("个人中心", () ->
                 BsToast.show(stage, skin, "个人中心为示例占位", BsToast.Variant.INFO));
         layout.addUserMenuItem("设置", this::showSettingsModal);
-        // 主题切换项：根据当前主题显示反向文案
-        layout.addUserMenuItem(themeMenuItemText(), this::toggleTheme);
+        // 主题切换：三选一（Light / Dark / Admin）
+        layout.addUserMenuItem("☀ Light", () -> switchTheme(BsLightTheme.INSTANCE));
+        layout.addUserMenuItem("🌙 Dark", () -> switchTheme(BsDarkTheme.INSTANCE));
+        layout.addUserMenuItem("🛡 Admin", () -> switchTheme(BsAdminTheme.INSTANCE));
         layout.addUserMenuItem("退出登录", this::logout);
 
         // 注册内置模块
@@ -134,9 +138,12 @@ public class BsAdminShell extends ScreenAdapter {
         register(new UserListModule());
         registerPlaceholder("用户管理/角色", "角色管理为示例占位，未实现");
         registerPlaceholder("用户管理/权限", "权限管理为示例占位，未实现");
-        // UI 模块：注册"UI 模块"分组入口 + 三类子菜单（通用UI/业务UI/图形UI，共 37 个控件演示）
-        register(new UiDemoModule());
+        // UI 模块：注册 44 个二级菜单（BsControlsSkinScreen 全部控件演示）作为「UI 模块」下的叶子
+        // 注意：不单独 register(new UiDemoModule())，否则会出现两个「UI 模块」一级标题
+        //       （register 单段 path 会建一个叶子，registerAll 又会建一个同名 root）
         UiDemoModule.registerAll(this);
+        // 注入真实 stage，让依赖 stage 的弹窗（Modal/Dialogs/Pickers...）在 UI 模块里正常工作
+        UiDemoModule.bindStage(stage);
         register(new BusinessDemoModule());
 
         // 重建侧边栏（注册完后）
@@ -178,11 +185,11 @@ public class BsAdminShell extends ScreenAdapter {
             layout.addSideMenu(segs[0], onClick);
             return;
         }
-        // 取或建一级 root
+        // 取或建一级 root（默认折叠：只显示一级标题，点开才展开子项）
         BsLayoutAdmin.SidebarItem root = rootSidebarMirror.get(segs[0]);
         if (root == null) {
             root = new BsLayoutAdmin.SidebarItem(segs[0]);
-            root.expanded = true;
+            root.expanded = false;
             rootSidebarMirror.put(segs[0], root);
             layout.addSideMenuTree(root);
         }
@@ -312,20 +319,27 @@ public class BsAdminShell extends ScreenAdapter {
         modal.showModal(stage);
     }
 
-    private String themeMenuItemText() {
-        return "admin".equals(BsUI.currentThemeName()) ? "切换到 Dark 主题" : "切换到 Admin 主题";
-    }
-
-    private void toggleTheme() {
-        // 在 admin ↔ dark 之间切换（两者都在 AdminApp 注册过）
-        BsTheme next = "admin".equals(BsUI.currentThemeName())
-                ? BsDarkTheme.INSTANCE
-                : BsAdminTheme.INSTANCE;
+    /**
+     * 切换主题：若已是该主题则 Toast 提示，否则 setTheme 触发 AdminApp listener 重建 shell。
+     */
+    private void switchTheme(BsTheme target) {
+        BsTheme current = BsUI.currentTheme();
+        if (current == target) {
+            BsToast.show(stage, skin, "已是" + targetDisplayName(target) + "主题", BsToast.Variant.INFO, 1500);
+            return;
+        }
         try {
-            BsUI.setTheme(next);
+            BsUI.setTheme(target);
         } catch (Throwable t) {
             log.warn("setTheme 失败", t);
         }
+    }
+
+    private static String targetDisplayName(BsTheme target) {
+        if (target == BsLightTheme.INSTANCE) return "Light";
+        if (target == BsDarkTheme.INSTANCE) return "Dark";
+        if (target == BsAdminTheme.INSTANCE) return "Admin";
+        return target.name();
     }
 
     private void logout() {
@@ -343,17 +357,15 @@ public class BsAdminShell extends ScreenAdapter {
     private void applySidebarStyle() {
         // 顶部栏：bg-header 底色 + 底部 1px 分隔线（隔离顶部与内容区）
         layout.getTopBar().setBackground(topBarBgDrawable());
-        // 内容区背景：bg-body（admin.json #f0f2f5）
-        scrollWrap.setBackground(com.git.bs.ui.BsUI.drawableOf(BsTheme.bb()));
 
         // 顶部栏：放大字号 + text-primary 深色字（只做一次，topBar 不重建）
         if (!topBarEnlarged) {
             styleActors(layout.getTopBar(), 1.25f, BsTheme.tp());
-            // 折叠按钮：换成"☰ 折叠"文字 + 加大点击区域
-            com.badlogic.gdx.scenes.scene2d.Actor first = layout.getTopBar().getChildren().first();
-            if (first instanceof com.badlogic.gdx.scenes.scene2d.ui.TextButton) {
+            // 折叠按钮：换成"☰ 折叠"文字 + 加大点击区域（用命名查找，避免新增 hideTopBtn 后索引偏移）
+            com.badlogic.gdx.scenes.scene2d.Actor toggleActor = layout.getTopBar().findActor("toggleSidebarBtn");
+            if (toggleActor instanceof com.badlogic.gdx.scenes.scene2d.ui.TextButton) {
                 com.badlogic.gdx.scenes.scene2d.ui.TextButton toggleBtn =
-                        (com.badlogic.gdx.scenes.scene2d.ui.TextButton) first;
+                        (com.badlogic.gdx.scenes.scene2d.ui.TextButton) toggleActor;
                 toggleBtn.setText("☰  折叠");
                 toggleBtn.getLabel().setFontScale(1.2f);
                 toggleBtn.setSize(110, 40);
@@ -435,6 +447,9 @@ public class BsAdminShell extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        // 主题切换会重建 BsAdminShell（见 AdminApp.applyTheme），旧 shell dispose 时
+        // 清空 UiDemoModule 的内容工厂缓存，避免新 shell 复用旧 skin 导致配色/字体错乱
+        UiDemoModule.resetFactory();
         stage.dispose();
     }
 

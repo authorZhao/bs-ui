@@ -32,7 +32,7 @@ public class BsControlsSkinScreen extends ScreenAdapter {
 
     private final BsSkinApp app;
     private final Skin skin;
-    private final Stage stage;
+    private Stage stage;
 
     /** 右侧内容容器；切换模块时 clear + add。 */
     private Table contentHost;
@@ -51,8 +51,8 @@ public class BsControlsSkinScreen extends ScreenAdapter {
     /** 全部 44 个控件演示模块名（按顺序对应 fillModuleContent 的 index）。 */
     public static final List<String> MODULES = buildModuleList();
 
-    /** Dark 切换按钮引用（重建后更新文字）。 */
-    private BsButton themeToggle;
+    /** 主题切换下拉（重建后恢复选中项）。 */
+    private com.badlogic.gdx.scenes.scene2d.ui.SelectBox<String> themeToggle;
 
     public BsControlsSkinScreen(BsSkinApp app) {
         this.app = app;
@@ -81,6 +81,16 @@ public class BsControlsSkinScreen extends ScreenAdapter {
     }
 
     /**
+     * 注入真实 stage（admin shell 构造后调用）。
+     * <p>工厂模式构造（{@link #BsControlsSkinScreen(Skin)}）创建的是独立未渲染的 stage，
+     * 导致 {@code BsModal.showModal(this.stage)} / {@code BsTooltip.attach(this.stage)} 等弹窗失效。
+     * admin shell 注入真实 stage 后，Pickers/DateTime/Overlay/Modal/Dialogs 等模块才能正常弹窗。</p>
+     */
+    public void setStage(Stage s) {
+        this.stage = s;
+    }
+
+    /**
      * 构建 root + 顶部标题栏 + 左导航 + 右内容 + 底部状态栏。
      * <p>首次构造和主题切换重建 UI 都走这里。</p>
      */
@@ -98,16 +108,26 @@ public class BsControlsSkinScreen extends ScreenAdapter {
         title.setFontScale(1.6f);
         header.add(title).pad(10).left().growX();
 
-        // Dark 切换按钮（保留对实例的引用，重建时更新文字）
-        boolean isDark = BsUI.currentTheme().isDark();
-        themeToggle = new BsButton(isDark ? "☀ Light" : "🌙 Dark", skin,
-                BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE, BsButton.Size.SM);
-        themeToggle.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                BsUI tm = BsUI.get();
-                boolean toDark = !BsUI.currentTheme().isDark();
-                // 只调 setTheme（不传 skin），由 BsControlsTestApp 的 listener 处理重建
-                BsUI.setTheme(toDark ? BsDarkTheme.INSTANCE : BsLightTheme.INSTANCE);
+        // 主题切换下拉：light / dark / admin 三选一
+        themeToggle = new com.badlogic.gdx.scenes.scene2d.ui.SelectBox<>(skin);
+        com.badlogic.gdx.utils.Array<String> themeNames = new com.badlogic.gdx.utils.Array<>();
+        themeNames.add("☀ Light");
+        themeNames.add("🌙 Dark");
+        themeNames.add("🛡 Admin");
+        themeToggle.setItems(themeNames);
+        // 按当前主题恢复选中项
+        String currentName = BsUI.currentThemeName();
+        if (currentName == null) currentName = "";
+        themeToggle.setSelectedIndex(
+                currentName.contains("admin") ? 2
+                : currentName.contains("dark") ? 1 : 0);
+        themeToggle.addListener(new ChangeListener() {
+            @Override public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                int idx = themeToggle.getSelectedIndex();
+                com.git.bs.ui.BsTheme target = idx == 2 ? com.git.bs.ui.BsAdminTheme.INSTANCE
+                        : idx == 1 ? BsDarkTheme.INSTANCE : BsLightTheme.INSTANCE;
+                // 只调 setTheme，由 BsSkinApp 的 listener 处理重建
+                BsUI.setTheme(target);
             }
         });
         header.add(themeToggle).pad(8).right();

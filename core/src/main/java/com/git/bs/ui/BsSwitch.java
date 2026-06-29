@@ -112,6 +112,7 @@ public class BsSwitch extends Table {
             setSize(wh[0], wh[1]);
             sr = new ShapeRenderer();
             knobX = knobRestX(false);
+            targetKnobX = knobX;
         }
 
         private float[] trackSize() {
@@ -133,7 +134,7 @@ public class BsSwitch extends Table {
         /** 滑块在指定状态下的 X 坐标（左侧 = unchecked，右侧 = checked）。 */
         private float knobRestX(boolean checkedState) {
             float r = knobRadius();
-            return checkedState ? getWidth() - r - 2 : r + 2;
+            return checkedState ? getWidth() - r - 4 : r + 4;
         }
 
         void slideTo(boolean c) {

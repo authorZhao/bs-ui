@@ -36,8 +36,31 @@ import java.util.Map;
 public class AdminApp extends Game {
 
     private static final String SKIN_CP = "com/git/bs/ui/skin";
-    private static final String TTF = SKIN_CP + "/LXGWWenKaiMonoLite-Light.ttf";
+    private static final String TTF = SKIN_CP + "/LXGWWenKaiScreen.ttf";
     private static final String CHARS = SKIN_CP + "/chinese.txt";
+    private static final String CHARS_COMMON = SKIN_CP + "/common.txt";
+
+    /** 导出皮肤时复用的 TTF 文件 classpath 路径。 */
+    public String ttfPath() { return TTF; }
+    /** 导出皮肤时复用的完整字符集（含生僻字）。 */
+    public String charsPath() { return CHARS; }
+    /** 导出皮肤时复用的精简字符集（8000+ 常用汉字 + ASCII）。 */
+    public String charsPathCommon() { return CHARS_COMMON; }
+
+    /**
+     * 返回实际可用的字符集条目（显示名 → classpath 路径），按优先级排序。
+     * 仅返回 classpath 里真实存在的文件，避免导出对话框暴露不存在的选项。
+     */
+    public java.util.List<String[]> availableCharsEntries() {
+        java.util.List<String[]> entries = new java.util.ArrayList<>();
+        if (Gdx.files.internal(CHARS_COMMON).exists()) {
+            entries.add(new String[]{"精简字符集 (common.txt)", CHARS_COMMON});
+        }
+        if (Gdx.files.internal(CHARS).exists()) {
+            entries.add(new String[]{"完整字符集 (chinese.txt)", CHARS});
+        }
+        return entries;
+    }
 
     @Getter
     private Skin skin;
@@ -74,8 +97,8 @@ public class AdminApp extends Game {
         long t0 = System.currentTimeMillis();
         chars = loadChars();
 
-        // 加载 admin 皮肤（admin.json + admin.atlas + admin.png，颜色在 JSON 里可直接改）
-        var skinFileHandle = Gdx.files.internal(SKIN_CP + "/admin.json");
+        // 加载 admin 皮肤（bs-admin.json + bs-admin.atlas + bs-admin.png）
+        var skinFileHandle = Gdx.files.internal(SKIN_CP + "/bs-admin.json");
 
 
         var defaultSkin = BsSkinLoader.loadAndAugmentWithCache(skinFileHandle, currentTheme);
@@ -90,22 +113,20 @@ public class AdminApp extends Game {
         bindDefaultFontStyles(skin, defaultFont);
         log.info("AdminApp 当前激活主题: {}", BsUI.currentThemeName());
 
+        // 同步注册其他主题（不依赖字号字体预热），避免启动早期切换失效
+        // admin（自身已注册，跳过）；dark / light 同步构建一份备用
+        registerExtraTheme(BsDarkTheme.INSTANCE, defaultFont);
+        registerExtraTheme(BsLightTheme.INSTANCE, defaultFont);
 
 
         setFontsReadyListener(() -> {
-
-
-            var darkTheme = BsDarkTheme.INSTANCE;
-
-            var darkFileHandle = Gdx.files.internal(SKIN_CP + "/" + darkTheme.name() + ".json");
-            var fontCache = SkinUtil.getFontCache(this.skin);
-            BsSkinLoader.loadAndAugmentWithCache(darkFileHandle, currentTheme, fontCache);
-            Skin darkSkin = BsUI.buildSkin(darkTheme, defaultFont);
-            for (String suffix : new String[]{"sm", "md", "lg", "xl"}) {
-                BitmapFont f = fonts.get(suffix);
-                if (f != null) BsSkinLoader.bindFontStyles(darkSkin, suffix, f);
+            // 字号字体生成完成后，把 sm/md/lg/xl 样式同时绑定到所有 skin
+            for (Skin s : BsUI.registeredSkins()) {
+                for (String suffix : new String[]{"sm", "md", "lg", "xl"}) {
+                    BitmapFont f = fonts.get(suffix);
+                    if (f != null) BsSkinLoader.bindFontStyles(s, suffix, f);
+                }
             }
-            BsUI.registerTheme(darkTheme.name(), darkTheme, darkSkin);
         });
 
         overlayStage = new Stage(new ScreenViewport());
@@ -247,6 +268,8 @@ public class AdminApp extends Game {
 
     @Override
     public void render() {
+        // 用当前主题 body 底色清屏，不同主题基础色调自动变
+        com.badlogic.gdx.utils.ScreenUtils.clear(com.git.bs.ui.BsTheme.bgBodyColor(), true);
         super.render();
         if (overlayStage != null) {
             if (loadingOverlay != null && loadingOverlay.isVisible()) {
@@ -302,5 +325,18 @@ public class AdminApp extends Game {
         BsSkinLoader.bindFontStyles(skin, "md", defaultFont);
         BsSkinLoader.bindFontStyles(skin, "lg", defaultFont);
         BsSkinLoader.bindFontStyles(skin, "xl", defaultFont);
+    }
+
+    /** 程序化构建并注册一个备用主题 skin（同步，不依赖字号字体预热）。 */
+    private void registerExtraTheme(BsTheme theme, BitmapFont defaultFont) {
+        try {
+            if (BsUI.currentThemeName() != null
+                    && BsUI.currentThemeName().equals(theme.name())) return;  // 已激活跳过
+            Skin s = BsUI.buildSkin(theme, defaultFont);
+            bindDefaultFontStyles(s, defaultFont);
+            BsUI.registerTheme(theme.name(), theme, s);
+        } catch (Throwable t) {
+            log.warn("registerExtraTheme {} 失败", theme.name(), t);
+        }
     }
 }

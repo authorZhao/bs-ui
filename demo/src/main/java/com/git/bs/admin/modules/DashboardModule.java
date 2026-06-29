@@ -37,16 +37,16 @@ public class DashboardModule implements AdminModule {
         title.setColor(BsTheme.tp());
         root.add(title).left().padBottom(8).row();
 
-        // 4 个统计卡（2x2）
+        // 4 个统计卡（2x2），高度按内容自适应（之前写死 110，内容溢出底部）
         Table statsRow1 = new Table();
         statsRow1.defaults().pad(8).growX();
-        statsRow1.add(statCard(skin, "用户数", "1,284", "+12%")).height(110);
-        statsRow1.add(statCard(skin, "订单数", "3,421", "+5%")).height(110);
+        statsRow1.add(statCard(skin, "用户数", "1,284", "+12%"));
+        statsRow1.add(statCard(skin, "订单数", "3,421", "+5%"));
 
         Table statsRow2 = new Table();
         statsRow2.defaults().pad(8).growX();
-        statsRow2.add(statCard(skin, "收入 (¥)", "98,210", "+8%")).height(110);
-        statsRow2.add(statCard(skin, "活跃用户", "456", "+3%")).height(110);
+        statsRow2.add(statCard(skin, "收入 (¥)", "98,210", "+8%"));
+        statsRow2.add(statCard(skin, "活跃用户", "456", "+3%"));
 
         root.add(statsRow1).growX().row();
         root.add(statsRow2).growX().row();
@@ -59,22 +59,22 @@ public class DashboardModule implements AdminModule {
 
     private BsCard statCard(Skin skin, String name, String value, String delta) {
         BsCard card = new BsCard(skin);
-        Table body = card.getBodyTable();
-        body.clearChildren();
-        body.top().left();
-        body.defaults().top().left();
 
         Label n = new Label(name, skin);
         n.setColor(BsTheme.ts());
         Label v = new Label(value, skin);
-        v.setFontScale(1.8f);
+        v.setFontScale(1.5f);
         v.setColor(BsTheme.tp());
         Label d = new Label(delta, skin);
         d.setColor(BsTheme.colorOf("success"));
 
-        body.add(n).left().row();
-        body.add(v).left().padTop(6).row();
-        body.add(d).left().padTop(4);
+        // 用 addCustom 走 bodyTable 的标准接口（bodyTable.defaults().growX().left() 已配置好），
+        // 之前 clearChildren + 自建 defaults 会丢 growX，导致 Label 宽度异常、数字跑到卡片外
+        card.addCustom(n);
+        Table valueRow = new Table();
+        valueRow.add(v).left();
+        card.addCustom(valueRow);
+        card.addCustom(d);
         return card;
     }
 

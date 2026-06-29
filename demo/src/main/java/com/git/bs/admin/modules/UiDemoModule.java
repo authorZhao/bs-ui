@@ -1,6 +1,7 @@
 package com.git.bs.admin.modules;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -11,108 +12,74 @@ import com.git.bs.ui.BsTheme;
 import com.git.bs.ui.BsUI;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * UI 模块（精简版入口）：把 BsControlsSkinScreen 的 44 个控件演示搬进 admin 模板，
- * 按三个二级菜单分组：
- * <ul>
- *   <li>UI 模块/通用UI —— 标签/按钮/输入/表单/卡片等基础控件</li>
- *   <li>UI 模块/业务UI —— 表格/树/搜索/工具栏/文件项等业务控件</li>
- *   <li>UI 模块/图形UI —— 折线/柱状/饼图/雷达等图表</li>
- * </ul>
+ * UI 模块：把 BsControlsSkinScreen 的 44 个控件演示作为二级菜单挂到 admin 侧边栏「UI 模块」下。
  *
- * <p>本类只作为入口注册"UI 模块"占位，实际子模块由 {@link BsAdminShell} 启动时
- * 调用 {@link #registerAll(BsAdminShell)} 批量注册。</p>
+ * <p>每个二级菜单项（叶子）点击后在内容区显示对应模块的控件预览，
+ * 复用 {@link BsControlsSkinScreen#fillModuleContent(int, Table)}，不重复实现 44 个 fill 方法。</p>
  *
- * <p>实现复用 {@link BsControlsSkinScreen#fillModuleContent(int, Table)}，
- * 不重复实现 44 个 fill 方法。</p>
+ * <p>44 个二级项由 {@link BsAdminShell} 构造时调用 {@link #registerAll(BsAdminShell)} 批量注册，
+ * 路径形如 {@code "UI 模块/标签"}（扁平，不再分级成 通用UI/业务UI/图形UI）。</p>
+ *
+ * <p>stage 注入：admin shell 构造后调 {@link #bindStage(Stage)}，
+ * 让 Pickers/DateTime/Overlay/Modal/Dialogs 等依赖真实 stage 的弹窗正常工作。</p>
  */
 @Slf4j
-public class UiDemoModule implements AdminModule {
+public class UiDemoModule {
 
     public static final String PATH = "UI 模块";
 
-    /** 通用UI：基础控件（标签/按钮/输入/选择/表单/卡片/徽标等）。值为 MODULES 的 index。 */
-    private static final int[] GENERAL_UI = {
-            0,   // Labels 标签
-            1,   // Buttons 按钮
-            2,   // ImageButton 图标按钮
-            3,   // Inputs 输入框
-            4,   // Selects 下拉
-            5,   // Radio & Check 单选/多选
-            6,   // Slider 滑块
-            7,   // Misc 杂项
-            10,  // Form 表单
-            17,  // Cards 卡片
-            18,  // Badge 徽标
-            22,  // Icons 图标库
-            24,  // Collapse & Accordion 折叠
-            25,  // ButtonGroup & Alert
-            26,  // InputNumber & InputGroup
-            36,  // Wave1-Basics Switch/Avatar/Timeline...
-            37,  // Wave1-Inputs AutoComplete/TagInput...
-    };
-
-    /** 业务UI：导航/布局/数据展示/业务组件。 */
-    private static final int[] BUSINESS_UI = {
-            8,   // MenuBar 菜单栏
-            12,  // Tree 树状列表
-            13,  // Table 表格+分页
-            19,  // Profile 个人面板
-            20,  // Layout 管理后台
-            21,  // Breadcrumb 面包屑
-            23,  // Progress & Toast
-            27,  // Navbar & Offcanvas
-            33,  // P2-Content Placeholder/Figure/ListGroup...
-            34,  // P2-Carousel 轮播图
-            38,  // Wave1-Feedback Result/LoadingOverlay
-            39,  // Wave2-Data DataTable/PropertySheet
-            41,  // Wave2-Business SearchBar/Toolbar/FileItem/Transfer
-            43,  // Wave3-Misc Affix/Drawer
-    };
-
-    /** 图形UI：各类图表。 */
-    private static final int[] GRAPHICS_UI = {
-            28,  // Charts-Line 折线图
-            29,  // Charts-Bar 柱状图
-            30,  // Charts-Pie 饼图
-            31,  // Charts-Legend 图例与系列切换
-            32,  // Charts-Hover Hover 数据查看
-            35,  // Charts-Extended Area/Spline/Scatter/Radar...
-    };
-
     /** BsControlsSkinScreen 内容工厂（复用 44 个 fill 方法）。 */
     private static BsControlsSkinScreen contentFactory;
+    /** admin shell 注入的真实 stage（懒加载工厂创建时应用，让弹窗 attach 到可见 stage）。 */
+    private static Stage boundStage;
 
-    /** 取内容工厂单例（懒加载，skin 用当前主题 skin）。 */
+    /** 取内容工厂单例（懒加载，skin 用当前主题 skin，stage 用注入的 boundStage）。 */
     private static BsControlsSkinScreen factory() {
         if (contentFactory == null) {
             contentFactory = new BsControlsSkinScreen(BsUI.getSkin());
+            // 懒加载创建后立即应用已注入的 stage（bindStage 可能在工厂创建前就调过）
+            if (boundStage != null) contentFactory.setStage(boundStage);
         }
         return contentFactory;
     }
 
     /**
-     * 把 44 个控件演示按"通用UI/业务UI/图形UI"三组注册到 shell。
-     * 由 BsAdminShell 构造时调用。
+     * 记录 admin shell 的真实 stage，供内容工厂使用。
+     * <p>注意：工厂是懒加载的，{@code registerAll}/{@code bindStage} 调用时工厂可能还没创建，
+     * 所以这里只记录 stage 引用，真正注入发生在 {@link #factory()} 首次创建工厂时；
+     * 若工厂已存在则立即注入。</p>
      */
-    public static void registerAll(BsAdminShell shell) {
-        registerGroup(shell, "通用UI", GENERAL_UI);
-        registerGroup(shell, "业务UI", BUSINESS_UI);
-        registerGroup(shell, "图形UI", GRAPHICS_UI);
+    public static void bindStage(Stage s) {
+        boundStage = s;
+        if (contentFactory != null) contentFactory.setStage(s);
     }
 
-    /** 注册一个分组下的所有模块。 */
-    private static void registerGroup(BsAdminShell shell, String groupName, int[] indices) {
-        for (int idx : indices) {
+    /**
+     * 清空内容工厂缓存（强制下次按新 skin 重建）。
+     * <p>注意：不清 boundStage——主题切换时新 shell 已 bindStage 设了新 stage，
+     * 而旧 shell 的 dispose 在新 shell 构造之后才执行，清 boundStage 会误清新值。</p>
+     */
+    public static void resetFactory() {
+        contentFactory = null;
+    }
+
+    /**
+     * 把 BsControlsSkinScreen 的 44 个控件演示（即其左侧导航 MODULES 列表）
+     * 全部作为二级菜单注册到「UI 模块」下，菜单名原封不动使用 MODULES 里的全名
+     * （如 "Labels  标签"，与 BsControlsSkinScreen 左侧导航完全一致）。
+     *
+     * <p>注意：MODULES 名字里含 {@code /}（如 "Overlay  Tooltip/Spinner/Popover/Link"），
+     * 而 path 用 {@code /} 作层级分隔符，直接拼会错误拆出多级。
+     * 这里把名字里的 {@code /} 替换成 {@code ·}（中文间隔点），既不冲突也保留可读性。</p>
+     *
+     * <p>由 BsAdminShell 构造时调用。</p>
+     */
+    public static void registerAll(BsAdminShell shell) {
+        for (int idx = 0; idx < BsControlsSkinScreen.MODULES.size(); idx++) {
             final int moduleIdx = idx;
-            String name = BsControlsSkinScreen.MODULES.get(idx);
-            // 菜单名取后半段（"Labels  标签" → "标签"），中文优先
-            String menuName = simplifyName(name);
-            final String path = "UI 模块/" + groupName + "/" + menuName;
+            String name = safeName(BsControlsSkinScreen.MODULES.get(idx));
+            final String path = PATH + "/" + name;
             shell.register(new AdminModule() {
                 @Override public String getPath() { return path; }
                 @Override public Actor buildView(BsAdminShell s) {
@@ -122,48 +89,12 @@ public class UiDemoModule implements AdminModule {
         }
     }
 
-    /** "Labels  标签" → "标签"；无中文则返回原名。 */
-    private static String simplifyName(String name) {
-        // 按多个空格分割，取最后一段
-        String[] parts = name.split("\\s{2,}|\\s+");
-        if (parts.length > 1) {
-            return parts[parts.length - 1];
-        }
-        return name;
+    /** 把模块名里的 {@code /} 替换成 {@code ·}，避免与 path 分隔符冲突拆出多级。 */
+    private static String safeName(String name) {
+        return name == null ? "" : name.replace("/", "·");
     }
 
-    // ============ AdminModule 入口（"UI 模块"本身是分组占位） ============
-
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
-    @Override
-    public Actor buildView(BsAdminShell shell) {
-        // "UI 模块"本身不可达（它是分组），这里给个说明页
-        Skin skin = BsUI.getSkin();
-        Table root = new Table();
-        root.top().left();
-        root.pad(20);
-        root.defaults().top().left();
-
-        Label title = new Label("UI 控件演示", skin);
-        title.setFontScale(1.4f);
-        title.setColor(BsTheme.tp());
-        root.add(title).left().padBottom(8).row();
-
-        Label hint = new Label("请在左侧菜单选择分类：通用UI / 业务UI / 图形UI", skin);
-        hint.setColor(BsTheme.tm());
-        root.add(hint).left().padBottom(4).row();
-
-        Label hint2 = new Label("共 " + BsControlsSkinScreen.MODULES.size() + " 个控件演示，"
-                + "源自 BsControlsSkinScreen。", skin);
-        hint2.setColor(BsTheme.tm());
-        root.add(hint2).left().row();
-
-        return root;
-    }
+    // ============ 具体控件演示页内容 ============
 
     /**
      * 构造一个具体控件演示页的内容（供注册的真实模块调用）。
@@ -175,8 +106,8 @@ public class UiDemoModule implements AdminModule {
         root.pad(12);
         root.defaults().top().left();
 
-        // 模块标题
-        String name = BsControlsSkinScreen.MODULES.get(moduleIdx);
+        // 模块标题（与菜单名一致，/ 替换为 ·）
+        String name = safeName(BsControlsSkinScreen.MODULES.get(moduleIdx));
         Label title = new Label(name, skin);
         title.setFontScale(1.3f);
         title.setColor(BsTheme.tp());

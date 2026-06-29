@@ -1,5 +1,5 @@
-admin.png
-dark.png
+
+bs-admin.png
 size: 1024,1024
 format: RGBA8888
 filter: Linear,Linear
@@ -338,14 +338,15 @@ split: 6,6,6,6
 index: -1
 bs-color-swatch-up
 rotate: false
-xy: 2, 30
-size: 32, 32
-orig: 32, 32
+xy: 992, 2
+size: 24, 24
+orig: 24, 24
 offset: 0, 0
+split: 8,8,8,8
 index: -1
 bs-warning-active
 rotate: false
-xy: 992, 2
+xy: 2, 30
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -361,7 +362,7 @@ split: 3,3,3,3
 index: -1
 bs-warning-soft-bg
 rotate: false
-xy: 2, 64
+xy: 2, 58
 size: 18, 18
 orig: 18, 18
 offset: 0, 0
@@ -369,14 +370,14 @@ split: 6,6,6,6
 index: -1
 bs-text-field-cursor
 rotate: false
-xy: 22, 64
+xy: 1018, 2
 size: 2, 16
 orig: 2, 16
 offset: 0, 0
 index: -1
 bs-menu-item-active
 rotate: false
-xy: 2, 84
+xy: 2, 78
 size: 12, 12
 orig: 12, 12
 offset: 0, 0
@@ -384,14 +385,14 @@ split: 4,4,4,4
 index: -1
 bs-arrow-right
 rotate: false
-xy: 2, 98
+xy: 2, 92
 size: 24, 24
 orig: 24, 24
 offset: 0, 0
 index: -1
 bs-btn-group-inactive
 rotate: false
-xy: 2, 124
+xy: 2, 118
 size: 18, 18
 orig: 18, 18
 offset: 0, 0
@@ -399,14 +400,14 @@ split: 6,6,6,6
 index: -1
 bs-arrow-left
 rotate: false
-xy: 2, 144
+xy: 2, 138
 size: 24, 24
 orig: 24, 24
 offset: 0, 0
 index: -1
 bs-success-checked
 rotate: false
-xy: 2, 170
+xy: 2, 164
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -414,7 +415,7 @@ split: 8,8,8,8
 index: -1
 bs-warning-disabled
 rotate: false
-xy: 2, 198
+xy: 2, 192
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -422,7 +423,7 @@ split: 8,8,8,8
 index: -1
 bs-list-selection
 rotate: false
-xy: 2, 226
+xy: 2, 220
 size: 18, 18
 orig: 18, 18
 offset: 0, 0
@@ -430,7 +431,7 @@ split: 6,6,6,6
 index: -1
 bs-danger-disabled
 rotate: false
-xy: 2, 246
+xy: 2, 240
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -438,7 +439,7 @@ split: 8,8,8,8
 index: -1
 bs-primary-soft-bg
 rotate: false
-xy: 2, 274
+xy: 2, 268
 size: 18, 18
 orig: 18, 18
 offset: 0, 0
@@ -446,7 +447,7 @@ split: 6,6,6,6
 index: -1
 bs-menu-title-up
 rotate: false
-xy: 16, 84
+xy: 16, 78
 size: 12, 12
 orig: 12, 12
 offset: 0, 0
@@ -454,21 +455,21 @@ split: 4,4,4,4
 index: -1
 bs-check-off
 rotate: false
-xy: 2, 294
+xy: 2, 288
 size: 24, 24
 orig: 24, 24
 offset: 0, 0
 index: -1
 bs-radio-on
 rotate: false
-xy: 2, 320
+xy: 2, 314
 size: 24, 24
 orig: 24, 24
 offset: 0, 0
 index: -1
 bs-info-hover
 rotate: false
-xy: 2, 346
+xy: 2, 340
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -476,7 +477,7 @@ split: 8,8,8,8
 index: -1
 bs-secondary-outline-active
 rotate: false
-xy: 2, 374
+xy: 2, 368
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -484,14 +485,14 @@ split: 8,8,8,8
 index: -1
 bs-arrow-left-disabled
 rotate: false
-xy: 2, 402
+xy: 2, 396
 size: 24, 24
 orig: 24, 24
 offset: 0, 0
 index: -1
 bs-info-up
 rotate: false
-xy: 2, 428
+xy: 2, 422
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -499,7 +500,7 @@ split: 8,8,8,8
 index: -1
 bs-danger-up
 rotate: false
-xy: 2, 456
+xy: 2, 450
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -514,7 +515,7 @@ offset: 0, 0
 index: -1
 bs-secondary-disabled
 rotate: false
-xy: 2, 484
+xy: 2, 478
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -522,7 +523,7 @@ split: 8,8,8,8
 index: -1
 bs-secondary-hover
 rotate: false
-xy: 2, 512
+xy: 2, 506
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -530,7 +531,7 @@ split: 8,8,8,8
 index: -1
 bs-primary-disabled
 rotate: false
-xy: 2, 540
+xy: 2, 534
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -538,7 +539,7 @@ split: 8,8,8,8
 index: -1
 bs-primary-outline-up
 rotate: false
-xy: 2, 568
+xy: 2, 562
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -546,7 +547,7 @@ split: 8,8,8,8
 index: -1
 bs-success-soft-bg
 rotate: false
-xy: 2, 596
+xy: 2, 590
 size: 18, 18
 orig: 18, 18
 offset: 0, 0
@@ -554,7 +555,7 @@ split: 6,6,6,6
 index: -1
 bs-primary-hover
 rotate: false
-xy: 2, 616
+xy: 2, 610
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -562,7 +563,7 @@ split: 8,8,8,8
 index: -1
 bs-danger-outline-active
 rotate: false
-xy: 2, 644
+xy: 2, 638
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -570,7 +571,7 @@ split: 8,8,8,8
 index: -1
 bs-warning-checked
 rotate: false
-xy: 2, 672
+xy: 2, 666
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -578,7 +579,7 @@ split: 8,8,8,8
 index: -1
 bs-secondary-outline-hover
 rotate: false
-xy: 2, 700
+xy: 2, 694
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -593,7 +594,7 @@ offset: 0, 0
 index: -1
 bs-secondary-soft-bg
 rotate: false
-xy: 2, 728
+xy: 2, 722
 size: 18, 18
 orig: 18, 18
 offset: 0, 0
@@ -601,7 +602,7 @@ split: 6,6,6,6
 index: -1
 bs-success-active
 rotate: false
-xy: 2, 748
+xy: 2, 742
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -609,7 +610,7 @@ split: 8,8,8,8
 index: -1
 bs-primary-up
 rotate: false
-xy: 2, 776
+xy: 2, 770
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -617,7 +618,7 @@ split: 8,8,8,8
 index: -1
 bs-window-bg
 rotate: false
-xy: 2, 804
+xy: 30, 30
 size: 32, 32
 orig: 32, 32
 offset: 0, 0
@@ -625,7 +626,7 @@ split: 10,10,10,10
 index: -1
 bs-primary-checked
 rotate: false
-xy: 2, 838
+xy: 2, 798
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -633,7 +634,7 @@ split: 8,8,8,8
 index: -1
 bs-info-disabled
 rotate: false
-xy: 2, 866
+xy: 2, 826
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -648,7 +649,7 @@ offset: 0, 0
 index: -1
 bs-progress-track
 rotate: false
-xy: 2, 894
+xy: 2, 854
 size: 18, 18
 orig: 18, 18
 offset: 0, 0
@@ -656,7 +657,7 @@ split: 6,6,6,6
 index: -1
 bs-warning-up
 rotate: false
-xy: 2, 914
+xy: 2, 874
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -664,7 +665,7 @@ split: 8,8,8,8
 index: -1
 bs-slider-bg
 rotate: false
-xy: 22, 124
+xy: 2, 902
 size: 12, 12
 orig: 12, 12
 offset: 0, 0
@@ -672,7 +673,7 @@ split: 4,4,4,4
 index: -1
 bs-menu-title-open
 rotate: false
-xy: 22, 226
+xy: 16, 902
 size: 12, 12
 orig: 12, 12
 offset: 0, 0
@@ -680,7 +681,7 @@ split: 4,4,4,4
 index: -1
 bs-primary-outline-active
 rotate: false
-xy: 2, 942
+xy: 2, 916
 size: 26, 26
 orig: 26, 26
 offset: 0, 0
@@ -688,7 +689,7 @@ split: 8,8,8,8
 index: -1
 bs-warning-outline-up
 rotate: false
-xy: 2, 970
+xy: 2, 944
 size: 26, 26
 orig: 26, 26
 offset: 0, 0

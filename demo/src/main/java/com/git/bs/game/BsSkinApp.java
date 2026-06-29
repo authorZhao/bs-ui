@@ -145,6 +145,12 @@ public class BsSkinApp extends Game {
         bindDefaultFontStyles(darkSkin, defaultFont);
         BsUI.registerTheme(darkTheme.name(), darkTheme, darkSkin);
 
+        // Admin 主题同步注册（程序化构建，不读 json，便于在测试台观察效果后再导出）
+        var adminTheme = BsAdminTheme.INSTANCE;
+        Skin adminSkin = BsUI.buildSkin(adminTheme, defaultFont);
+        bindDefaultFontStyles(adminSkin, defaultFont);
+        BsUI.registerTheme(adminTheme.name(), adminTheme, adminSkin);
+
         setFontsReadyListener(() -> {
             // 字号字体生成完成后，把 sm/md/lg/xl 样式同时绑定到 light 和 dark 两份 skin
             for (Skin s : BsUI.registeredSkins()) {

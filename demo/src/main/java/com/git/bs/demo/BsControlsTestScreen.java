@@ -127,8 +127,8 @@ public class BsControlsTestScreen extends ScreenAdapter {
     /** 模块列表（在 buildLayout 重建时复用）。 */
     private static final java.util.List<String> MODULES = buildModuleList();
 
-    /** Dark 切换按钮引用（重建后更新文字）。 */
-    private BsButton themeToggle;
+    /** 主题切换下拉（重建后恢复选中项）。 */
+    private com.badlogic.gdx.scenes.scene2d.ui.SelectBox<String> themeToggle;
 
     public BsControlsTestScreen(BsControlsTestApp app) {
         this.app = app;
@@ -158,16 +158,26 @@ public class BsControlsTestScreen extends ScreenAdapter {
         title.setFontScale(1.6f);
         header.add(title).pad(10).left().growX();
 
-        // Dark 切换按钮（保留对实例的引用，重建时更新文字）
-        boolean isDark = BsUI.currentTheme().isDark();
-        themeToggle = new BsButton(isDark ? "☀ Light" : "🌙 Dark", skin,
-                BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE, BsButton.Size.SM);
-        themeToggle.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                BsUI tm = BsUI.get();
-                boolean toDark = !BsUI.currentTheme().isDark();
-                // 只调 setTheme（不传 skin），由 BsControlsTestApp 的 listener 处理重建
-                BsUI.setTheme(toDark ? BsDarkTheme.INSTANCE : BsLightTheme.INSTANCE);
+        // 主题切换下拉：light / dark / admin 三选一
+        themeToggle = new com.badlogic.gdx.scenes.scene2d.ui.SelectBox<>(skin);
+        com.badlogic.gdx.utils.Array<String> themeNames = new com.badlogic.gdx.utils.Array<>();
+        themeNames.add("☀ Light");
+        themeNames.add("🌙 Dark");
+        themeNames.add("🛡 Admin");
+        themeToggle.setItems(themeNames);
+        // 按当前主题恢复选中项
+        String currentName = BsUI.currentThemeName();
+        if (currentName == null) currentName = "";
+        themeToggle.setSelectedIndex(
+                currentName.contains("admin") ? 2
+                : currentName.contains("dark") ? 1 : 0);
+        themeToggle.addListener(new ChangeListener() {
+            @Override public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                int idx = themeToggle.getSelectedIndex();
+                com.git.bs.ui.BsTheme target = idx == 2 ? com.git.bs.ui.BsAdminTheme.INSTANCE
+                        : idx == 1 ? BsDarkTheme.INSTANCE : BsLightTheme.INSTANCE;
+                // 只调 setTheme，由 BsControlsTestApp 的 listener 处理重建
+                BsUI.setTheme(target);
             }
         });
         header.add(themeToggle).pad(8).right();
