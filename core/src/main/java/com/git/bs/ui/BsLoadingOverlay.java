@@ -1,6 +1,5 @@
 package com.git.bs.ui;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -43,7 +42,8 @@ public class BsLoadingOverlay extends Table {
     private boolean showProgress = false;
 
     public BsLoadingOverlay(Skin skin) {
-        setBackground(skin.newDrawable("white", new Color(0, 0, 0, 0.5f)));
+        // 用 bs-overlay token（主题驱动，暗色主题下也是合适的半透明遮罩）
+        setBackground(skin.newDrawable("white", BsTheme.ov()));
         setFillParent(true);
         setTouchable(Touchable.enabled);   // 拦截点击
         center();

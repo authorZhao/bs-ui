@@ -19,7 +19,7 @@ public final class BsDarkTheme extends BsAbstractTheme {
     public static final BsDarkTheme INSTANCE = new BsDarkTheme();
 
     private BsDarkTheme() {
-        super("dark", true);
+        super("bs-dark", true);
         // 文本
         put("text-primary",     0xF8F9FA);
         put("text-secondary",   0xADB5BD);

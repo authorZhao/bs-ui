@@ -45,8 +45,31 @@ import java.util.Map;
 public class BsControlsTestApp extends Game {
 
     private static final String SKIN_CP = "com/git/bs/ui/skin";
-    private static final String TTF = SKIN_CP + "/LXGWWenKaiMonoLite-Light.ttf";
+    private static final String TTF = SKIN_CP + "/LXGWWenKaiScreen.ttf";
     private static final String CHARS = SKIN_CP + "/chinese.txt";
+    private static final String CHARS_COMMON = SKIN_CP + "/common.txt";
+
+    /** 导出皮肤时复用的 TTF 文件 classpath 路径。 */
+    public String ttfPath() { return TTF; }
+    /** 导出皮肤时复用的完整字符集（63197 字符，含生僻字）。 */
+    public String charsPath() { return CHARS; }
+    /** 导出皮肤时复用的精简字符集（32870 字符，8000+ 常用汉字 + ASCII）。 */
+    public String charsPathCommon() { return CHARS_COMMON; }
+
+    /**
+     * 返回实际可用的字符集条目（显示名 → classpath 路径），按优先级排序。
+     * 仅返回 classpath 里真实存在的文件，避免导出对话框暴露不存在的选项。
+     */
+    public java.util.List<String[]> availableCharsEntries() {
+        java.util.List<String[]> entries = new java.util.ArrayList<>();
+        if (Gdx.files.internal(CHARS_COMMON).exists()) {
+            entries.add(new String[]{"精简字符集 (common.txt)", CHARS_COMMON});
+        }
+        if (Gdx.files.internal(CHARS).exists()) {
+            entries.add(new String[]{"完整字符集 (chinese.txt)", CHARS});
+        }
+        return entries;
+    }
 
     /** 4 档字号定义（suffix → size）。 */
     private static final String[][] FONT_SIZES = {
@@ -109,14 +132,21 @@ public class BsControlsTestApp extends Game {
 
         bindDefaultFontStyles(skin, defaultFont);
 
+        // Dark 主题同步注册：不依赖字号字体预热（dark skin 用 default 字体即可工作）。
+        // 否则用户在分帧字体生成完成前点 Dark 按钮，BsUI.setTheme 会因 dark 未注册而静默忽略。
+        var darkTheme = BsDarkTheme.INSTANCE;
+        Skin darkSkin = BsUI.buildSkin(darkTheme, defaultFont);
+        bindDefaultFontStyles(darkSkin, defaultFont);
+        BsUI.registerTheme(darkTheme.name(), darkTheme, darkSkin);
+
         setFontsReadyListener(() -> {
-            var darkTheme = BsDarkTheme.INSTANCE;
-            Skin darkSkin = BsUI.buildSkin(darkTheme, defaultFont);
-            for (String suffix : new String[]{"sm", "md", "lg", "xl"}) {
-                BitmapFont f = fonts.get(suffix);
-                if (f != null) BsSkinLoader.bindFontStyles(darkSkin,suffix,  f);
+            // 字号字体生成完成后，把 sm/md/lg/xl 样式同时绑定到 light 和 dark 两份 skin
+            for (Skin s : BsUI.registeredSkins()) {
+                for (String suffix : new String[]{"sm", "md", "lg", "xl"}) {
+                    BitmapFont f = fonts.get(suffix);
+                    if (f != null) BsSkinLoader.bindFontStyles(s, suffix, f);
+                }
             }
-            BsUI.registerTheme(darkTheme.name(), darkTheme, darkSkin);
         });
 
 
@@ -288,6 +318,8 @@ public class BsControlsTestApp extends Game {
 
     @Override
     public void render() {
+        // 用当前主题 body 底色清屏（Light #F5F6F8 / Dark #212529），切换主题后基础色调自动变
+        com.badlogic.gdx.utils.ScreenUtils.clear(com.git.bs.ui.BsTheme.bgBodyColor(), true);
         super.render();
         // 渲染旋转器 overlay（如果可见）
         if (overlayStage != null) {

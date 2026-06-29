@@ -51,8 +51,8 @@ public class BsWindow extends Window {
         // 已有 backdrop 则先清掉（防御重复调用）
         removeBackdrop();
         backdrop = new Table(getSkin());
-        backdrop.setBackground(getSkin().newDrawable("white",
-                new com.badlogic.gdx.graphics.Color(0, 0, 0, 0.45f)));
+        // 用 bs-overlay token（主题驱动，与 BsModal 的 backdrop 保持一致）
+        backdrop.setBackground(getSkin().newDrawable("white", BsTheme.ov()));
         backdrop.setFillParent(true);
         backdrop.setTouchable(Touchable.enabled);
         // backdrop 点击 → 关闭窗口（Bootstrap 5 模态默认行为）

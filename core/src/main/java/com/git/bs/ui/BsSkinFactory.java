@@ -274,7 +274,7 @@ public final class BsSkinFactory {
             // 会 fallback 到 bs-primary-up 导致 link 按钮变成蓝色色块
             if (!skin.has("bs-transparent", com.badlogic.gdx.scenes.scene2d.utils.Drawable.class)) {
                 skin.add("bs-transparent",
-                        skin.newDrawable("white", new Color(0, 0, 0, 0)),
+                        com.git.bs.ui.BsUI.drawableOf(new Color(0, 0, 0, 0)),
                         com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
             }
             com.badlogic.gdx.scenes.scene2d.utils.Drawable transparent =

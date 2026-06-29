@@ -171,6 +171,16 @@ public class BsControlsTestScreen extends ScreenAdapter {
             }
         });
         header.add(themeToggle).pad(8).right();
+
+        // 导出皮肤按钮：弹对话框确认导出名 / 字符集 / 目录
+        BsButton exportBtn = new BsButton("⭳ 导出皮肤", skin,
+                BsButton.Variant.SUCCESS, BsButton.Style.SOLID, BsButton.Size.SM);
+        exportBtn.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent event, float x, float y) {
+                showExportDialog();
+            }
+        });
+        header.add(exportBtn).pad(8).right();
         root.add(header).growX().row();
 
         // 主区：左导航 + 右内容（可滚动）
@@ -262,6 +272,108 @@ public class BsControlsTestScreen extends ScreenAdapter {
 
     private void setStatus(String text) {
         statusLine.setText(text);
+    }
+
+    // =================== 皮肤导出 ===================
+
+    /**
+     * 弹出导出皮肤对话框：让用户输入导出名（默认按当前主题命名）+ 选择字符集，
+     * 确认后调用 {@link com.git.bs.ui.BsSkinExporter#export} 把当前 skin 导出到本地目录。
+     *
+     * <p>输出结构：{@code <Gdx.files.local(bs-skin-export/<name>)/} 下
+     * {@code <name>.json} + {@code <name>.atlas} + {@code <name>.png} + {@code ttf/} + 字符集 txt。</p>
+     */
+    private void showExportDialog() {
+        // 默认导出名 = theme.name()（如 bs-light / bs-dark，theme.name 本身已含 bs- 前缀）
+        final String defaultName = BsUI.currentThemeName() == null ? "bs-skin" : BsUI.currentThemeName();
+        final com.badlogic.gdx.scenes.scene2d.ui.TextField nameField =
+                new com.badlogic.gdx.scenes.scene2d.ui.TextField(defaultName, skin);
+
+        // 字符集选择：根据 classpath 实际存在的文件动态填充（避免暴露不存在的选项）
+        final java.util.List<String[]> charsEntries = app.availableCharsEntries();
+        final com.badlogic.gdx.scenes.scene2d.ui.SelectBox<String> charsBox =
+                new com.badlogic.gdx.scenes.scene2d.ui.SelectBox<>(skin);
+        com.badlogic.gdx.utils.Array<String> charsItems = new com.badlogic.gdx.utils.Array<>();
+        for (String[] entry : charsEntries) charsItems.add(entry[0]);
+        charsBox.setItems(charsItems);
+        charsBox.setSelectedIndex(0);
+
+        Table form = new Table(skin);
+        form.defaults().pad(6).left().growX();
+        form.add(new Label("导出名（生成 <名>.json / .atlas / .png）", skin)).row();
+        form.add(nameField).growX().row();
+        form.add(new Label("字符集（影响字体生成范围与加载速度）", skin)).padTop(4).row();
+        form.add(charsBox).growX().left().row();
+        Label hint = new Label("目录：bs-skin-export/   ·   多主题共用字体与字符集，主题资源以导出名区分", skin);
+        hint.setColor(com.git.bs.ui.BsTheme.tm());
+        hint.setFontScale(0.9f);
+        hint.setWrap(true);
+        form.add(hint).padTop(4).growX().row();
+
+        new BsModal("导出皮肤", skin)
+                .content(form)
+                .contentWidth(440)
+                .separator(true)
+                .addButton("取消", () -> setStatus("导出取消"), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE)
+                .addButton("导出", () -> doExport(nameField.getText(),
+                                charsEntries.get(charsBox.getSelectedIndex())[1]),
+                        BsButton.Variant.PRIMARY, BsButton.Style.SOLID)
+                .showModal(stage);
+    }
+
+    /**
+     * 执行导出：在 GL 线程同步导出（含 PixmapPacker / 文件 IO，耗时约几十~几百毫秒），
+     * 完成后更新状态栏。
+     *
+     * @param nameRaw     导出名（生成 <名>.json/.atlas/.png）
+     * @param charsCp     字符集文件 classpath 路径（如 com/git/bs/ui/skin/chinese.txt）
+     */
+    private void doExport(String nameRaw, String charsCp) {
+        final String name = (nameRaw == null || nameRaw.trim().isEmpty()) ? "bs-skin" : nameRaw.trim();
+        final BsControlsTestApp appRef = this.app;
+        // 导出涉及文件 IO 和 PixmapPacker，放下一帧执行避免阻塞 modal 关闭动画
+        Gdx.app.postRunnable(() -> {
+            try {
+                com.badlogic.gdx.files.FileHandle outDir =
+                        Gdx.files.local("bs-skin-export");
+                if (!outDir.exists()) outDir.mkdirs();
+
+                com.badlogic.gdx.files.FileHandle ttfSource =
+                        Gdx.files.internal(appRef.ttfPath());
+                com.badlogic.gdx.files.FileHandle charsFile =
+                        Gdx.files.internal(charsCp);
+
+                long t0 = System.currentTimeMillis();
+                com.git.bs.ui.BsSkinExporter.export(skin, outDir, name, ttfSource, charsFile);
+                long elapsed = System.currentTimeMillis() - t0;
+
+                String charsName = charsFile.name();
+                String msg = "✓ 导出完成：" + outDir.path() + "/" + name + ".*   ("
+                        + elapsed + "ms, " + charsName + ")";
+                log.info(msg);
+                setStatus(msg);
+                showExportResultDialog(true, outDir.path(), null);
+            } catch (Throwable t) {
+                log.error("皮肤导出失败", t);
+                setStatus("✗ 导出失败：" + t.getMessage());
+                showExportResultDialog(false, null, t.getMessage());
+            }
+        });
+    }
+
+    /** 导出结果提示框（成功 / 失败）。 */
+    private void showExportResultDialog(boolean ok, String path, String error) {
+        Label content = new Label(ok
+                ? "已导出到：\n" + path + "\n\n包含：json + atlas + png + ttf + 字符集 txt"
+                : "导出失败：\n" + error,
+                skin);
+        content.setWrap(true);
+        new BsModal(ok ? "导出成功" : "导出失败", skin)
+                .content(content)
+                .contentWidth(440)
+                .separator(true)
+                .addButton("关闭", () -> {}, BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE)
+                .showModal(stage);
     }
 
     private void switchModule(int index) {
@@ -645,7 +757,10 @@ public class BsControlsTestScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0.94f, 0.95f, 0.97f, 1f);
+        // 用当前主题 body 底色清屏（与 BsControlsTestApp.render 的清屏一致）：
+        // 写死浅灰会让 Dark 主题下根 actor 之外的边缘区域仍显示浅色
+        com.badlogic.gdx.graphics.Color bb = com.git.bs.ui.BsTheme.bgBodyColor();
+        ScreenUtils.clear(bb.r, bb.g, bb.b, 1f);
         // 同步 Shift/Ctrl 修饰键给图表（折线点击隔离用）
         BsLineChart.setModifiers(
                 Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.SHIFT_LEFT)

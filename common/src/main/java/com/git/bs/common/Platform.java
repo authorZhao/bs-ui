@@ -1,5 +1,7 @@
 package com.git.bs.common;
 
+import com.badlogic.gdx.utils.Json;
+
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -39,5 +41,13 @@ public interface Platform {
      */
     default boolean isSystemDarkMode() {
         return false;
+    }
+
+    default  String toJson(Object object) {
+        return new Json().toJson(object);
+    }
+
+    default <T> T fromJson(String json, Class<T> type){
+        return new Json().fromJson(type,json);
     }
 }

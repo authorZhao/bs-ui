@@ -54,6 +54,8 @@ public class BsLayoutAdmin extends Table {
     private final Table topMenuRow;
     private final Table userInfoRow;
     private final Table sidebarMenuList;
+    /** sidebar 菜单的 ScrollPane（setSidebarWidth 时同步更新宽度 cell）。 */
+    private com.badlogic.gdx.scenes.scene2d.ui.ScrollPane menuScroll;
 
     /** sidebar 当前/目标宽度。 */
     private float sidebarExpandedW = 180;
@@ -74,18 +76,26 @@ public class BsLayoutAdmin extends Table {
     private final List<TextButton> topSidebarButtons = new ArrayList<>();
     /** 所有 sidebar 节点按钮（含子级，用于选中态管理）。 */
     private final List<TextButton> allSidebarButtons = new ArrayList<>();
+    /** sidebar 是否用深色风格（白字）。默认 false，admin 模板设 true。 */
+    private boolean sidebarDarkStyle = false;
+    /** 让 sidebar 菜单字色走 text-on-dark（白），适配深色侧边栏背景。 */
+    public BsLayoutAdmin setSidebarDarkStyle(boolean on) {
+        this.sidebarDarkStyle = on;
+        rebuildSidebar();
+        return this;
+    }
     private int selectedSidebarIndex = -1;
     /** 顶层 SidebarItem 数据（保留以便 rebuild）。 */
     private final List<SidebarItem> rootSidebarItems = new ArrayList<>();
 
     public BsLayoutAdmin(Skin skin) {
-        setBackground(skin.newDrawable("white", BsTheme.bhH()));
+        setBackground(com.git.bs.ui.BsUI.drawableOf(BsTheme.bhH()));
         top();
         left();
 
         // ========== 顶部栏 ==========
         topBar = new Table();
-        topBar.setBackground(skin.newDrawable("white", Color.WHITE));
+        topBar.setBackground(com.git.bs.ui.BsUI.drawableOf(BsTheme.bhH()));
         topBar.pad(6, 12, 6, 12);
         topBar.left();
 
@@ -116,16 +126,30 @@ public class BsLayoutAdmin extends Table {
         Table body = new Table();
 
         sidebarWrap = new Table();
-        sidebarWrap.setBackground(skin.newDrawable("white", BsTheme.be()));
+        // 侧边栏背景：从构造参数 skin 取 bs-bg-elevated（admin.json #304156）
+        Color sidebarBg = skin.get("bs-bg-elevated", Color.class);
+        com.badlogic.gdx.scenes.scene2d.utils.Drawable sidebarBgDrawable =
+                com.git.bs.ui.BsUI.drawableOf(sidebarBg);
+        sidebarWrap.setBackground(sidebarBgDrawable);
 
         sidebar = new Table();
-        sidebar.pad(8);
+        sidebar.pad(4, 0, 4, 0);
         sidebar.top().left();
+        sidebar.setBackground(com.git.bs.ui.BsUI.drawableOf(sidebarBg));
 
         sidebarMenuList = new Table();
         sidebarMenuList.top().left();
         sidebarMenuList.defaults().growX().left().pad(2);
-        sidebar.add(sidebarMenuList).growY().width(sidebarExpandedW - 16);
+        // 用 ScrollPane 包裹菜单列表，菜单项超出侧边栏高度时可滚动
+        // 用独立 style（透明背景），避免 default style 的 bs-window-bg 白底盖住 sidebar 深色
+        com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle menuScrollStyle =
+                new com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle();
+        menuScrollStyle.hScroll = skin.getDrawable("bs-scrollpane-h-bar");
+        menuScrollStyle.vScroll = skin.getDrawable("bs-scrollpane-v-bar");
+        menuScroll = new com.badlogic.gdx.scenes.scene2d.ui.ScrollPane(sidebarMenuList, menuScrollStyle);
+        menuScroll.setFadeScrollBars(false);
+        menuScroll.setScrollingDisabled(true, false);  // 只允许纵向滚动
+        sidebar.add(menuScroll).growY().width(sidebarExpandedW - 16);
 
         // sidebarWrap 包 sidebar，宽度变化时驱动折叠动画
         Container<Table> sidebarOuter = new Container<>(sidebar);
@@ -136,7 +160,8 @@ public class BsLayoutAdmin extends Table {
         body.add(sidebarWrap).growY().width(sidebarExpandedW).top();
 
         contentWrap = new Container<>();
-        contentWrap.setBackground(skin.newDrawable("white", BsTheme.bb()));
+        // 内容区容器背景：bg-body（admin.json 深灰），用 drawableOf 避免 newDrawable 不可靠
+        contentWrap.setBackground(com.git.bs.ui.BsUI.drawableOf(BsTheme.bb()));
         contentWrap.fill(true);
         contentWrap.pad(10);
         content = new Table();
@@ -260,12 +285,32 @@ public class BsLayoutAdmin extends Table {
                 }
             }
         });
-        // 按 depth 调字色（深度越深越浅，与 BsTree 同风格）
-        Color tc = BsTheme.tp();
-        if (depth == 1) tc = BsTheme.ts();
-        else if (depth >= 2) tc = BsTheme.tm();
+        // 按 depth 调字色（深度越深越浅）
+        // 深色侧边栏风格下用 text-on-dark（admin.json 为白），按层级降透明度
+        // 从构造参数 skin 取色，不依赖 BsUI 全局状态
+        Color tc;
+        if (sidebarDarkStyle) {
+            Color base = skin.get("bs-text-on-dark", Color.class);
+            tc = base;
+            if (depth == 1) tc = new Color(base.r, base.g, base.b, 0.95f);
+            else if (depth >= 2) tc = new Color(base.r, base.g, base.b, 0.88f);
+        } else {
+            tc = BsTheme.tp();
+            if (depth == 1) tc = BsTheme.ts();
+            else if (depth >= 2) tc = BsTheme.tm();
+        }
         TextButton.TextButtonStyle ts = new TextButton.TextButtonStyle(skin.get("bs-menu-title", TextButton.TextButtonStyle.class));
         ts.fontColor = tc;
+        // 深色侧边栏模式：按钮背景用透明（让 sidebarWrap 的深色透出来，否则 bs-menu-title-up 白色会盖住）
+        if (sidebarDarkStyle) {
+            com.badlogic.gdx.scenes.scene2d.utils.Drawable transparent =
+                    skin.has("bs-transparent", com.badlogic.gdx.scenes.scene2d.utils.Drawable.class)
+                            ? skin.getDrawable("bs-transparent")
+                            : com.git.bs.ui.BsUI.drawableOf(new Color(0, 0, 0, 0));
+            ts.up = transparent;
+            ts.over = transparent;
+            ts.down = transparent;
+        }
         textBtn.setStyle(ts);
 
         row.add(textBtn).growX().height(28);
@@ -342,6 +387,11 @@ public class BsLayoutAdmin extends Table {
     /** 设置展开时 sidebar 宽度（默认 180）。 */
     public void setSidebarWidth(float w) {
         this.sidebarExpandedW = w;
+        // 同步菜单 ScrollPane 的宽度（构造时按默认 180 算的，需要更新）
+        if (menuScroll != null) {
+            sidebar.getCells().get(0).width(w - 16);
+            sidebar.invalidate();
+        }
         if (!sidebarCollapsed) animateSidebarTo(w);
     }
 

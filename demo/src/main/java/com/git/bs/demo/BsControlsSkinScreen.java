@@ -48,7 +48,8 @@ public class BsControlsSkinScreen extends ScreenAdapter {
     private int currentModuleIndex = 0;
 
     /** 模块列表（在 buildLayout 重建时复用）。 */
-    private static final List<String> MODULES = buildModuleList();
+    /** 全部 44 个控件演示模块名（按顺序对应 fillModuleContent 的 index）。 */
+    public static final List<String> MODULES = buildModuleList();
 
     /** Dark 切换按钮引用（重建后更新文字）。 */
     private BsButton themeToggle;
@@ -61,6 +62,22 @@ public class BsControlsSkinScreen extends ScreenAdapter {
         buildLayout();
         switchModule(0);
         // 主题切换由 BsControlsTestApp.applyTheme 处理（重建整个 screen），本类不监听
+    }
+
+    /**
+     * 内容工厂模式构造：只用于复用 44 个 fill 方法（admin UiDemo 模块用），
+     * 不建 stage / nav / root，避免无用开销。fillModuleContent 可直接调用。
+     *
+     * @param skin 当前 skin
+     */
+    public BsControlsSkinScreen(Skin skin) {
+        this.app = null;
+        this.skin = skin;
+        // 创建一个独立的 Stage 供 BsTooltip/BsPopover 等 attach 使用（admin 模块不 render 这个 stage，
+        // tooltip 不会显示，但避免 attach(null) NPE）
+        this.stage = new Stage(new com.badlogic.gdx.utils.viewport.ScreenViewport());
+        this.statusLine = new Label("(就绪)", skin);
+        this.statusLine.setColor(com.git.bs.ui.BsTheme.ts());
     }
 
     /**
@@ -94,6 +111,16 @@ public class BsControlsSkinScreen extends ScreenAdapter {
             }
         });
         header.add(themeToggle).pad(8).right();
+
+        // 导出皮肤按钮：弹对话框确认导出名 / 目录
+        BsButton exportBtn = new BsButton("⭳ 导出皮肤", skin,
+                BsButton.Variant.SUCCESS, BsButton.Style.SOLID, BsButton.Size.SM);
+        exportBtn.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent event, float x, float y) {
+                showExportDialog();
+            }
+        });
+        header.add(exportBtn).pad(8).right();
         root.add(header).growX().row();
 
         // 主区：左导航 + 右内容（可滚动）
@@ -187,63 +214,174 @@ public class BsControlsSkinScreen extends ScreenAdapter {
         statusLine.setText(text);
     }
 
+    // =================== 皮肤导出 ===================
+
+    /**
+     * 弹出导出皮肤对话框：让用户输入导出名（默认按当前主题命名），
+     * 确认后调用 {@link BsSkinExporter#export} 把当前 skin 导出到本地目录。
+     *
+     * <p>输出结构：{@code <Gdx.files.local(bs-skin-export/<name>)/} 下
+     * {@code <name>.json} + {@code <name>.atlas} + {@code <name>.png} + {@code ttf/} + {@code chinese.txt}。</p>
+     */
+    private void showExportDialog() {
+        // 默认导出名 = theme.name()（如 bs-light / bs-dark，theme.name 本身已含 bs- 前缀）
+        final String defaultName = BsUI.currentThemeName() == null ? "bs-skin" : BsUI.currentThemeName();
+        final TextField nameField = new TextField(defaultName, skin);
+
+        // 字符集选择：根据 classpath 实际存在的文件动态填充（避免暴露不存在的选项）
+        final java.util.List<String[]> charsEntries = app.availableCharsEntries();
+        final SelectBox<String> charsBox = new SelectBox<>(skin);
+        com.badlogic.gdx.utils.Array<String> charsItems = new com.badlogic.gdx.utils.Array<>();
+        for (String[] entry : charsEntries) charsItems.add(entry[0]);
+        charsBox.setItems(charsItems);
+        charsBox.setSelectedIndex(0);
+
+        Table form = new Table(skin);
+        form.defaults().pad(6).left().growX();
+        form.add(new Label("导出名（生成 <名>.json / .atlas / .png）", skin)).row();
+        form.add(nameField).growX().row();
+        form.add(new Label("字符集（影响字体生成范围与加载速度）", skin)).padTop(4).row();
+        form.add(charsBox).growX().left().row();
+        Label hint = new Label("目录：bs-skin-export/   ·   多主题共用字体与字符集，主题资源以导出名区分", skin);
+        hint.setColor(BsTheme.tm());
+        hint.setFontScale(0.9f);
+        hint.setWrap(true);
+        form.add(hint).padTop(4).growX().row();
+
+        new BsModal("导出皮肤", skin)
+                .content(form)
+                .contentWidth(440)
+                .separator(true)
+                .addButton("取消", () -> setStatus("导出取消"), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE)
+                .addButton("导出", () -> doExport(nameField.getText(),
+                                charsEntries.get(charsBox.getSelectedIndex())[1]),
+                        BsButton.Variant.PRIMARY, BsButton.Style.SOLID)
+                .showModal(stage);
+    }
+
+    /**
+     * 执行导出：在 GL 线程同步导出（含 PixmapPacker / 文件 IO，耗时约几十~几百毫秒），
+     * 完成后更新状态栏。
+     *
+     * @param nameRaw     导出名（生成 <名>.json/.atlas/.png）
+     * @param charsCp     字符集文件 classpath 路径（如 com/git/bs/ui/skin/chinese.txt）
+     */
+    private void doExport(String nameRaw, String charsCp) {
+        final String name = (nameRaw == null || nameRaw.trim().isEmpty()) ? "bs-skin" : nameRaw.trim();
+        final BsSkinApp appRef = this.app;
+        // 导出涉及文件 IO 和 PixmapPacker，放下一帧执行避免阻塞 modal 关闭动画
+        Gdx.app.postRunnable(() -> {
+            try {
+                com.badlogic.gdx.files.FileHandle outDir =
+                        Gdx.files.local("bs-skin-export");
+                if (!outDir.exists()) outDir.mkdirs();
+
+                com.badlogic.gdx.files.FileHandle ttfSource =
+                        Gdx.files.internal(appRef.ttfPath());
+                com.badlogic.gdx.files.FileHandle charsFile =
+                        Gdx.files.internal(charsCp);
+
+                long t0 = System.currentTimeMillis();
+                BsSkinExporter.export(skin, outDir, name, ttfSource, charsFile);
+                long elapsed = System.currentTimeMillis() - t0;
+
+                String charsName = charsFile.name();
+                String msg = "✓ 导出完成：" + outDir.path() + "/" + name + ".*   ("
+                        + elapsed + "ms, " + charsName + ")";
+                log.info(msg);
+                setStatus(msg);
+                showExportResultDialog(true, outDir.path(), null);
+            } catch (Throwable t) {
+                log.error("皮肤导出失败", t);
+                setStatus("✗ 导出失败：" + t.getMessage());
+                showExportResultDialog(false, null, t.getMessage());
+            }
+        });
+    }
+
+    /** 导出结果提示框（成功 / 失败）。 */
+    private void showExportResultDialog(boolean ok, String path, String error) {
+        Label content = new Label(ok
+                ? "已导出到：\n" + path + "\n\n包含：json + atlas + png + ttf + 字符集 txt"
+                : "导出失败：\n" + error,
+                skin);
+        content.setWrap(true);
+        new BsModal(ok ? "导出成功" : "导出失败", skin)
+                .content(content)
+                .contentWidth(440)
+                .separator(true)
+                .addButton("关闭", () -> {}, BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE)
+                .showModal(stage);
+    }
+
     private void switchModule(int index) {
         currentModuleIndex = index;
         contentHost.clearChildren();
         Table content = new Table(skin);
         content.defaults().pad(6).left();
-        switch (index) {
-            case 0: fillLabels(content); break;
-            case 1: fillButtons(content); break;
-            case 2: fillImageButtons(content); break;
-            case 3: fillInputs(content); break;
-            case 4: fillSelects(content); break;
-            case 5: fillRadioCheck(content); break;
-            case 6: fillSliders(content); break;
-            case 7: fillMisc(content); break;
-            case 8: fillMenuBar(content); break;
-            case 9: fillPickers(content); break;
-            case 10: fillForm(content); break;
-            case 11: fillDateTime(content); break;
-            case 12: fillTree(content); break;
-            case 13: fillTable(content); break;
-            case 14: fillOverlay(content); break;
-            case 15: fillModal(content); break;
-            case 16: fillDialogs(content); break;
-            case 17: fillCards(content); break;
-            case 18: fillBadge(content); break;
-            case 19: fillProfile(content); break;
-            case 20: fillLayout(content); break;
-            case 21: fillBreadcrumb(content); break;
-            case 22: fillIcons(content); break;
-            case 23: fillProgressToast(content); break;
-            case 24: fillCollapseAccordion(content); break;
-            case 25: fillButtonGroupAlert(content); break;
-            case 26: fillInputNumberGroup(content); break;
-            case 27: fillNavbarOffcanvas(content); break;
-            case 28: fillChartsLine(content); break;
-            case 29: fillChartsBar(content); break;
-            case 30: fillChartsPie(content); break;
-            case 31: fillChartsLegend(content); break;
-            case 32: fillChartsHover(content); break;
-            case 33: fillP2Content(content); break;
-            case 34: fillP2Carousel(content); break;
-            case 35: fillChartsExtended(content); break;
-            case 36: fillWave1Basics(content); break;
-            case 37: fillWave1Inputs(content); break;
-            case 38: fillWave1Feedback(content); break;
-            case 39: fillWave2Data(content); break;
-            case 40: fillWave3Editor(content); break;
-            case 41: fillWave2Business(content); break;
-            case 42: fillWave3EditorPro(content); break;
-            case 43: fillWave3Misc(content); break;
-            default:
-                content.add(new Label("(未知模块)", skin));
-        }
+        fillModuleContent(index, content);
         contentHost.add(content).growX().top();
         contentHost.row();
         // 占位避免内容太短时贴底
         contentHost.add().expandY();
+    }
+
+    /**
+     * 把指定模块（0~43）的内容填充到外部 host Table。供 admin UiDemo 模块复用，
+     * 避免重复实现 44 个 fill 方法。
+     *
+     * @param index 模块索引（对应 MODULES 列表顺序）
+     * @param host  外部容器（建议 defaults().pad(6).left()）
+     */
+    public void fillModuleContent(int index, Table host) {
+        switch (index) {
+            case 0: fillLabels(host); break;
+            case 1: fillButtons(host); break;
+            case 2: fillImageButtons(host); break;
+            case 3: fillInputs(host); break;
+            case 4: fillSelects(host); break;
+            case 5: fillRadioCheck(host); break;
+            case 6: fillSliders(host); break;
+            case 7: fillMisc(host); break;
+            case 8: fillMenuBar(host); break;
+            case 9: fillPickers(host); break;
+            case 10: fillForm(host); break;
+            case 11: fillDateTime(host); break;
+            case 12: fillTree(host); break;
+            case 13: fillTable(host); break;
+            case 14: fillOverlay(host); break;
+            case 15: fillModal(host); break;
+            case 16: fillDialogs(host); break;
+            case 17: fillCards(host); break;
+            case 18: fillBadge(host); break;
+            case 19: fillProfile(host); break;
+            case 20: fillLayout(host); break;
+            case 21: fillBreadcrumb(host); break;
+            case 22: fillIcons(host); break;
+            case 23: fillProgressToast(host); break;
+            case 24: fillCollapseAccordion(host); break;
+            case 25: fillButtonGroupAlert(host); break;
+            case 26: fillInputNumberGroup(host); break;
+            case 27: fillNavbarOffcanvas(host); break;
+            case 28: fillChartsLine(host); break;
+            case 29: fillChartsBar(host); break;
+            case 30: fillChartsPie(host); break;
+            case 31: fillChartsLegend(host); break;
+            case 32: fillChartsHover(host); break;
+            case 33: fillP2Content(host); break;
+            case 34: fillP2Carousel(host); break;
+            case 35: fillChartsExtended(host); break;
+            case 36: fillWave1Basics(host); break;
+            case 37: fillWave1Inputs(host); break;
+            case 38: fillWave1Feedback(host); break;
+            case 39: fillWave2Data(host); break;
+            case 40: fillWave3Editor(host); break;
+            case 41: fillWave2Business(host); break;
+            case 42: fillWave3EditorPro(host); break;
+            case 43: fillWave3Misc(host); break;
+            default:
+                host.add(new Label("(未知模块)", skin));
+        }
     }
 
     // ============================ Labels ============================
@@ -568,7 +706,11 @@ public class BsControlsSkinScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0.94f, 0.95f, 0.97f, 1f);
+        // 用当前主题 body 底色清屏（与 BsSkinApp.render 的清屏一致）：
+        // 写死浅灰会让 Dark 主题下根 actor 之外的边缘区域仍显示浅色
+        ScreenUtils.clear(com.git.bs.ui.BsTheme.bgBodyColor().r,
+                com.git.bs.ui.BsTheme.bgBodyColor().g,
+                com.git.bs.ui.BsTheme.bgBodyColor().b, 1f);
         // 同步 Shift/Ctrl 修饰键给图表（折线点击隔离用）
         BsLineChart.setModifiers(
                 Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.SHIFT_LEFT)

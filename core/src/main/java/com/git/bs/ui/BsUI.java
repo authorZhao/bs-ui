@@ -217,6 +217,22 @@ public final class BsUI {
         return new java.util.ArrayList<>(registeredSkins.values());
     }
 
+    /**
+     * 用指定颜色构造一个纯色 Drawable（Pixmap 1×1 染色，包成 TextureRegionDrawable）。
+     * <p>比 {@code skin.newDrawable("white", color)} 更可靠——不依赖 skin 里 "white" drawable 的存在与类型，
+     * 用于 setBackground 等需要纯色背景的场景。</p>
+     */
+    public static com.badlogic.gdx.scenes.scene2d.utils.Drawable drawableOf(com.badlogic.gdx.graphics.Color color) {
+        com.badlogic.gdx.graphics.Pixmap pix = new com.badlogic.gdx.graphics.Pixmap(2, 2,
+                com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888);
+        pix.setColor(color);
+        pix.fill();
+        com.badlogic.gdx.graphics.Texture tex = new com.badlogic.gdx.graphics.Texture(pix);
+        pix.dispose();
+        return new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(
+                new com.badlogic.gdx.graphics.g2d.TextureRegion(tex));
+    }
+
     // =================== 监听器（实例方法，通过 get() 调用） ===================
 
     public void addOnThemeChangeListener(Consumer<BsTheme> listener) {

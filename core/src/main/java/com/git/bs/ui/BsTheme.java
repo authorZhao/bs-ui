@@ -112,6 +112,13 @@ public interface BsTheme {
                 1f);
     }
 
+    /**
+     * 全局背景清屏色（{@code bs-bg-body}）。
+     * <p>App 的 render 开头应调 {@code ScreenUtils.clear(BsTheme.bgBodyColor(), 1)}：
+     * 不同主题有不同的基础色调（Light #F5F6F8 / Dark #212529），切换主题后下一次清屏自动变。</p>
+     */
+    static Color bgBodyColor() { return bb(); }
+
     /** 提亮：HSL 的 L 通道 + amount。 */
     static Color lighten(Color c, float amount) {
         float[] hsl = BsColors.rgbToHsl(c.r, c.g, c.b);

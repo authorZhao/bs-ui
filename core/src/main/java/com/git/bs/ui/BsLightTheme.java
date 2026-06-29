@@ -11,7 +11,7 @@ public final class BsLightTheme extends BsAbstractTheme {
     public static final BsLightTheme INSTANCE = new BsLightTheme();
 
     private BsLightTheme() {
-        super("light", false);
+        super("bs-light", false);
         // 文本
         put("text-primary",     0x1A1A1F);
         put("text-secondary",   0x495057);

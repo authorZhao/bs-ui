@@ -1,0 +1,108 @@
+package com.git.bs.admin.modules;
+
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.git.bs.admin.AdminModule;
+import com.git.bs.admin.BsAdminShell;
+import com.git.bs.ui.BsCard;
+import com.git.bs.ui.BsTheme;
+import com.git.bs.ui.BsUI;
+
+/**
+ * 主页面板：4 个统计卡 + 最近活动列表。
+ * 路径："首页"（点击 logo / 面包屑首页都进这里）。
+ */
+public class DashboardModule implements AdminModule {
+
+    public static final String PATH = "首页";
+
+    @Override
+    public String getPath() {
+        return PATH;
+    }
+
+    @Override
+    public Actor buildView(BsAdminShell shell) {
+        Skin skin = BsUI.getSkin();
+        Table root = new Table();
+        root.top().left();
+        root.pad(16);
+        root.defaults().top().left().pad(8);
+
+        // 标题
+        Label title = new Label("仪表盘", skin);
+        title.setFontScale(1.3f);
+        title.setColor(BsTheme.tp());
+        root.add(title).left().padBottom(8).row();
+
+        // 4 个统计卡（2x2）
+        Table statsRow1 = new Table();
+        statsRow1.defaults().pad(8).growX();
+        statsRow1.add(statCard(skin, "用户数", "1,284", "+12%")).height(110);
+        statsRow1.add(statCard(skin, "订单数", "3,421", "+5%")).height(110);
+
+        Table statsRow2 = new Table();
+        statsRow2.defaults().pad(8).growX();
+        statsRow2.add(statCard(skin, "收入 (¥)", "98,210", "+8%")).height(110);
+        statsRow2.add(statCard(skin, "活跃用户", "456", "+3%")).height(110);
+
+        root.add(statsRow1).growX().row();
+        root.add(statsRow2).growX().row();
+
+        // 最近活动
+        root.add(activityCard(skin)).growX().padTop(16).row();
+
+        return root;
+    }
+
+    private BsCard statCard(Skin skin, String name, String value, String delta) {
+        BsCard card = new BsCard(skin);
+        Table body = card.getBodyTable();
+        body.clearChildren();
+        body.top().left();
+        body.defaults().top().left();
+
+        Label n = new Label(name, skin);
+        n.setColor(BsTheme.ts());
+        Label v = new Label(value, skin);
+        v.setFontScale(1.8f);
+        v.setColor(BsTheme.tp());
+        Label d = new Label(delta, skin);
+        d.setColor(BsTheme.colorOf("success"));
+
+        body.add(n).left().row();
+        body.add(v).left().padTop(6).row();
+        body.add(d).left().padTop(4);
+        return card;
+    }
+
+    private BsCard activityCard(Skin skin) {
+        BsCard card = new BsCard(skin);
+        card.title("最近活动");
+        Table body = card.getBodyTable();
+        body.top().left();
+        body.defaults().top().left().pad(4);
+
+        String[] acts = {
+                "admin 登录系统",
+                "新增用户 zhangsan",
+                "更新订单 #10234 状态为已发货",
+                "lisi 修改了个人资料",
+                "系统主题切换为 Dark"
+        };
+        for (int i = 0; i < acts.length; i++) {
+            Label dot = new Label("•", skin);
+            dot.setColor(BsTheme.colorOf("primary"));
+            Label t = new Label(acts[i], skin);
+            t.setColor(BsTheme.tp());
+            Table line = new Table();
+            line.defaults().left().pad(0, 4, 0, 4);
+            line.add(dot).width(16).top();
+            line.add(t).growX().left();
+            body.add(line).growX().left().row();
+        }
+        return card;
+    }
+}

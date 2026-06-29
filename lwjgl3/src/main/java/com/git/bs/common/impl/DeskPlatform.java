@@ -1,6 +1,8 @@
 package com.git.bs.common.impl;
 
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.git.bs.common.Platform;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 import games.spooky.gdx.nativefilechooser.desktop.DesktopFileChooser;
@@ -107,5 +109,15 @@ public class DeskPlatform implements Platform {
             // headless 或非 desktop 环境，回退 false
         }
         return false;
+    }
+
+    @Override
+    public String toJson(Object object) {
+        return JSON.toJSONString(object, JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.UnquoteFieldName);
+    }
+
+    @Override
+    public <T> T fromJson(String json, Class<T> type) {
+        return JSON.parseObject(json, type);
     }
 }
