@@ -13,12 +13,12 @@ import com.git.bs.ui.BsUI;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * UI 模块：把 BsControlsSkinScreen 的 44 个控件演示作为二级菜单挂到 admin 侧边栏「UI 模块」下。
+ * UI 模块：把 BsControlsSkinScreen 的 48 个控件演示作为二级菜单挂到 admin 侧边栏「UI 模块」下。
  *
  * <p>每个二级菜单项（叶子）点击后在内容区显示对应模块的控件预览，
- * 复用 {@link BsControlsSkinScreen#fillModuleContent(int, Table)}，不重复实现 44 个 fill 方法。</p>
+ * 复用 {@link BsControlsSkinScreen#fillModuleContent(int, Table)}，不重复实现 48 个 fill 方法。</p>
  *
- * <p>44 个二级项由 {@link BsAdminShell} 构造时调用 {@link #registerAll(BsAdminShell)} 批量注册，
+ * <p>48 个二级项由 {@link BsAdminShell} 构造时调用 {@link #registerAll(BsAdminShell)} 批量注册，
  * 路径形如 {@code "UI 模块/标签"}（扁平，不再分级成 通用UI/业务UI/图形UI）。</p>
  *
  * <p>stage 注入：admin shell 构造后调 {@link #bindStage(Stage)}，
@@ -29,7 +29,7 @@ public class UiDemoModule {
 
     public static final String PATH = "UI 模块";
 
-    /** BsControlsSkinScreen 内容工厂（复用 44 个 fill 方法）。 */
+    /** BsControlsSkinScreen 内容工厂（复用 48 个 fill 方法）。 */
     private static BsControlsSkinScreen contentFactory;
     /** admin shell 注入的真实 stage（懒加载工厂创建时应用，让弹窗 attach 到可见 stage）。 */
     private static Stage boundStage;
@@ -65,7 +65,7 @@ public class UiDemoModule {
     }
 
     /**
-     * 把 BsControlsSkinScreen 的 44 个控件演示（即其左侧导航 MODULES 列表）
+     * 把 BsControlsSkinScreen 的 48 个控件演示（即其左侧导航 MODULES 列表）
      * 全部作为二级菜单注册到「UI 模块」下，菜单名原封不动使用 MODULES 里的全名
      * （如 "Labels  标签"，与 BsControlsSkinScreen 左侧导航完全一致）。
      *

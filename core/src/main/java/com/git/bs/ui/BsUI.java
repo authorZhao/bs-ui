@@ -2,11 +2,10 @@ package com.git.bs.ui;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.common.SkinUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
@@ -70,7 +69,10 @@ public final class BsUI {
     }
 
     /** 显式初始化（可选）。 */
-    public static void init() { get(); }
+    public static void init() {
+        get();
+        BsSkinLoader.loadAllThemes();
+    }
 
     /** dispose：清空状态。 */
     public static void dispose() {
@@ -84,6 +86,19 @@ public final class BsUI {
         currentTheme = null;
         instance = null;
     }
+
+    public static void disposeAllSkins() {
+        List<BitmapFont> fontList = new ArrayList<>();
+        for (var skin : registeredSkins.values()) {
+            Map<String, BitmapFont> fontCache = SkinUtil.getFontCache(skin);
+            fontCache.forEach((name, font) -> {
+                skin.remove(name, BitmapFont.class);
+                fontList.add(font);
+            });
+        }
+        fontList.forEach(BitmapFont::dispose);
+    }
+
 
     // =================== 静态访问 API（VISUI 风格） ===================
 

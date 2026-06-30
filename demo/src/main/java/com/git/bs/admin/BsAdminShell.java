@@ -138,7 +138,7 @@ public class BsAdminShell extends ScreenAdapter {
         register(new UserListModule());
         registerPlaceholder("用户管理/角色", "角色管理为示例占位，未实现");
         registerPlaceholder("用户管理/权限", "权限管理为示例占位，未实现");
-        // UI 模块：注册 44 个二级菜单（BsControlsSkinScreen 全部控件演示）作为「UI 模块」下的叶子
+        // UI 模块：注册 48 个二级菜单（BsControlsSkinScreen 全部控件演示）作为「UI 模块」下的叶子
         // 注意：不单独 register(new UiDemoModule())，否则会出现两个「UI 模块」一级标题
         //       （register 单段 path 会建一个叶子，registerAll 又会建一个同名 root）
         UiDemoModule.registerAll(this);

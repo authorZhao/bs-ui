@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,6 +51,32 @@ import java.util.Map;
  */
 @Slf4j
 public final class BsSkinLoader {
+
+    private static final String SKIN_CP = "com/git/bs/ui/skin";
+    private static final String TTF = SKIN_CP + "/LXGWWenKaiScreen.ttf";
+    private static final String CHARS = SKIN_CP + "/chinese.txt";
+    private static final String CHARS_COMMON = SKIN_CP + "/common.txt";
+
+    public static Skin loadDefault() {
+        BsLightTheme lightTheme = BsLightTheme.INSTANCE;
+        var lightSkin = BsSkinLoader.loadAndRegisterTheme(SKIN_CP, lightTheme, new HashMap<>());
+        BsUI.registerTheme(lightTheme.name(), lightTheme, lightSkin);
+        return lightSkin;
+    }
+
+
+    public static void loadAllThemes() {
+        var themes = List.of(BsDarkTheme.INSTANCE, BsAdminTheme.INSTANCE, BsLightTheme.INSTANCE);
+        Map<String, BitmapFont> fontHashMap = new HashMap<>();
+        for (BsAbstractTheme theme : themes) {
+            if (BsUI.hasTheme(theme)) {
+                continue;
+            }
+            var lightSkin = BsSkinLoader.loadAndRegisterTheme(SKIN_CP, theme, fontHashMap);
+            BsUI.registerTheme(theme.name(), theme, lightSkin);
+        }
+    }
+
 
     private BsSkinLoader() {}
 

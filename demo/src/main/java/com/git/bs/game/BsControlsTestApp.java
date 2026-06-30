@@ -111,7 +111,7 @@ public class BsControlsTestApp extends Game {
     @Override
     public void create() {
         log.info("BsControlsTest init: 同步加载 default 字体 + 分帧预热 4 档字号");
-        BsUI.init();
+        //BsUI.init();
         long t0 = System.currentTimeMillis();
         chars = loadChars();
 
