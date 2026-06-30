@@ -175,5 +175,12 @@ public final class BsSkinLoader {
         skin.add(labelKey, new Label.LabelStyle(font, BsTheme.tp()), Label.LabelStyle.class);
     }
 
+    public static Skin loadAndRegisterTheme(String skinCp, BsTheme bsTheme, Map<String, BitmapFont> fontCache) {
+        var fileHandle = Gdx.files.internal(skinCp + "/" + bsTheme.name() + ".json");
+        var skin = BsSkinLoader.loadAndAugmentWithCache(fileHandle, bsTheme, fontCache);
+        BsUI.registerTheme(bsTheme.name(), bsTheme, skin);
+        return skin;
+    }
+
 
 }
