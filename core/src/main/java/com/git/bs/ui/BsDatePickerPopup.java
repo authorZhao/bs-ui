@@ -122,8 +122,10 @@ public class BsDatePickerPopup {
 
         // 月份导航：‹ 年月 ›
         Table nav = new Table();
-        TextButton prev = new TextButton("‹", skin, "bs-menu-title");
-        TextButton next = new TextButton("›", skin, "bs-menu-title");
+        // 中间标题保留 bs-menu-title 样式；两侧箭头改用 skin 的 bs-arrow-* drawable
+        // （程序化三角，不依赖字体字符，在 light/dark 主题下都是主色，对比稳定）
+        com.badlogic.gdx.scenes.scene2d.ui.Image prev = arrowImage(false);
+        com.badlogic.gdx.scenes.scene2d.ui.Image next = arrowImage(true);
         TextButton title = new TextButton(currentMonth.format(MONTH_FMT), skin, "bs-menu-title");
         title.setDisabled(true);
         prev.addListener(new ClickListener() {
@@ -292,4 +294,14 @@ public class BsDatePickerPopup {
     }
 
     public boolean isOpen() { return open; }
+
+    /** 月份切换箭头：用 skin 的 bs-arrow-* drawable（程序化三角，主题主色，对比稳定）。 */
+    private com.badlogic.gdx.scenes.scene2d.ui.Image arrowImage(boolean pointRight) {
+        String name = pointRight ? "bs-arrow-right" : "bs-arrow-left";
+        com.badlogic.gdx.scenes.scene2d.ui.Image img = new com.badlogic.gdx.scenes.scene2d.ui.Image(
+                BsUI.getSkin().getDrawable(name));
+        img.setScaling(com.badlogic.gdx.utils.Scaling.contain);
+        img.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
+        return img;
+    }
 }

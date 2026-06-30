@@ -75,7 +75,7 @@ public class BsDateRangePicker extends BsTextField {
     private void refreshText() {
         String s = start != null ? start.format(FMT) : "";
         String e = end != null ? end.format(FMT) : "";
-        setText(s.isEmpty() && e.isEmpty() ? "" : s + " ~ " + e);
+        setTextProgrammatic(s.isEmpty() && e.isEmpty() ? "" : s + " ~ " + e);
     }
 
     private void openPopup() {

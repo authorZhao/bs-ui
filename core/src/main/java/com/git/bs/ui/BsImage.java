@@ -196,6 +196,6 @@ public class BsImage extends Table {
     private Drawable currentFallback() {
         if (fallback != null) return fallback;
         Color c = skin.get("bs-bg-elevated", Color.class);
-        return BsUI.drawableOf(c);
+        return BsSkinFactory.drawableOf(c);
     }
 }

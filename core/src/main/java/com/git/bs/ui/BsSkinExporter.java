@@ -223,9 +223,11 @@ public final class BsSkinExporter {
             return BsSkinFactory.vLinePixmap(colorOf(skin, "bs-cursor"));
         }
         if (key.contains("arrow")) {
-            // 箭头：24×24 三角形（左/右 + 禁用色）
+            // 箭头：24×24 三角形（左/右/上/下 + 禁用色）
             if (splitOut != null) splitOut[0] = 0;
             Color c = key.contains("disabled") ? colorOf(skin, "bs-text-disabled") : colorOf(skin, "bs-primary");
+            if (key.endsWith("up")) return BsSkinFactory.arrowVerticalPixmap(c, true);
+            if (key.endsWith("down")) return BsSkinFactory.arrowVerticalPixmap(c, false);
             return BsSkinFactory.arrowPixmap(c, key.endsWith("right"));
         }
         if (key.startsWith("bs-check-") || key.startsWith("bs-radio-")) {
@@ -239,6 +241,11 @@ public final class BsSkinExporter {
             return isRadio
                     ? BsSkinFactory.radioPixmap(isOn, border, surface, primary)
                     : BsSkinFactory.checkboxPixmap(isOn, border, surface, primary);
+        }
+        if (key.equals("bs-circle")) {
+            // 白色圆点（BsCircularProgress 等运行时 batch.setColor 染色）
+            if (splitOut != null) splitOut[0] = 0;
+            return BsSkinFactory.circlePixmap(16);
         }
 
         // ---- 2. 圆角矩形：按 key 命名约定解析 (fillColor, borderColor, corner, border) ----

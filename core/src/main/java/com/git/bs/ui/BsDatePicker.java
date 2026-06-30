@@ -70,8 +70,8 @@ public class BsDatePicker extends BsTextField {
     }
 
     private void refreshText() {
-        if (value == null) { setText(""); return; }
-        setText(withTime ? value.format(DATETIME_FMT) : value.toLocalDate().format(DATE_FMT));
+        if (value == null) { setTextProgrammatic(""); return; }
+        setTextProgrammatic(withTime ? value.format(DATETIME_FMT) : value.toLocalDate().format(DATE_FMT));
     }
 
     /** 仅日期模式取值。含时间模式时返回 date 部分（time 部分用 {@link #getDateTime()}）。 */

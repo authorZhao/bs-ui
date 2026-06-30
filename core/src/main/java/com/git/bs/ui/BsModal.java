@@ -352,10 +352,39 @@ public class BsModal extends Table {
 
     // ========================= drawable 工具 =========================
 
-    /** 从图片路径构造 drawable（用作 titleBanner / backgroundImage）。 */
+    /** 路径 → 已加载 Drawable 的缓存，避免同一张图反复 new Texture 泄漏 GPU 内存。
+     *  Drawable 只是 Texture 的视图，多调用方共用同一 Texture（只读渲染，线程安全）。 */
+    private static final java.util.Map<String, Drawable> PATH_DRAWABLE_CACHE = new java.util.HashMap<>();
+
+    /**
+     * 从图片路径构造 drawable（用作 titleBanner / backgroundImage）。
+     *
+     * <p><b>带缓存</b>：同一 internalPath 只加载一次 Texture，后续调用复用（返回新 Drawable 视图，
+     * 但底层 Texture 共享，不重复占用 GPU 内存）。修正了旧版每次调用都 new Texture 的泄漏。</p>
+     *
+     * <p>缓存跟随应用生命周期（demo 测试图数量有限）。若需释放，调用 {@link #disposePathCache()}。</p>
+     */
     public static Drawable drawableFromPath(String internalPath) {
+        if (internalPath == null) return null;
+        Drawable cached = PATH_DRAWABLE_CACHE.get(internalPath);
+        if (cached != null) return cached;
         Texture tex = new Texture(com.badlogic.gdx.Gdx.files.internal(internalPath));
         tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        return new TextureRegionDrawable(new TextureRegion(tex));
+        Drawable d = new TextureRegionDrawable(new TextureRegion(tex));
+        PATH_DRAWABLE_CACHE.put(internalPath, d);
+        return d;
+    }
+
+    /** 释放 {@link #drawableFromPath} 的缓存 Texture（应用退出时调用）。 */
+    public static void disposePathCache() {
+        for (Drawable d : PATH_DRAWABLE_CACHE.values()) {
+            if (d instanceof TextureRegionDrawable) {
+                Texture t = ((TextureRegionDrawable) d).getRegion().getTexture();
+                if (t != null) {
+                    try { t.dispose(); } catch (Throwable ignored) {}
+                }
+            }
+        }
+        PATH_DRAWABLE_CACHE.clear();
     }
 }

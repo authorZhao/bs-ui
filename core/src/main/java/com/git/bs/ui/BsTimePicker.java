@@ -61,7 +61,7 @@ public class BsTimePicker extends BsTextField {
 
     public BsTimePicker setValue(LocalTime t) {
         this.value = t;
-        setText(t == null ? "" : (withSeconds ? t.format(HMS) : t.format(HM)));
+        setTextProgrammatic(t == null ? "" : (withSeconds ? t.format(HMS) : t.format(HM)));
         return this;
     }
 
@@ -125,25 +125,37 @@ public class BsTimePicker extends BsTextField {
         open = true;
     }
 
-    /// 构建一个单位列：`▲` / 输入框 / `▼`。返回输入框。
+    /// 构建一个单位列：上箭头 / 输入框 / 下箭头。返回输入框。
     private BsTextField addUnit(Table parent, int initVal, int max, Skin skin) {
         Table col = new Table();
         BsTextField f = new BsTextField(String.format("%02d", initVal), skin);
         f.setTextFieldFilter((field, c) -> Character.isDigit(c));
         f.setMaxLength(2);
-        TextButton up = new TextButton("▲", skin, "bs-menu-title");
-        TextButton down = new TextButton("▼", skin, "bs-menu-title");
+        // 上下箭头用 skin 的 bs-arrow-up/down drawable（程序化三角，不依赖字体字符，
+        // 在 light/dark 主题下都是主色，对比稳定）
+        com.badlogic.gdx.scenes.scene2d.ui.Image up = arrowImage(true);
+        com.badlogic.gdx.scenes.scene2d.ui.Image down = arrowImage(false);
         up.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { step(f, max, 1); }
         });
         down.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { step(f, max, -1); }
         });
-        col.add(up).size(36, 22).row();
+        col.add(up).size(24, 16).pad(1).row();
         col.add(f).width(44).pad(2).row();
-        col.add(down).size(36, 22);
+        col.add(down).size(24, 16).pad(1);
         parent.add(col);
         return f;
+    }
+
+    /** 步进箭头：用 skin 的 bs-arrow-up/down drawable（主题主色，多主题对比稳定）。 */
+    private com.badlogic.gdx.scenes.scene2d.ui.Image arrowImage(boolean pointUp) {
+        String name = pointUp ? "bs-arrow-up" : "bs-arrow-down";
+        com.badlogic.gdx.scenes.scene2d.ui.Image img = new com.badlogic.gdx.scenes.scene2d.ui.Image(
+                BsUI.getSkin().getDrawable(name));
+        img.setScaling(com.badlogic.gdx.utils.Scaling.contain);
+        img.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
+        return img;
     }
 
     private void step(BsTextField f, int max, int delta) {
@@ -151,6 +163,7 @@ public class BsTimePicker extends BsTextField {
         int range = max + 1;
         int v = ((cur + delta) % range + range) % range;   // 带负数安全的回绕
         f.setText(String.format("%02d", v));
+        syncValue(true);   // 实时同步到外层输入框 + 触发回调
     }
 
     private static com.badlogic.gdx.scenes.scene2d.ui.Label colon(Skin skin) {
@@ -160,16 +173,22 @@ public class BsTimePicker extends BsTextField {
     }
 
     private void confirm() {
+        syncValue(true);
+        closePopup();
+    }
+
+    /// 把浮层内三个输入框的值同步到 value + 外层输入框；fireCallback=true 时触发 onChange。
+    private void syncValue(boolean fireCallback) {
+        if (hourF == null) return;   // 浮层未打开
         int h = parseClamp(hourF.getText(), 0, 23, value != null ? value.getHour() : 0);
         int m = parseClamp(minF.getText(), 0, 59, value != null ? value.getMinute() : 0);
         int s = withSeconds ? parseClamp(secF.getText(), 0, 59, value != null ? value.getSecond() : 0) : 0;
         LocalTime t = LocalTime.of(h, m, s);
         value = t;
-        setText(withSeconds ? t.format(HMS) : t.format(HM));
-        if (onChange != null) {
+        setTextProgrammatic(withSeconds ? t.format(HMS) : t.format(HM));
+        if (fireCallback && onChange != null) {
             try { onChange.accept(t); } catch (Throwable ex) { log.warn("BsTimePicker onChange error", ex); }
         }
-        closePopup();
     }
 
     private static int parseClamp(String s, int min, int max, int fallback) {
@@ -211,6 +230,7 @@ public class BsTimePicker extends BsTextField {
 
     private void closePopup() {
         if (!open) return;
+        syncValue(false);   // 兜底：关闭前把浮层内当前值同步到外层输入框（不重复触发回调）
         if (backdrop != null) { backdrop.remove(); backdrop = null; }
         if (popupRoot != null) { popupRoot.remove(); popupRoot = null; }
         hourF = minF = secF = null;

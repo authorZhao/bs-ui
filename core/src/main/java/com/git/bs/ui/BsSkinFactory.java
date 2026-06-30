@@ -157,6 +157,11 @@ public final class BsSkinFactory {
         putIfAbsent(skin, "bs-arrow-right", arrowDrawable(primary, true));
         putIfAbsent(skin, "bs-arrow-left-disabled", arrowDrawable(td, false));
         putIfAbsent(skin, "bs-arrow-right-disabled", arrowDrawable(td, true));
+        // 上下箭头：TimePicker 步进按钮等用（不依赖字体字符，主题主色，多主题对比稳定）
+        putIfAbsent(skin, "bs-arrow-up", arrowVerticalDrawable(primary, true));
+        putIfAbsent(skin, "bs-arrow-down", arrowVerticalDrawable(primary, false));
+        putIfAbsent(skin, "bs-arrow-up-disabled", arrowVerticalDrawable(td, true));
+        putIfAbsent(skin, "bs-arrow-down-disabled", arrowVerticalDrawable(td, false));
 
         // CheckBox / RadioButton
         putIfAbsent(skin, "bs-check-off", checkboxDrawable(false, bd, bs));
@@ -276,7 +281,7 @@ public final class BsSkinFactory {
             // 会 fallback 到 bs-primary-up 导致 link 按钮变成蓝色色块
             if (!skin.has("bs-transparent", com.badlogic.gdx.scenes.scene2d.utils.Drawable.class)) {
                 skin.add("bs-transparent",
-                        com.git.bs.ui.BsUI.drawableOf(new Color(0, 0, 0, 0)),
+                        drawableOf(new Color(0, 0, 0, 0)),
                         com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
             }
             com.badlogic.gdx.scenes.scene2d.utils.Drawable transparent =
@@ -523,8 +528,27 @@ public final class BsSkinFactory {
         return pix;
     }
 
+    /** 上下方向箭头 Pixmap（24×24，实心三角形）。供 BsTimePicker 步进按钮等使用。 */
+    static Pixmap arrowVerticalPixmap(Color color, boolean pointUp) {
+        int size = 24;
+        Pixmap pix = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+        pix.setBlending(Blending.None);
+        pix.setColor(color);
+        float cx = size / 2f, cy = size / 2f, h = size * 0.3f, w = size * 0.35f;
+        if (pointUp) {
+            fillTriangle(pix, cx - w, cy + h / 2f,   cx + w, cy + h / 2f,   cx, cy - h / 2f);
+        } else {
+            fillTriangle(pix, cx - w, cy - h / 2f,   cx + w, cy - h / 2f,   cx, cy + h / 2f);
+        }
+        return pix;
+    }
+
     private static com.badlogic.gdx.scenes.scene2d.utils.Drawable arrowDrawable(Color color, boolean pointRight) {
         return toDrawable(arrowPixmap(color, pointRight));
+    }
+
+    private static com.badlogic.gdx.scenes.scene2d.utils.Drawable arrowVerticalDrawable(Color color, boolean pointUp) {
+        return toDrawable(arrowVerticalPixmap(color, pointUp));
     }
 
     private static void fillTriangle(Pixmap pix, float x1, float y1, float x2, float y2, float x3, float y3) {
@@ -713,14 +737,36 @@ public final class BsSkinFactory {
 
     public static com.badlogic.gdx.scenes.scene2d.utils.Drawable makeRoundDrawableFromPath(
             String internalPath, int size) {
+        Texture tex = null;
         try {
-            Texture tex = new Texture(com.badlogic.gdx.Gdx.files.internal(internalPath));
+            tex = new Texture(com.badlogic.gdx.Gdx.files.internal(internalPath));
             tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            // makeRoundDrawable 只从源 Texture 读像素到新 Pixmap，读完源 Texture 即可释放。
+            // 若不 dispose，每次调用都会泄漏一个从文件加载的源 Texture。
             return makeRoundDrawable(
                     new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(new TextureRegion(tex)),
                     size);
         } catch (Throwable t) {
             return null;
+        } finally {
+            // 新 Drawable 已用新 Texture（makeRoundDrawable 内部 new 的），源 Texture 不再需要
+            if (tex != null) tex.dispose();
         }
+    }
+
+    /**
+     * 用指定颜色构造一个纯色 Drawable（Pixmap 1×1 染色，包成 TextureRegionDrawable）。
+     * <p>比 {@code skin.newDrawable("white", color)} 更可靠——不依赖 skin 里 "white" drawable 的存在与类型，
+     * 用于 setBackground 等需要纯色背景的场景。</p>
+     */
+    public static com.badlogic.gdx.scenes.scene2d.utils.Drawable drawableOf(Color color) {
+        Pixmap pix = new Pixmap(2, 2,
+                Pixmap.Format.RGBA8888);
+        pix.setColor(color);
+        pix.fill();
+        Texture tex = new Texture(pix);
+        pix.dispose();
+        return new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(
+                new TextureRegion(tex));
     }
 }

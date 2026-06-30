@@ -130,21 +130,18 @@ public class BsCalendar extends Table {
 
         if (showNav) {
             Table nav = new Table();
-            TextButton prev = new TextButton("‹", skin, "bs-menu-title");
+            // 中间标题保留 bs-menu-title 样式（字体较粗，整体协调）
             TextButton title = new TextButton(currentMonth.format(MONTH_FMT), skin, "bs-menu-title");
             title.setDisabled(true);
-            TextButton next = new TextButton("›", skin, "bs-menu-title");
-            prev.addListener(new ClickListener() {
-                @Override public void clicked(InputEvent e, float x, float y) {
-                    currentMonth = currentMonth.minusMonths(1);
-                    rebuild();
-                }
+            // 两侧箭头改用 skin 的 bs-arrow-* drawable（程序化三角，不依赖字体字符，
+            // 在 light/dark 主题下都是主色，对比稳定）
+            com.badlogic.gdx.scenes.scene2d.ui.Image prev = arrowImage(false, () -> {
+                currentMonth = currentMonth.minusMonths(1);
+                rebuild();
             });
-            next.addListener(new ClickListener() {
-                @Override public void clicked(InputEvent e, float x, float y) {
-                    currentMonth = currentMonth.plusMonths(1);
-                    rebuild();
-                }
+            com.badlogic.gdx.scenes.scene2d.ui.Image next = arrowImage(true, () -> {
+                currentMonth = currentMonth.plusMonths(1);
+                rebuild();
             });
             nav.add(prev).size(cellW, cellH);
             nav.add(title).growX().pad(0, 4, 0, 4);
@@ -228,5 +225,20 @@ public class BsCalendar extends Table {
                 try { onRange.accept(rangeStart, rangeEnd); } catch (Throwable t) { log.warn("BsCalendar onRange error", t); }
             }
         }
+    }
+
+    /** 月份切换箭头：用 skin 的 bs-arrow-* drawable（程序化三角，主题主色，对比稳定）。 */
+    private com.badlogic.gdx.scenes.scene2d.ui.Image arrowImage(boolean pointRight, Runnable action) {
+        String name = pointRight ? "bs-arrow-right" : "bs-arrow-left";
+        com.badlogic.gdx.scenes.scene2d.ui.Image img = new com.badlogic.gdx.scenes.scene2d.ui.Image(
+                BsUI.getSkin().getDrawable(name));
+        img.setScaling(com.badlogic.gdx.utils.Scaling.contain);
+        img.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
+        if (action != null) {
+            img.addListener(new ClickListener() {
+                @Override public void clicked(InputEvent e, float x, float y) { action.run(); }
+            });
+        }
+        return img;
     }
 }

@@ -234,7 +234,7 @@ public class BsContextMenu {
         for (Item it : items) {
             if (it.separator) {
                 Table sep = new Table();
-                sep.setBackground(BsUI.drawableOf(border));
+                sep.setBackground(BsSkinFactory.drawableOf(border));
                 root.add(sep).growX().height(1f).padTop(4).padBottom(4).row();
                 continue;
             }

@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.git.bs.ui.BsUI;
+import com.git.bs.ui.BsSkinFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -113,7 +113,7 @@ public class BsDataGrid<T> extends Table {
         }
         // 斑马纹
         if (zebra && index % 2 == 1) {
-            row.setBackground(BsUI.drawableOf(skin.get("bs-bg-hover", Color.class)));
+            row.setBackground(BsSkinFactory.drawableOf(skin.get("bs-bg-hover", Color.class)));
         } else {
             row.setBackground((com.badlogic.gdx.scenes.scene2d.utils.Drawable) null);
         }

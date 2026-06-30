@@ -79,11 +79,12 @@ public class BsColorPickerPopup {
     private Image svImage;
     private TextureRegionDrawable svDrawable;
     private Texture svTexture;
+    private Texture hueTexture;   // hue 渐变条 Texture，close 时释放（不存 skin 托管）
     private Image hueImage;
     private Image cursorSV;
     private BsSlider hueSlider;
     private Image previewImage;
-    private TextureRegionDrawable previewDrawable;   // 白底，靠 Image.setColor 染色
+    private Drawable previewDrawable;   // 白底，靠 Image.setColor 染色
     private TextField hexField;
 
     public BsColorPickerPopup(Skin skin) {
@@ -175,15 +176,16 @@ public class BsColorPickerPopup {
         topRow.add(svGroup).size(SV_SIZE, SV_SIZE).pad(4);
 
         // Hue 滑条（垂直）：用 hue 渐变图作为 slider bg
-        Drawable hueDrawable = makeHueBarDrawable();
-        // skin 里临时注册一个 hue slider style
-        if (!skin.has("bs-hue-slider", com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle.class)) {
-            com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle st =
-                    new com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle();
-            st.background = hueDrawable;
-            st.knob = makeSolidDrawable(Color.WHITE);
-            skin.add("bs-hue-slider", st, com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle.class);
-        }
+        // hue 渐变必须用真实像素（不能靠 setColor 染色），保留 new Texture，但实例持有、close 时 dispose。
+        // 每次打开都覆盖 skin 里的 bs-hue-slider style（指向当前实例的 hueTexture），
+        // 避免复用旧 style 指向已 dispose 的 Texture。
+        hueTexture = makeHueBarTexture();
+        Drawable hueDrawable = new TextureRegionDrawable(new TextureRegion(hueTexture));
+        com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle hueStyle =
+                new com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle();
+        hueStyle.background = hueDrawable;
+        hueStyle.knob = makeSolidDrawable(Color.WHITE);
+        skin.add("bs-hue-slider", hueStyle, com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle.class);
         hueSlider = new BsSlider(0, 360, 1, true, skin, "bs-hue-slider");
         hueSlider.setValue(h);
         hueSlider.addListener(new ChangeListener() {
@@ -395,8 +397,8 @@ public class BsColorPickerPopup {
         return tex;
     }
 
-    /** 生成一个色相渐变 Drawable（垂直，顶=红，过绿过蓝回红）。 */
-    private static Drawable makeHueBarDrawable() {
+    /** 生成一个色相渐变 Texture（垂直，顶=红，过绿过蓝回红）。调用方负责 dispose。 */
+    private static Texture makeHueBarTexture() {
         Pixmap pix = new Pixmap(8, HUE_H, Pixmap.Format.RGB888);
         for (int y = 0; y < HUE_H; y++) {
             // 顶部 y=0 → h=360（红）；底部 → h=0（红）；中间绿/蓝
@@ -408,17 +410,17 @@ public class BsColorPickerPopup {
         Texture tex = new Texture(pix);
         tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         pix.dispose();
-        return new TextureRegionDrawable(new TextureRegion(tex));
+        return tex;
     }
 
-    /** 生成纯色 drawable（Pixmap 直接画指定色，不依赖 TextureRegionDrawable.setColor）。 */
-    private static TextureRegionDrawable makeSolidDrawable(Color c) {
-        Pixmap pix = new Pixmap(2, 2, Pixmap.Format.RGBA8888);
-        pix.setColor(c);
-        pix.fill();
-        Texture tex = new Texture(pix);
-        pix.dispose();
-        return new TextureRegionDrawable(new TextureRegion(tex));
+    /**
+     * 纯色 drawable：复用 skin 的 "white" Texture（{@code skin.newDrawable} 只 new 视图对象，
+     * 不创建新 Texture），避免每次调用都 new Texture 导致 GPU 内存泄漏。
+     *
+     * <p>调用方若需特定颜色，给返回的 Image 调 {@code setColor}，或在此处 tint —— 二者都不会新建 Texture。</p>
+     */
+    private static Drawable makeSolidDrawable(Color c) {
+        return BsUI.getSkin().newDrawable("white", c);
     }
 
     public void close() {
@@ -426,6 +428,7 @@ public class BsColorPickerPopup {
         if (backdrop != null) { backdrop.remove(); backdrop = null; }
         if (root != null) { root.remove(); root = null; }
         if (svTexture != null) { svTexture.dispose(); svTexture = null; }
+        if (hueTexture != null) { hueTexture.dispose(); hueTexture = null; }
         open = false;
         if (onClose != null) {
             try { onClose.run(); } catch (Throwable t) { log.warn("onClose error", t); }

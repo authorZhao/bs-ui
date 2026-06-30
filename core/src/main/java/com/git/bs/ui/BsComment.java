@@ -123,18 +123,28 @@ public class BsComment extends Table {
         return this;
     }
 
-    /// `self=true`：头像在右、气泡右对齐、primary-soft 底色；`false`：左侧 surface 底色。
+    /// `self=true`：头像在右、气泡右对齐、primary 底 + on-primary 白字（三主题对比稳定）；
+    /// `false`：左侧 surface 底色。
     public BsComment self(boolean isSelf) {
         clearChildren();
         defaults().pad(4);
+        Color onPrimary = skin.get("bs-text-on-primary", Color.class);
         if (isSelf) {
             top().right();
-            bubble.setBackground(skin.getDrawable("bs-primary-soft-bg"));
+            bubble.setBackground(skin.getDrawable("bs-primary-up"));
+            // self 气泡用主色底，文字必须切到 on-primary（白），否则深底浅字看不清
+            nameLabel.setColor(onPrimary);
+            timeLabel.setColor(onPrimary);
+            bodyLabel.setColor(onPrimary);
             add(bubble).top().right().padRight(8);
             add(avatarWrap).top();
         } else {
             top().left();
             bubble.setBackground(skin.getDrawable("bs-window-bg"));
+            // 还原 other 侧的字色（可能之前被 self(true) 改过）
+            nameLabel.setColor(skin.get("bs-text-primary", Color.class));
+            timeLabel.setColor(skin.get("bs-text-muted", Color.class));
+            bodyLabel.setColor(skin.get("bs-text-primary", Color.class));
             add(avatarWrap).top().padRight(8);
             add(bubble).top().left();
         }

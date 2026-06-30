@@ -177,7 +177,7 @@ public class BsRangeSlider extends Actor {
     public void draw(Batch batch, float parentAlpha) {
         Skin skin = BsUI.getSkin();
         Drawable track = skin.getDrawable("bs-slider-bg");
-        Drawable fill = BsUI.drawableOf(BsPalette.PRIMARY.getMain());
+        Drawable fill = BsSkinFactory.drawableOf(BsPalette.PRIMARY.getMain());
         Drawable knob = skin.getDrawable("bs-slider-knob");
 
         float w = getWidth();

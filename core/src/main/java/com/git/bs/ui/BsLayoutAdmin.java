@@ -99,13 +99,13 @@ public class BsLayoutAdmin extends Table {
     private final List<SidebarItem> rootSidebarItems = new ArrayList<>();
 
     public BsLayoutAdmin(Skin skin) {
-        setBackground(com.git.bs.ui.BsUI.drawableOf(BsTheme.bhH()));
+        setBackground(BsSkinFactory.drawableOf(BsTheme.bhH()));
         top();
         left();
 
         // ========== 顶部栏 ==========
         topBar = new Table();
-        topBar.setBackground(com.git.bs.ui.BsUI.drawableOf(BsTheme.bhH()));
+        topBar.setBackground(BsSkinFactory.drawableOf(BsTheme.bhH()));
         topBar.pad(6, 12, 6, 12);
         topBar.left();
 
@@ -369,7 +369,7 @@ public class BsLayoutAdmin extends Table {
             com.badlogic.gdx.scenes.scene2d.utils.Drawable transparent =
                     skin.has("bs-transparent", com.badlogic.gdx.scenes.scene2d.utils.Drawable.class)
                             ? skin.getDrawable("bs-transparent")
-                            : com.git.bs.ui.BsUI.drawableOf(new Color(0, 0, 0, 0));
+                            : BsSkinFactory.drawableOf(new Color(0, 0, 0, 0));
             ts.up = transparent;
             ts.over = transparent;
             ts.down = transparent;

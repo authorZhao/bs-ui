@@ -15,6 +15,11 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.git.bs.game.BsControlsTestApp;
 import com.git.bs.game.BsSkinApp;
 import com.git.bs.ui.*;
+import com.git.bs.ui.ext.BsDataGrid;
+import com.git.bs.ui.ext.BsDnd;
+import com.git.bs.ui.ext.BsFormValidator;
+import com.git.bs.ui.ext.BsRule;
+import com.git.bs.ui.ext.BsVirtualList;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -221,6 +226,10 @@ public class BsControlsSkinScreen extends ScreenAdapter {
         modules.add("Wave2-Business  SearchBar/Toolbar/FileItem/Transfer");
         modules.add("Wave3-EditorPro  Inspector/NodePalette/MiniMap");
         modules.add("Wave3-Misc  Affix/Drawer");
+        modules.add("Wave4-Pickers  Calendar/DateRange/Time/Cascader");
+        modules.add("Wave4-Display  Anchor/Comment/Circular/RangeSlider");
+        modules.add("Wave4-Form  FormValidator/Rule");
+        modules.add("Wave4-Data  DnD/VirtualList/DataGrid");
         return modules;
     }
 
@@ -399,6 +408,10 @@ public class BsControlsSkinScreen extends ScreenAdapter {
             case 41: fillWave2Business(host); break;
             case 42: fillWave3EditorPro(host); break;
             case 43: fillWave3Misc(host); break;
+            case 44: fillWave4Pickers(host); break;
+            case 45: fillWave4Display(host); break;
+            case 46: fillWave4Form(host); break;
+            case 47: fillWave4Data(host); break;
             default:
                 host.add(new Label("(未知模块)", skin));
         }
@@ -3478,6 +3491,348 @@ public class BsControlsSkinScreen extends ScreenAdapter {
         c.add(affixScroll).growX().height(200).padTop(4).row();
         Label affixNote = new Label("(滚动内容时，分组标题会「钉住」在顶部，演示 Affix 行为)", skin);
         c.add(affixNote).padTop(4).row();
+    }
+
+    // ============================ Wave4: 新增组件 ============================
+
+    /** Wave4-Pickers：Calendar / DateRangePicker / TimePicker / Cascader。 */
+    private void fillWave4Pickers(Table c) {
+        c.add(sectionTitle("Wave4-Pickers  —— Calendar / DateRange / Time / Cascader")).row();
+
+        // ===== BsCalendar 单选 =====
+        c.add(new Label("① BsCalendar 月历（单选，点击日期）：", skin)).padTop(8).left().row();
+        BsCalendar singleCal = new BsCalendar(skin)
+                .setOnSelect(d -> setStatus("Calendar 选中: " + d));
+        c.add(singleCal).padTop(4).left().row();
+
+        // ===== BsCalendar 区间 =====
+        c.add(new Label("② BsCalendar 区间模式（先点起点，再点终点）：", skin)).padTop(14).left().row();
+        BsCalendar rangeCal = new BsCalendar(skin, BsCalendar.Mode.RANGE)
+                .setOnRange((s, e) -> setStatus(e == null
+                        ? "区间起点: " + s
+                        : "区间: " + s + " ~ " + e));
+        c.add(rangeCal).padTop(4).left().row();
+
+        // ===== BsDateRangePicker =====
+        c.add(new Label("③ BsDateRangePicker（只读输入框，点击弹浮层选区间）：", skin)).padTop(14).left().row();
+        BsDateRangePicker drp = new BsDateRangePicker(skin)
+                .setOnChange((s, e) -> setStatus("DateRange: " + s + " ~ " + e));
+        drp.setRange(java.time.LocalDate.now().minusDays(7), java.time.LocalDate.now());
+        c.add(drp).width(260).padTop(4).left().row();
+
+        // ===== BsTimePicker =====
+        c.add(new Label("④ BsTimePicker（只读输入框，点击弹时:分:秒面板）：", skin)).padTop(14).left().row();
+        Table timeRow = new Table();
+        timeRow.defaults().pad(4).left();
+        BsTimePicker tpHms = new BsTimePicker(skin, true)
+                .setOnChange(t -> setStatus("Time(HMS): " + t));
+        tpHms.setValue(java.time.LocalTime.now());
+        timeRow.add(new Label("时:分:秒", skin));
+        timeRow.add(tpHms).width(140);
+
+        BsTimePicker tpHm = new BsTimePicker(skin, false)
+                .setOnChange(t -> setStatus("Time(HM): " + t));
+        tpHm.setValue(java.time.LocalTime.now());
+        timeRow.add(new Label("时:分", skin)).padLeft(16);
+        timeRow.add(tpHm).width(100);
+        c.add(timeRow).padTop(4).left().row();
+
+        // ===== BsCascader =====
+        c.add(new Label("⑤ BsCascader 级联选择（省 > 市 > 区，选到叶子回填）：", skin)).padTop(14).left().row();
+        BsCascader.Option root1 = new BsCascader.Option().label("广东").value("gd")
+                .child(new BsCascader.Option().label("深圳").value("sz")
+                        .child(new BsCascader.Option().label("南山区").value("ns"))
+                        .child(new BsCascader.Option().label("福田区").value("ft")))
+                .child(new BsCascader.Option().label("广州").value("gz")
+                        .child(new BsCascader.Option().label("天河区").value("th"))
+                        .child(new BsCascader.Option().label("越秀区").value("yx")));
+        BsCascader.Option root2 = new BsCascader.Option().label("浙江").value("zj")
+                .child(new BsCascader.Option().label("杭州").value("hz")
+                        .child(new BsCascader.Option().label("西湖区").value("xh")))
+                .child(new BsCascader.Option().label("宁波").value("nb")
+                        .child(new BsCascader.Option().label("海曙区").value("hs")));
+        BsCascader cascader = new BsCascader(skin)
+                .setOptions(java.util.Arrays.asList(root1, root2))
+                .setOnChange(path -> {
+                    StringBuilder sb = new StringBuilder("Cascader: ");
+                    for (int i = 0; i < path.size(); i++) {
+                        if (i > 0) sb.append(" / ");
+                        sb.append(path.get(i).label);
+                    }
+                    setStatus(sb.toString());
+                });
+        c.add(cascader).width(280).padTop(4).left().row();
+    }
+
+    /** Wave4-Display：Anchor / Comment / CircularProgress / RangeSlider。 */
+    private void fillWave4Display(Table c) {
+        c.add(sectionTitle("Wave4-Display  —— Anchor / Comment / CircularProgress / RangeSlider")).row();
+
+        // ===== BsAnchor 锚点导航 =====
+        c.add(new Label("① BsAnchor 锚点导航（点击链接滚到目标，滚动时高亮当前节）：",
+                skin)).padTop(8).left().row();
+        Table anchorRow = new Table();
+        // 内嵌滚动文档
+        Table doc = new Table();
+        doc.left().top();
+        doc.defaults().growX().left();
+        Label h0 = sectionTitle("概述");
+        Label h1 = sectionTitle("安装");
+        Label h2 = sectionTitle("用法");
+        doc.add(h0).padTop(8).row();
+        for (int i = 0; i < 8; i++) doc.add(new Label("  概述内容行 " + (i + 1), skin)).pad(2).row();
+        doc.add(h1).padTop(8).row();
+        for (int i = 0; i < 10; i++) doc.add(new Label("  安装内容行 " + (i + 1), skin)).pad(2).row();
+        doc.add(h2).padTop(8).row();
+        for (int i = 0; i < 12; i++) doc.add(new Label("  用法内容行 " + (i + 1), skin)).pad(2).row();
+        BsScrollPane docScroll = new BsScrollPane(doc, skin);
+        docScroll.setFadeScrollBars(false);
+        BsAnchor anchor = new BsAnchor(skin, docScroll)
+                .setOnAnchorChange(i -> setStatus("Anchor 当前节: " + i))
+                .add("概述", h0)
+                .add("安装", h1)
+                .add("用法", h2);
+        anchorRow.add(anchor).width(140).top().padRight(8);
+        anchorRow.add(docScroll).grow().height(220);
+        c.add(anchorRow).growX().padTop(4).row();
+
+        // ===== BsComment 评论 / 聊天气泡 =====
+        c.add(new Label("② BsComment 评论 / 聊天气泡（对方/自己/评论流）：",
+                skin)).padTop(14).left().row();
+        Drawable avatar = skin.newDrawable("white", BsPalette.PRIMARY.getMain());
+        BsComment msgOther = new BsComment(skin)
+                .avatar(avatar).name("张三").time("12:30").text("你好！今天天气不错。");
+        BsComment msgSelf = new BsComment(skin)
+                .self(true).avatar(avatar).name("我").text("收到，下午见 👍").maxWidth(260);
+        BsComment comment = new BsComment(skin)
+                .avatar(avatar).name("李四").time("昨天")
+                .text("这条评论很有用，已点赞收藏。").bubble(false);
+        c.add(msgOther).left().padTop(4).row();
+        c.add(msgSelf).right().padTop(4).row();
+        c.add(comment).left().padTop(4).row();
+
+        // ===== BsCircularProgress 环形进度 =====
+        c.add(new Label("③ BsCircularProgress 环形进度（百分比环 / 不确定加载环）：",
+                skin)).padTop(14).left().row();
+        Table ringRow = new Table();
+        ringRow.defaults().pad(10);
+        for (BsCircularProgress.Variant v : BsCircularProgress.Variant.values()) {
+            BsCircularProgress ring = new BsCircularProgress(skin, v)
+                    .setPercent(0.65f)
+                    .setShowLabel(true);
+            ring.setSize(72, 72);
+            Container<BsCircularProgress> wrap = new Container<>(ring);
+            wrap.size(72);
+            ringRow.add(wrap);
+        }
+        // 不确定态加载环
+        BsCircularProgress indet = new BsCircularProgress(skin, BsCircularProgress.Variant.PRIMARY)
+                .setIndeterminate(true);
+        indet.setSize(48, 48);
+        Container<BsCircularProgress> indetWrap = new Container<>(indet);
+        indetWrap.size(48);
+        ringRow.add(indetWrap);
+        c.add(ringRow).left().padTop(4).row();
+
+        // ===== BsRangeSlider 双滑块区间 =====
+        c.add(new Label("④ BsRangeSlider 双滑块区间（拖动两 knob 选 [low, high]）：",
+                skin)).padTop(14).left().row();
+        final Label[] rsLabel = { new Label("区间: 20 ~ 80", skin) };
+        BsRangeSlider rs = new BsRangeSlider(0, 100, 1)
+                .setRange(20, 80)
+                .setMinGap(5)
+                .setOnChange((lo, hi) -> rsLabel[0].setText("区间: " + (int) lo + " ~ " + (int) hi));
+        rs.setSize(420, 24);
+        Container<BsRangeSlider> rsWrap = new Container<>(rs);
+        rsWrap.size(420, 24);
+        c.add(rsWrap).padTop(4).left().row();
+        c.add(rsLabel[0]).left().padTop(2).row();
+    }
+
+    /** Wave4-Form：BsFormValidator + BsRule 声明式表单校验。 */
+    private void fillWave4Form(Table c) {
+        c.add(sectionTitle("Wave4-Form  —— BsFormValidator + BsRule 声明式校验")).row();
+        c.add(new Label("声明式规则（required/minLen/email/range/crossField）+ 异步校验，点「校验」查看结果：",
+                skin)).padBottom(8).left().row();
+
+        final BsTextField userF = new BsTextField("", skin);
+        userF.setMessageText("3~16 字符");
+        final BsTextField emailF = new BsTextField("", skin);
+        emailF.setMessageText("邮箱");
+        final BsTextField ageF = new BsTextField("", skin);
+        ageF.setMessageText("18~60");
+        final BsTextField pwdF = new BsTextField("", skin);
+        pwdF.setPasswordMode(true);
+        pwdF.setMessageText("密码");
+        final BsTextField confirmF = new BsTextField("", skin);
+        confirmF.setPasswordMode(true);
+        confirmF.setMessageText("再输一次");
+
+        Table form = new Table(skin);
+        form.defaults().pad(4).left();
+        form.add(new Label("用户名", skin)).width(70);
+        form.add(userF).width(220).row();
+        form.add(new Label("邮箱", skin)).width(70);
+        form.add(emailF).width(220).row();
+        form.add(new Label("年龄", skin)).width(70);
+        form.add(ageF).width(220).row();
+        form.add(new Label("密码", skin)).width(70);
+        form.add(pwdF).width(220).row();
+        form.add(new Label("确认", skin)).width(70);
+        form.add(confirmF).width(220).row();
+        c.add(form).left().row();
+
+        // 错误展示区
+        final Label errLabel = new Label("(待校验)", skin);
+        errLabel.setColor(BsPalette.DANGER.getMain());
+        errLabel.setWrap(true);
+        c.add(errLabel).growX().padTop(6).row();
+
+        BsFormValidator validator = new BsFormValidator()
+                .addField("user", userF, BsRule.required("请输入用户名"), BsRule.minLen(3), BsRule.maxLen(16))
+                .addField("email", emailF, BsRule.email())
+                .addField("age", ageF, BsRule.range(18, 60))
+                .addField("pwd", pwdF, BsRule.required("请输入密码"), BsRule.minLen(6))
+                .addField("confirm", confirmF,
+                        BsRule.crossField(ctx -> ctx.get("pwd").equals(ctx.self()) ? null : "两次密码不一致"));
+
+        // 异步规则示例：模拟「用户名查重」——延迟 300ms 在 GL 线程返回
+        validator.addAsyncRule("user", (val, onResult) -> {
+            setStatus("异步查重中: " + val + " ...");
+            new Thread(() -> {
+                try { Thread.sleep(300); } catch (InterruptedException ignored) {}
+                // 演示：用户名 "admin" 视为已存在
+                boolean exists = "admin".equalsIgnoreCase(val == null ? "" : val.trim());
+                Gdx.app.postRunnable(() -> onResult.accept(exists ? "用户名已存在" : null));
+            }).start();
+        });
+
+        Table btnRow = new Table();
+        btnRow.defaults().pad(4);
+        BsButton bSync = new BsButton("同步校验", skin,
+                BsButton.Variant.PRIMARY, BsButton.Style.SOLID, BsButton.Size.SM);
+        bSync.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent event, float x, float y) {
+                java.util.Map<String, String> errs = validator.validateAll();
+                errLabel.setText(errs.isEmpty() ? "✓ 同步校验通过" : "✗ " + errs.toString());
+                setStatus(errs.isEmpty() ? "同步校验通过" : "同步校验失败");
+            }
+        });
+        BsButton bAsync = new BsButton("异步校验（含查重）", skin,
+                BsButton.Variant.INFO, BsButton.Style.SOLID, BsButton.Size.SM);
+        bAsync.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent event, float x, float y) {
+                errLabel.setText("异步校验中...");
+                validator.validateAsync(errs -> {
+                    errLabel.setText(errs.isEmpty() ? "✓ 全部通过（含异步）" : "✗ " + errs.toString());
+                    setStatus(errs.isEmpty() ? "异步校验通过" : "异步校验失败");
+                });
+            }
+        });
+        btnRow.add(bSync);
+        btnRow.add(bAsync);
+        c.add(btnRow).left().padTop(6).row();
+    }
+
+    /** Wave4-Data：DnD / VirtualList / DataGrid。 */
+    private void fillWave4Data(Table c) {
+        c.add(sectionTitle("Wave4-Data  —— DnD / VirtualList / DataGrid")).row();
+
+        // ===== BsDnd 拖放 =====
+        c.add(new Label("① BsDnd 拖放（把左边卡片拖到右边回收站）：", skin)).padTop(8).left().row();
+        Table dndRow = new Table();
+        dndRow.defaults().pad(6);
+        // 卡片源：用 Table 包 Label 才能设背景
+        final Table card = new Table();
+        card.setBackground(skin.getDrawable("bs-window-bg"));
+        Label cardLbl = new Label("卡片 #42", skin);
+        cardLbl.setColor(BsPalette.PRIMARY.getMain());
+        card.add(cardLbl).pad(6);
+        // 回收站目标
+        final Table bin = new Table();
+        bin.setBackground(skin.getDrawable("bs-window-bg"));
+        final Label binLbl = new Label("🗑 回收站", skin);
+        binLbl.setColor(BsPalette.DANGER.getMain());
+        bin.add(binLbl).pad(6);
+
+        Container<Table> cardWrap = new Container<>(card);
+        cardWrap.size(120, 50);
+        Container<Table> binWrap = new Container<>(bin);
+        binWrap.size(160, 60);
+
+        BsDnd dnd = new BsDnd();
+        dnd.source(card)
+                .payload("卡片 #42")
+                .onDropped((payload, overTarget) -> setStatus(overTarget != null
+                        ? "已拖到回收站: " + payload
+                        : "拖放取消（未落在目标上）"));
+        dnd.target(bin)
+                .setAccept(o -> true)
+                .onDrop((payload, sourceActor) -> {
+                    setStatus("回收站接收: " + payload);
+                    binLbl.setText("🗑 已回收: " + payload);
+                });
+        dndRow.add(cardWrap);
+        dndRow.add(new Label("  →  ", skin));
+        dndRow.add(binWrap);
+        c.add(dndRow).left().padTop(4).row();
+
+        // ===== BsVirtualList 虚拟化长列表 =====
+        c.add(new Label("② BsVirtualList 虚拟化长列表（1 万条数据，仅渲染可见 cell）：",
+                skin)).padTop(14).left().row();
+        java.util.List<String> huge = new java.util.ArrayList<>();
+        for (int i = 0; i < 10000; i++) huge.add("数据项 #" + (i + 1));
+        BsVirtualList<String> vlist = new BsVirtualList<>(skin, (existing, item, idx) -> {
+            Table row;
+            if (existing instanceof Table) {
+                row = (Table) existing;
+                row.clearChildren();
+            } else {
+                row = new Table();
+            }
+            // 斑马纹（bs-bg-hover 是 Color 资源，转 drawable）
+            if (idx % 2 == 1) {
+                row.setBackground(BsSkinFactory.drawableOf(skin.get("bs-bg-hover", Color.class)));
+            } else {
+                row.setBackground((Drawable) null);
+            }
+            Label l = new Label(item, skin);
+            row.add(l).left().growX().padLeft(6);
+            return row;
+        }, 26f);
+        vlist.setItems(huge)
+                .setOnClick((idx, item) -> setStatus("VirtualList 点 " + idx + ": " + item));
+        c.add(vlist).growX().height(220).padTop(4).row();
+
+        // ===== BsDataGrid 虚拟化数据表格 =====
+        c.add(new Label("③ BsDataGrid 虚拟化数据表格（固定表头 + 大数据量）：",
+                skin)).padTop(14).left().row();
+        java.util.List<BsDataGridDemoRow> rows = new java.util.ArrayList<>();
+        String[] names = {"张三", "李四", "王五", "赵六", "钱七", "孙八", "周九", "吴十"};
+        for (int i = 0; i < 500; i++) {
+            String n = names[i % names.length];
+            rows.add(new BsDataGridDemoRow(i + 1, n, 18 + (i % 40),
+                    n.toLowerCase() + (i + 1) + "@example.com"));
+        }
+        BsDataGrid<BsDataGridDemoRow> grid = new BsDataGrid<>(skin);
+        grid.addColumn("ID", r -> String.valueOf(r.id), 60)
+                .addColumn("姓名", r -> r.name, 100)
+                .addColumn("年龄", r -> String.valueOf(r.age), 70)
+                .addColumn("邮箱", r -> r.email, 240)
+                .setItems(rows)
+                .setOnRowClick((idx, r) -> setStatus("DataGrid 点行 " + idx + ": " + r.name));
+        c.add(grid).growX().height(240).padTop(4).row();
+    }
+
+    /** BsDataGrid demo 行数据。 */
+    private static final class BsDataGridDemoRow {
+        final int id;
+        final String name;
+        final int age;
+        final String email;
+        BsDataGridDemoRow(int id, String name, int age, String email) {
+            this.id = id; this.name = name; this.age = age; this.email = email;
+        }
     }
 
     /** 演示：用 Drawer 装一个用户编辑表单。 */

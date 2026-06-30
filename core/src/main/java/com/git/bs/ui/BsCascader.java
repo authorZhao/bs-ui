@@ -202,7 +202,7 @@ public class BsCascader extends BsTextField {
                 if (i > 0) sb.append(" / ");
                 sb.append(path.get(i).label);
             }
-            setText(sb.toString());
+            setTextProgrammatic(sb.toString());
             if (onChange != null) {
                 try { onChange.accept(new ArrayList<>(path)); } catch (Throwable t) { log.warn("BsCascader onChange error", t); }
             }
