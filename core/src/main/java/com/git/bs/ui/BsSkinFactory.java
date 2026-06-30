@@ -142,6 +142,8 @@ public final class BsSkinFactory {
         putIfAbsent(skin, "bs-menu-bar-bg", roundRect(bgH, bds, 4, 1));
         putIfAbsent(skin, "bs-slider-bg", roundRect(bds, bds, 4, 0));
         putIfAbsent(skin, "bs-slider-knob", roundRect(primary, primary, 8, 0));
+        // 白色圆点：供 BsCircularProgress 等按 batch.setColor 染色（统一生成，随 skin 可导出/换主题）
+        putIfAbsent(skin, "bs-circle", circleDrawable(16));
         // progress-track：用 secondary softBg（暂用 secondary 主色计算，6 色循环里会重新算）
         Color secMain = skin.get("bs-secondary", Color.class);
         Color secSoft = new Color(
@@ -653,6 +655,24 @@ public final class BsSkinFactory {
 
     private static com.badlogic.gdx.scenes.scene2d.utils.Drawable vLineDrawable(Color color) {
         return toDrawable(vLinePixmap(color));
+    }
+
+    /**
+     * 白色实心圆点 Pixmap（统一生成入口）。供 BsSkinExporter 复用 + BsCircularProgress 兜底，
+     * 用 batch.setColor 染成任意颜色。
+     */
+    static Pixmap circlePixmap(int size) {
+        int s = Math.max(4, size);
+        Pixmap pix = new Pixmap(s, s, Pixmap.Format.RGBA8888);
+        pix.setBlending(Blending.None);
+        pix.setColor(Color.WHITE);
+        pix.fillCircle(s / 2, s / 2, s / 2 - 1);
+        return pix;
+    }
+
+    /** 白色圆点 Drawable（TextureRegionDrawable）。走兜底路径时由调用方按需 dispose 其 Texture。 */
+    static com.badlogic.gdx.scenes.scene2d.utils.Drawable circleDrawable(int size) {
+        return toDrawable(circlePixmap(size));
     }
 
     private static com.badlogic.gdx.scenes.scene2d.utils.Drawable toDrawable(Pixmap pix) {
