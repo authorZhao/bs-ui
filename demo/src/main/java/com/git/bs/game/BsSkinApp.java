@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.git.bs.common.SkinUtil;
 import com.git.bs.demo.BsControlsSkinScreen;
@@ -21,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Bs 控件测试 App（V2：主题切换走 setScreen 重建）。
@@ -91,7 +94,7 @@ public class BsSkinApp extends Game {
 
     /** 当前主题（默认 Light）。 */
     @Getter
-    private BsTheme currentTheme = BsLightTheme.INSTANCE;
+    private BsTheme currentTheme = BsDarkTheme.INSTANCE;
 
     /** 字符集（启动时加载，分帧生成字体复用）。 */
     private String chars;
@@ -116,50 +119,11 @@ public class BsSkinApp extends Game {
         log.info("BsControlsTest init: 同步加载 default 字体 + 分帧预热 4 档字号");
         BsUI.init();
         long t0 = System.currentTimeMillis();
-        chars = loadChars();
-
-
-        var lightFileHandle = Gdx.files.internal(SKIN_CP + "/" + currentTheme.name() + ".json");
-        var darkTheme = BsDarkTheme.INSTANCE;
-
-        var lightSkin = BsSkinLoader.loadAndAugmentWithCache(lightFileHandle, currentTheme);
-
-
-        // ① 同步生成 default (18px)，UI 立即可用
-        BitmapFont defaultFont = lightSkin.getFont("default");
-        fonts.put("default", defaultFont);
-
-
-
-        log.info("default 字体就绪，UI 可启动，耗时 {}ms", System.currentTimeMillis() - t0);
-
-        skin = lightSkin;
-        BsUI.registerTheme(currentTheme.name(), currentTheme, skin);
-        bindDefaultFontStyles(skin, defaultFont);
-
-        // Dark 主题同步注册：不依赖字号字体预热（dark skin 用 default 字体即可工作，
-        // 字号样式后面异步生成时会同时绑定到 light/dark 两份 skin）。
-        // 否则用户在分帧字体生成完成前点 Dark 按钮，BsUI.setTheme 会因 dark 未注册而静默忽略，
-        // 表现为"切到 Dark 后整屏还是白底"。
-        Skin darkSkin = BsUI.buildSkin(darkTheme, defaultFont);
-        bindDefaultFontStyles(darkSkin, defaultFont);
-        BsUI.registerTheme(darkTheme.name(), darkTheme, darkSkin);
-
-        // Admin 主题同步注册（程序化构建，不读 json，便于在测试台观察效果后再导出）
-        var adminTheme = BsAdminTheme.INSTANCE;
-        Skin adminSkin = BsUI.buildSkin(adminTheme, defaultFont);
-        bindDefaultFontStyles(adminSkin, defaultFont);
-        BsUI.registerTheme(adminTheme.name(), adminTheme, adminSkin);
-
-        setFontsReadyListener(() -> {
-            // 字号字体生成完成后，把 sm/md/lg/xl 样式同时绑定到 light 和 dark 两份 skin
-            for (Skin s : BsUI.registeredSkins()) {
-                for (String suffix : new String[]{"sm", "md", "lg", "xl"}) {
-                    BitmapFont f = fonts.get(suffix);
-                    if (f != null) BsSkinLoader.bindFontStyles(s, suffix, f);
-                }
-            }
-        });
+        skin = BsSkinLoader.loadAndRegisterTheme(SKIN_CP, currentTheme, new HashMap<>());
+        var fontCache = SkinUtil.getFontCache(skin);
+        fonts.putAll(fontCache);
+        BsSkinLoader.loadAndRegisterTheme(SKIN_CP, BsLightTheme.INSTANCE, fontCache);
+        BsSkinLoader.loadAndRegisterTheme(SKIN_CP, BsAdminTheme.INSTANCE, fontCache);
 
 
         // ③ 旋转器 overlay stage（独立）
@@ -169,62 +133,11 @@ public class BsSkinApp extends Game {
         // ④ 立即进入测试台
         setScreen(new BsControlsSkinScreen(this));
 
-        // ⑤ 分帧加载 sm/md/lg/xl
-        scheduleRemainingFonts(0);
-
         // ⑥ 监听主题切换（外部调 BsUI.setTheme 时触发）
         BsUI.get().addOnThemeChangeListener(theme ->
                 Gdx.app.postRunnable(() -> applyTheme(theme)));
     }
 
-
-    /** 递归 postRunnable：每帧生成 1 个字号。 */
-    private void scheduleRemainingFonts(int idx) {
-        if (idx >= FONT_SIZES.length) {
-            log.info("✓ 所有 {} 档字号加载完成", FONT_SIZES.length);
-            if (fontsReadyListener != null) {
-                try { fontsReadyListener.onFontsReady(); } catch (Throwable e) { log.warn("onFontsReady", e); }
-            }
-            return;
-        }
-        final int nextIdx = idx;
-        Gdx.app.postRunnable(() -> {
-            String suffix = FONT_SIZES[nextIdx][0];
-            int size = Integer.parseInt(FONT_SIZES[nextIdx][1]);
-            try {
-                long t = System.currentTimeMillis();
-                BitmapFont f = generateFont(chars, size);
-                long elapsed = System.currentTimeMillis() - t;
-                log.info("分帧字体生成完成 [{}] size={} 耗时={}ms", suffix, size, elapsed);
-                fonts.put(suffix, f);
-                // 注册到当前 skin（在线注册，不切主题）
-                BsSkinLoader.bindFontStyles(skin, suffix, f);
-                loadedCount++;
-            } catch (Throwable e) {
-                log.warn("字体生成失败 size=" + size, e);
-            }
-            scheduleRemainingFonts(nextIdx + 1);
-        });
-    }
-
-    private String loadChars() {
-        return Gdx.files.internal(CHARS).readString(StandardCharsets.UTF_8.name());
-    }
-
-    private BitmapFont generateFont(String chars, int size) {
-        FreeTypeFontGenerator gen = new FreeTypeFontGenerator(Gdx.files.internal(TTF));
-        try {
-            FreeTypeFontGenerator.FreeTypeFontParameter p = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            p.size = size;
-            p.minFilter = Texture.TextureFilter.Linear;
-            p.magFilter = Texture.TextureFilter.Linear;
-            p.hinting = FreeTypeFontGenerator.Hinting.AutoMedium;
-            p.characters = chars;
-            return gen.generateFont(p);
-        } finally {
-            gen.dispose();
-        }
-    }
 
     // =================== 主题切换（核心） ===================
 
@@ -255,11 +168,6 @@ public class BsSkinApp extends Game {
                 // 3. 新 skin + 新 screen
                 this.currentTheme = theme;
                 this.skin = BsUI.getSkin();
-                // 字号字体绑定
-                for (String suffix : new String[]{"sm", "md", "lg", "xl"}) {
-                    BitmapFont f = fonts.get(suffix);
-                    if (f != null) BsSkinLoader.bindFontStyles(this.skin, suffix, f);
-                }
 
                 // 4. setScreen（新 screen 用新 skin）
                 setScreen(new BsControlsSkinScreen(this));
@@ -351,26 +259,23 @@ public class BsSkinApp extends Game {
         if (overlayStage != null) overlayStage.getViewport().update(width, height, true);
     }
 
-    public int getLoadedFontCount() { return loadedCount; }
-    public boolean isAllFontsReady() { return loadedCount >= FONT_SIZES.length; }
-
     @Override
     public void dispose() {
         super.dispose();
         java.util.List<Skin> allSkins = new java.util.ArrayList<>(BsUI.registeredSkins());
         if (skin != null && !allSkins.contains(skin)) allSkins.add(skin);
+
+        Set<BitmapFont> fontSet = new HashSet<>();
         for (Skin s : allSkins) {
             if (s == null) continue;
-            for (String key : fonts.keySet()) {
-                try { s.remove(key, BitmapFont.class); } catch (Throwable ignored) {}
-                try { s.remove("font-" + key, BitmapFont.class); } catch (Throwable ignored) {}
-            }
-            try { s.remove("font", BitmapFont.class); } catch (Throwable ignored) {}
-            try { s.remove("lxgw", BitmapFont.class); } catch (Throwable ignored) {}
-            try { s.dispose(); } catch (Throwable ignored) {}
+            ObjectMap<String, BitmapFont> all = s.getAll(BitmapFont.class);
+            all.forEach(i->{
+                fontSet.add(i.value);
+                s.remove(i.key, BitmapFont.class);
+            });
         }
         // 字体最后释放
-        for (BitmapFont f : fonts.values()) {
+        for (var f : fontSet) {
             try { f.dispose(); } catch (Throwable ignored) {}
         }
         fonts.clear();
@@ -378,10 +283,4 @@ public class BsSkinApp extends Game {
         BsUI.dispose();
     }
 
-    private void bindDefaultFontStyles(Skin skin, BitmapFont defaultFont) {
-        BsSkinLoader.bindFontStyles(skin, "sm", defaultFont);
-        BsSkinLoader.bindFontStyles(skin, "md", defaultFont);
-        BsSkinLoader.bindFontStyles(skin, "lg", defaultFont);
-        BsSkinLoader.bindFontStyles(skin, "xl", defaultFont);
-    }
 }
