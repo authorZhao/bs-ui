@@ -1,0 +1,232 @@
+package com.git.bs.ui;
+
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import lombok.extern.slf4j.Slf4j;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Locale;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+/// 可内嵌的月历面板（Calendar）：月份导航 + 星期表头 + 6×7 日期网格。
+///
+/// 把 `BsDatePickerPopup` 里锁死的网格逻辑抽成独立组件，供内嵌展示、
+/// `BsDateRangePicker` 等复用。
+///
+/// 两种模式：
+/// - `SINGLE`：单选，`setOnSelect(Consumer)` 回调。
+/// - `RANGE`：区间选，先点起点再点终点（自动校正顺序）；
+///   `setOnRange(BiConsumer)` 回调，起点选定后传 `(start, null)`，终点点齐传 `(start, end)`。
+///
+/// 用法：
+/// ```java
+/// // 单选
+/// BsCalendar cal = new BsCalendar(skin)
+///         .setOnSelect(d -> setStatus("选了 " + d));
+/// // 区间
+/// BsCalendar range = new BsCalendar(skin, BsCalendar.Mode.RANGE)
+///         .setOnRange((s, e) -> { if (e != null) setStatus(s + " ~ " + e); });
+/// stage.addActor(cal);
+/// ```
+///
+/// 实现：`Table`，clearChildren + rebuild 重建（切月/选择后）。
+/// 今天=主色字、选中=checked、区间内=primary-soft 底 + 主色字、跨月灰显。周一为首列。
+@Slf4j
+public class BsCalendar extends Table {
+
+    public enum Mode { SINGLE, RANGE }
+
+    private static final DateTimeFormatter MONTH_FMT = DateTimeFormatter.ofPattern("yyyy 年 MM 月");
+    private static final DayOfWeek[] WEEK = {
+            DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+            DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
+    };
+
+    private final Mode mode;
+
+    private boolean showNav = true;
+    private float cellW = 36f;
+    private float cellH = 28f;
+
+    private YearMonth currentMonth;
+    private LocalDate selected;               // SINGLE
+    private LocalDate rangeStart, rangeEnd;   // RANGE
+
+    private Consumer<LocalDate> onSelect;
+    private BiConsumer<LocalDate, LocalDate> onRange;
+
+    public BsCalendar(Skin skin) {
+        this(skin, Mode.SINGLE);
+    }
+
+    public BsCalendar(Skin skin, Mode mode) {
+        this.mode = mode;
+        this.currentMonth = YearMonth.now();
+        rebuild();
+    }
+
+    // =================== API ===================
+
+    public BsCalendar setMonth(YearMonth ym) {
+        this.currentMonth = ym != null ? ym : YearMonth.now();
+        rebuild();
+        return this;
+    }
+
+    /// SINGLE：设置选中值（同时把视图切到该值所在月）。
+    public BsCalendar setValue(LocalDate d) {
+        this.selected = d;
+        if (d != null) currentMonth = YearMonth.from(d);
+        rebuild();
+        return this;
+    }
+
+    /// RANGE：设置区间（视图切到 start 所在月）。
+    public BsCalendar setRange(LocalDate start, LocalDate end) {
+        this.rangeStart = start;
+        this.rangeEnd = end;
+        if (start != null) currentMonth = YearMonth.from(start);
+        rebuild();
+        return this;
+    }
+
+    public BsCalendar setCellSize(float w, float h) {
+        this.cellW = w;
+        this.cellH = h;
+        rebuild();
+        return this;
+    }
+
+    public BsCalendar setShowNav(boolean b) {
+        this.showNav = b;
+        rebuild();
+        return this;
+    }
+
+    public BsCalendar setOnSelect(Consumer<LocalDate> c) { this.onSelect = c; return this; }
+
+    public BsCalendar setOnRange(BiConsumer<LocalDate, LocalDate> c) { this.onRange = c; return this; }
+
+    public LocalDate getValue() { return selected; }
+
+    public LocalDate getRangeStart() { return rangeStart; }
+
+    public LocalDate getRangeEnd() { return rangeEnd; }
+
+    // =================== 内部 ===================
+
+    private void rebuild() {
+        clearChildren();
+        Skin skin = BsUI.getSkin();   // 主题安全：重建时取当前 skin
+
+        if (showNav) {
+            Table nav = new Table();
+            TextButton prev = new TextButton("‹", skin, "bs-menu-title");
+            TextButton title = new TextButton(currentMonth.format(MONTH_FMT), skin, "bs-menu-title");
+            title.setDisabled(true);
+            TextButton next = new TextButton("›", skin, "bs-menu-title");
+            prev.addListener(new ClickListener() {
+                @Override public void clicked(InputEvent e, float x, float y) {
+                    currentMonth = currentMonth.minusMonths(1);
+                    rebuild();
+                }
+            });
+            next.addListener(new ClickListener() {
+                @Override public void clicked(InputEvent e, float x, float y) {
+                    currentMonth = currentMonth.plusMonths(1);
+                    rebuild();
+                }
+            });
+            nav.add(prev).size(cellW, cellH);
+            nav.add(title).growX().pad(0, 4, 0, 4);
+            nav.add(next).size(cellW, cellH);
+            add(nav).growX().pad(4).row();
+        }
+
+        // 星期表头（周一~周日）
+        Table header = new Table();
+        for (DayOfWeek dow : WEEK) {
+            Label h = new Label(dow.getDisplayName(TextStyle.NARROW, Locale.CHINA), skin);
+            h.setColor(BsTheme.ts());
+            header.add(h).width(cellW).center();
+        }
+        add(header).pad(2, 4, 2, 4).row();
+
+        // 6×7 日期网格
+        LocalDate first = currentMonth.atDay(1);
+        int firstDow = first.getDayOfWeek().getValue();   // MONDAY=1 .. SUNDAY=7
+        LocalDate cursor = first.minusDays(firstDow - 1);
+        LocalDate today = LocalDate.now();
+
+        Table grid = new Table();
+        for (int row = 0; row < 6; row++) {
+            for (int col = 0; col < 7; col++) {
+                final LocalDate d = cursor.plusDays(row * 7L + col);
+                boolean inMonth = YearMonth.from(d).equals(currentMonth);
+                TextButton cell = new TextButton(String.valueOf(d.getDayOfMonth()), skin, "bs-menu-item");
+                if (!inMonth) {
+                    cell.getLabel().setColor(BsTheme.tm());
+                }
+                if (d.equals(today)) {
+                    cell.getLabel().setColor(BsPalette.PRIMARY.getMain());
+                }
+                // 选中 / 区间高亮
+                boolean isEnd = mode == Mode.RANGE && (d.equals(rangeStart) || d.equals(rangeEnd));
+                boolean isSel = mode == Mode.SINGLE ? d.equals(selected) : isEnd;
+                boolean inRange = mode == Mode.RANGE && rangeStart != null && rangeEnd != null
+                        && d.isAfter(rangeStart) && d.isBefore(rangeEnd);
+                if (isSel) cell.setChecked(true);
+                if (inRange) {
+                    cell.setBackground(skin.getDrawable("bs-primary-soft-bg"));
+                    cell.getLabel().setColor(BsPalette.PRIMARY.getMain());
+                }
+                cell.addListener(new ClickListener() {
+                    @Override public void clicked(InputEvent e, float x, float y) { onCellClick(d); }
+                });
+                grid.add(cell).size(cellW, cellH).pad(1);
+            }
+            grid.row();
+        }
+        add(grid).pad(2, 4, 2, 4).row();
+    }
+
+    private void onCellClick(LocalDate d) {
+        if (mode == Mode.SINGLE) {
+            selected = d;
+            rebuild();
+            if (onSelect != null) {
+                try { onSelect.accept(d); } catch (Throwable t) { log.warn("BsCalendar onSelect error", t); }
+            }
+            return;
+        }
+        // RANGE：无起点 / 已选齐 → 开始新区间；有起点无终点 → 设终点
+        if (rangeStart == null || rangeEnd != null) {
+            rangeStart = d;
+            rangeEnd = null;
+            rebuild();
+            if (onRange != null) {
+                try { onRange.accept(rangeStart, null); } catch (Throwable t) { log.warn("BsCalendar onRange error", t); }
+            }
+        } else {
+            if (d.isBefore(rangeStart)) {
+                rangeEnd = rangeStart;
+                rangeStart = d;
+            } else {
+                rangeEnd = d;
+            }
+            rebuild();
+            if (onRange != null) {
+                try { onRange.accept(rangeStart, rangeEnd); } catch (Throwable t) { log.warn("BsCalendar onRange error", t); }
+            }
+        }
+    }
+}
