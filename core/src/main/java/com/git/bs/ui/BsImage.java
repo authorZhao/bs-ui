@@ -16,31 +16,29 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Bootstrap 风格独立图片组件（无图注，区别于 {@link BsFigure} 的"图+说明"）。
- *
- * <p>多来源、可缩放、可设 fallback/边框/点击。适合头像、缩略图、占位图、按钮内图标位等。</p>
- *
- * <p><b>用法</b>：</p>
- * <pre>{@code
- * // 从 classpath 资源加载（Texture 由组件托管）
- * BsImage img = new BsImage()
- *         .path("icons/logo.png")
- *         .size(120, 120)
- *         .fit()
- *         .bordered(true)
- *         .onClick(() -> System.out.println("clicked"));
- *
- * // 直接给 Drawable（调用方自管生命周期）
- * BsImage img2 = new BsImage().drawable(skin.getDrawable("bs-primary-up")).size(64, 64);
- * }</pre>
- *
- * <p><b>生命周期</b>：通过 {@link #path(String)} / {@link #file(FileHandle)} 加载的 {@link Texture}
- * 由本组件托管，组件不再使用时调 {@link #dispose()} 释放。通过 {@link #drawable(Drawable)} /
- * {@link #region(TextureRegion)} 传入的资源由调用方管理。</p>
- *
- * <p><b>v1 不含</b>：圆角裁剪（需 shader/mask）、图片预览/缩放弹层、http 远程图、懒加载。</p>
- */
+/// Bootstrap 风格独立图片组件（无图注，区别于 `BsFigure` 的"图+说明"）。
+///
+/// 多来源、可缩放、可设 fallback/边框/点击。适合头像、缩略图、占位图、按钮内图标位等。
+///
+/// 用法：
+/// ```java
+/// // 从 classpath 资源加载（Texture 由组件托管）
+/// BsImage img = new BsImage()
+///         .path("icons/logo.png")
+///         .size(120, 120)
+///         .fit()
+///         .bordered(true)
+///         .onClick(() -> System.out.println("clicked"));
+///
+/// // 直接给 Drawable（调用方自管生命周期）
+/// BsImage img2 = new BsImage().drawable(skin.getDrawable("bs-primary-up")).size(64, 64);
+/// ```
+///
+/// 生命周期：通过 `path(String)` / `file(FileHandle)` 加载的 `Texture`
+/// 由本组件托管，组件不再使用时调 `dispose()` 释放。通过 `drawable(Drawable)` /
+/// `region(TextureRegion)` 传入的资源由调用方管理。
+///
+/// v1 不含：圆角裁剪（需 shader/mask）、图片预览/缩放弹层、http 远程图、懒加载。
 @Slf4j
 public class BsImage extends Table {
 
@@ -48,9 +46,9 @@ public class BsImage extends Table {
     private final Image image;
     private final Table imgWrap;
 
-    /** 通过 path/file 加载、由本组件托管 dispose 的 Texture。 */
+    /// 通过 path/file 加载、由本组件托管 dispose 的 Texture。
     private Texture ownedTexture;
-    /** 无图时显示的兜底 Drawable（null 则用 bs-bg-elevated 纯色块）。 */
+    /// 无图时显示的兜底 Drawable（null 则用 bs-bg-elevated 纯色块）。
     private Drawable fallback;
 
     private float imgW = 100f;
@@ -73,14 +71,14 @@ public class BsImage extends Table {
 
     // =================== 来源 ===================
 
-    /** 直接设置 Drawable（调用方管理生命周期）。传 null 显示 fallback。 */
+    /// 直接设置 Drawable（调用方管理生命周期）。传 null 显示 fallback。
     public BsImage drawable(Drawable d) {
         disposeOwned();
         image.setDrawable(d != null ? d : currentFallback());
         return this;
     }
 
-    /** 用 Texture 作为图片（本组件托管 dispose）。传 null 显示 fallback。 */
+    /// 用 Texture 作为图片（本组件托管 dispose）。传 null 显示 fallback。
     public BsImage texture(Texture t) {
         disposeOwned();
         if (t == null) {
@@ -93,19 +91,19 @@ public class BsImage extends Table {
         return this;
     }
 
-    /** 用 TextureRegion 作为图片（调用方管理 Texture 生命周期）。传 null 显示 fallback。 */
+    /// 用 TextureRegion 作为图片（调用方管理 Texture 生命周期）。传 null 显示 fallback。
     public BsImage region(TextureRegion r) {
         disposeOwned();
         image.setDrawable(r != null ? new TextureRegionDrawable(r) : currentFallback());
         return this;
     }
 
-    /** 从 classpath/internal 路径加载（Texture 由组件托管）。加载失败显示 fallback。 */
+    /// 从 classpath/internal 路径加载（Texture 由组件托管）。加载失败显示 fallback。
     public BsImage path(String internalPath) {
         return file(internalPath == null ? null : Gdx.files.internal(internalPath));
     }
 
-    /** 从任意 FileHandle 加载（Texture 由组件托管）。文件不存在/失败显示 fallback。 */
+    /// 从任意 FileHandle 加载（Texture 由组件托管）。文件不存在/失败显示 fallback。
     public BsImage file(FileHandle file) {
         disposeOwned();
         if (file == null || !file.exists()) {
@@ -126,7 +124,7 @@ public class BsImage extends Table {
 
     // =================== 配置 ===================
 
-    /** 图片尺寸（同时也是占位区域大小）。 */
+    /// 图片尺寸（同时也是占位区域大小）。
     public BsImage size(float w, float h) {
         this.imgW = w;
         this.imgH = h;
@@ -139,35 +137,35 @@ public class BsImage extends Table {
         return this;
     }
 
-    /** 保持比例、完整显示（默认）。 */
+    /// 保持比例、完整显示（默认）。
     public BsImage fit() { return scaling(Scaling.fit); }
 
-    /** 保持比例、填满区域（可能裁切）。 */
+    /// 保持比例、填满区域（可能裁切）。
     public BsImage fill() { return scaling(Scaling.fill); }
 
-    /** 拉伸填满（不保持比例）。 */
+    /// 拉伸填满（不保持比例）。
     public BsImage stretch() { return scaling(Scaling.stretch); }
 
-    /** 无图时的兜底图。 */
+    /// 无图时的兜底图。
     public BsImage fallback(Drawable d) {
         this.fallback = d;
         if (image.getDrawable() == null) image.setDrawable(currentFallback());
         return this;
     }
 
-    /** 是否显示圆角底边框（默认有）。 */
+    /// 是否显示圆角底边框（默认有）。
     public BsImage bordered(boolean show) {
         imgWrap.setBackground(show ? skin.getDrawable("bs-window-bg") : null);
         return this;
     }
 
-    /** 是否按组件 bounds 矩形裁剪内容（fill 模式下有用；非圆角）。 */
+    /// 是否按组件 bounds 矩形裁剪内容（fill 模式下有用；非圆角）。
     public BsImage clip(boolean c) {
         imgWrap.setClip(c);
         return this;
     }
 
-    /** 点击回调（设了才接收点击）。 */
+    /// 点击回调（设了才接收点击）。
     public BsImage onClick(Runnable r) {
         setTouchable(Touchable.enabled);
         addListener(new ClickListener() {
@@ -183,7 +181,7 @@ public class BsImage extends Table {
 
     // =================== 生命周期 ===================
 
-    /** 释放本组件托管的 Texture（path/file 加载的）。多次调用安全。 */
+    /// 释放本组件托管的 Texture（path/file 加载的）。多次调用安全。
     public void dispose() {
         disposeOwned();
     }
