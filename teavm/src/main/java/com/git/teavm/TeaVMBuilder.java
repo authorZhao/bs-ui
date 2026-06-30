@@ -71,9 +71,11 @@ public class TeaVMBuilder {
 
                 , (new AssetFileHandle("com/git/bs/ui/skin/chinese.txt", com.badlogic.gdx.Files.FileType.Classpath))
                 , (new AssetFileHandle("com/git/bs/ui/skin/LXGWWenKaiMonoLite-Light.ttf", com.badlogic.gdx.Files.FileType.Classpath))
+                , (new AssetFileHandle("com/git/bs/ui/skin/LXGWWenKaiScreen.ttf", com.badlogic.gdx.Files.FileType.Classpath))
 
-                , (new AssetFileHandle("com/git/bs/ui/skin/dark", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/light", com.badlogic.gdx.Files.FileType.Classpath))
+                , (new AssetFileHandle("com/git/bs/ui/skin", com.badlogic.gdx.Files.FileType.Classpath))
+                , (new AssetFileHandle("com/git/bs/ui/skin", com.badlogic.gdx.Files.FileType.Classpath))
+                , (new AssetFileHandle("bs/test/img", com.badlogic.gdx.Files.FileType.Classpath))
 
 
                 , (new AssetFileHandle("com/git/bs/ui/skin/light.json", com.badlogic.gdx.Files.FileType.Classpath))
