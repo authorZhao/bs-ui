@@ -187,6 +187,10 @@ public final class BsUI {
 
     }
 
+    public static boolean hasTheme(BsTheme bsTheme) {
+        return registeredThemes.containsKey(bsTheme.name());
+    }
+
     /**
      * 切换主题（按主题对象，必须已注册）。
      */
