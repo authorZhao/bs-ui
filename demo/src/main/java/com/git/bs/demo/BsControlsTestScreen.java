@@ -214,21 +214,22 @@ public class BsControlsTestScreen extends ScreenAdapter {
         modules.add("Charts-Pie  饼图");                             // 原 30 → 31
         modules.add("Charts-Legend  图例与系列切换");               // 原 31 → 32
         modules.add("Charts-Hover  Hover 数据查看");                // 原 32 → 33
-        modules.add("P2-Content  Placeholder/Figure/ListGroup/FloatingLabel");  // 原 33 → 34
-        modules.add("P2-Carousel  轮播图");                          // 原 34 → 35
-        modules.add("Charts-Extended  Area/Spline/Scatter/Radar/Doughnut");     // 原 35 → 36
-        modules.add("Wave1-Basics  Switch/Avatar/Timeline/Statistic/Steps/Empty/Rating");  // 原 36 → 37
-        modules.add("Wave1-Inputs  AutoComplete/TagInput/DescriptionList");                // 原 37 → 38
-        modules.add("Wave1-Feedback  Result/LoadingOverlay");                              // 原 38 → 39
-        modules.add("Wave2-Data  DataTable/PropertySheet");                                // 原 39 → 40
-        modules.add("Wave3-Editor  StatusBar");                                            // 原 40 → 41
-        modules.add("Wave2-Business  SearchBar/Toolbar/FileItem/Transfer");                // 原 41 → 42
-        modules.add("Wave3-EditorPro  Inspector/NodePalette/MiniMap");                     // 原 42 → 43
-        modules.add("Wave3-Misc  Affix/Drawer");                                           // 原 43 → 44
-        modules.add("Wave4-Pickers  Calendar/DateRange/Time/Cascader");                    // 原 44 → 45
-        modules.add("Wave4-Display  Anchor/Comment/Circular/RangeSlider");                 // 原 45 → 46
-        modules.add("Wave4-Form  FormValidator/Rule");                                     // 原 46 → 47
-        modules.add("Wave4-Data  DnD/VirtualList/DataGrid");                               // 原 47 → 48
+        modules.add("Charts-Bar3D  3D 柱状图");                     // 新增（index 34）
+        modules.add("P2-Content  Placeholder/Figure/ListGroup/FloatingLabel");  // 原 33 → 35
+        modules.add("P2-Carousel  轮播图");                          // 原 34 → 36
+        modules.add("Charts-Extended  Area/Spline/Scatter/Radar/Doughnut");     // 原 35 → 37
+        modules.add("Wave1-Basics  Switch/Avatar/Timeline/Statistic/Steps/Empty/Rating");  // 原 36 → 38
+        modules.add("Wave1-Inputs  AutoComplete/TagInput/DescriptionList");                // 原 37 → 39
+        modules.add("Wave1-Feedback  Result/LoadingOverlay");                              // 原 38 → 40
+        modules.add("Wave2-Data  DataTable/PropertySheet");                                // 原 39 → 41
+        modules.add("Wave3-Editor  StatusBar");                                            // 原 40 → 42
+        modules.add("Wave2-Business  SearchBar/Toolbar/FileItem/Transfer");                // 原 41 → 43
+        modules.add("Wave3-EditorPro  Inspector/NodePalette/MiniMap");                     // 原 42 → 44
+        modules.add("Wave3-Misc  Affix/Drawer");                                           // 原 43 → 45
+        modules.add("Wave4-Pickers  Calendar/DateRange/Time/Cascader");                    // 原 44 → 46
+        modules.add("Wave4-Display  Anchor/Comment/Circular/RangeSlider");                 // 原 45 → 47
+        modules.add("Wave4-Form  FormValidator/Rule");                                     // 原 46 → 48
+        modules.add("Wave4-Data  DnD/VirtualList/DataGrid");                               // 原 47 → 49
         return modules;
     }
 
@@ -379,21 +380,22 @@ public class BsControlsTestScreen extends ScreenAdapter {
             case 31: chartMods.fillChartsPie(content); break;
             case 32: chartMods.fillChartsLegend(content); break;
             case 33: chartMods.fillChartsHover(content); break;
-            case 34: waveMods.fillP2Content(content); break;
-            case 35: waveMods.fillP2Carousel(content); break;
-            case 36: chartMods.fillChartsExtended(content); break;
-            case 37: waveMods.fillWave1Basics(content); break;
-            case 38: waveMods.fillWave1Inputs(content); break;
-            case 39: waveMods.fillWave1Feedback(content); break;
-            case 40: waveMods.fillWave2Data(content); break;
-            case 41: waveMods.fillWave3Editor(content); break;
-            case 42: waveMods.fillWave2Business(content); break;
-            case 43: waveMods.fillWave3EditorPro(content); break;
-            case 44: waveMods.fillWave3Misc(content); break;
-            case 45: waveMods.fillWave4Pickers(content); break;
-            case 46: waveMods.fillWave4Display(content); break;
-            case 47: waveMods.fillWave4Form(content); break;
-            case 48: waveMods.fillWave4Data(content); break;
+            case 34: chartMods.fillChartsBar3D(content); break;   // 新增
+            case 35: waveMods.fillP2Content(content); break;
+            case 36: waveMods.fillP2Carousel(content); break;
+            case 37: chartMods.fillChartsExtended(content); break;
+            case 38: waveMods.fillWave1Basics(content); break;
+            case 39: waveMods.fillWave1Inputs(content); break;
+            case 40: waveMods.fillWave1Feedback(content); break;
+            case 41: waveMods.fillWave2Data(content); break;
+            case 42: waveMods.fillWave3Editor(content); break;
+            case 43: waveMods.fillWave2Business(content); break;
+            case 44: waveMods.fillWave3EditorPro(content); break;
+            case 45: waveMods.fillWave3Misc(content); break;
+            case 46: waveMods.fillWave4Pickers(content); break;
+            case 47: waveMods.fillWave4Display(content); break;
+            case 48: waveMods.fillWave4Form(content); break;
+            case 49: waveMods.fillWave4Data(content); break;
             default:
                 content.add(new Label("(未知模块)", skin));
         }

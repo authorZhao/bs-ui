@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.git.bs.ui.BsAreaChart;
 import com.git.bs.ui.BsBarChart;
+import com.git.bs.ui.BsBarChart3D;
 import com.git.bs.ui.BsChart;
 import com.git.bs.ui.BsDoughnutChart;
 import com.git.bs.ui.BsLineChart;
@@ -309,6 +310,93 @@ public class BsChartModules {
         c.add(wrapChart(lineNoHover, 640, 200)).padTop(4).row();
 
         c.add(new Label("(hover 命中半径可调：折线 setHitRadius，默认 12px)", skin)).padTop(8).row();
+    }
+
+    // ============================ Charts-Bar3D ============================
+    public void fillChartsBar3D(Table c) {
+        c.add(sectionTitle(skin, "Charts-Bar3D  —— 真 3D 柱状图（等距投影 + 三面明暗 + 可旋转）")).row();
+
+        c.add(new Label("① 单系列 3D 柱状（季度销量，顶亮/正面中/侧面暗）:", skin)).padTop(8).left().row();
+        BsBarChart3D bar1 = new BsBarChart3D();
+        bar1.setSize(640, 260);
+        bar1.setSkinFont(skin);
+        bar1.setCategories("Q1", "Q2", "Q3", "Q4");
+        bar1.setMultiSeries(List.of(
+                new BsChart.Series("销量", BsChart.pointsOfY(35, 48, 60, 72))
+        ));
+        bar1.setLegendPlacement(BsChart.LegendPlacement.NONE);
+        c.add(wrapChart(bar1, 640, 260)).padTop(4).row();
+
+        c.add(new Label("② 多系列分组 3D（2024 vs 2025）:", skin)).padTop(14).left().row();
+        BsBarChart3D bar2 = new BsBarChart3D();
+        bar2.setSize(640, 260);
+        bar2.setSkinFont(skin);
+        bar2.setCategories("Q1", "Q2", "Q3", "Q4");
+        bar2.setMultiSeries(Arrays.asList(
+                new BsChart.Series("2024", BsChart.pointsOfY(35, 48, 60, 72)),
+                new BsChart.Series("2025", BsChart.pointsOfY(45, 55, 68, 88))
+        ));
+        bar2.setLegendPlacement(BsChart.LegendPlacement.TOP);
+        c.add(wrapChart(bar2, 640, 260)).padTop(4).row();
+
+        c.add(new Label("③ 拖拽旋转视角（按住鼠标拖动可绕 Y 轴旋转）:", skin)).padTop(14).left().row();
+        final BsBarChart3D bar3 = new BsBarChart3D();
+        bar3.setSize(640, 280);
+        bar3.setSkinFont(skin);
+        bar3.setCategories("北京", "上海", "广州", "深圳", "杭州");
+        bar3.setMultiSeries(Arrays.asList(
+                new BsChart.Series("男", BsChart.pointsOfY(120, 150, 100, 130, 90)),
+                new BsChart.Series("女", BsChart.pointsOfY(110, 140, 95, 125, 85))
+        ));
+        bar3.setLegendPlacement(BsChart.LegendPlacement.TOP);
+        attachDragRotate(bar3);
+        c.add(wrapChart(bar3, 640, 280)).padTop(4).row();
+
+        c.add(new Label("④ 加大柱深 + 俯仰角（更夸张的立体感）:", skin)).padTop(14).left().row();
+        BsBarChart3D bar4 = new BsBarChart3D();
+        bar4.setSize(640, 260);
+        bar4.setSkinFont(skin);
+        bar4.setBarDepth(56);
+        bar4.setPitchDegrees(28);
+        bar4.setYawDegrees(45);
+        bar4.setCategories("A", "B", "C", "D", "E");
+        bar4.setMultiSeries(List.of(
+                new BsChart.Series("数量", BsChart.pointsOfY(20, 35, 50, 28, 42))
+        ));
+        bar4.setLegendPlacement(BsChart.LegendPlacement.NONE);
+        c.add(wrapChart(bar4, 640, 260)).padTop(4).row();
+
+        c.add(new Label("(鼠标 hover 柱子显示数值；③ 中拖拽可旋转 yaw；点击图例切换系列显隐)", skin)).padTop(8).row();
+    }
+
+    /** 给 3D 柱状图绑定拖拽旋转：按住鼠标左右拖动改变 yawDeg。 */
+    private void attachDragRotate(BsBarChart3D chart) {
+        final float[] dragStart = {-1};
+        final float[] yawStart = {0};
+        chart.addListener(new com.badlogic.gdx.scenes.scene2d.InputListener() {
+            @Override
+            public boolean touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent event,
+                                     float x, float y, int pointer, int button) {
+                dragStart[0] = event.getStageX();
+                yawStart[0] = chart.getYawDegrees();
+                return true;
+            }
+            @Override
+            public void touchDragged(com.badlogic.gdx.scenes.scene2d.InputEvent event,
+                                     float x, float y, int pointer) {
+                if (dragStart[0] < 0) return;
+                float dx = event.getStageX() - dragStart[0];
+                // 拖动 2px ≈ 1°，规整到 [0, 360)
+                float yaw = (yawStart[0] + dx * 0.5f) % 360f;
+                if (yaw < 0) yaw += 360f;
+                chart.setYawDegrees(yaw);
+            }
+            @Override
+            public void touchUp(com.badlogic.gdx.scenes.scene2d.InputEvent event,
+                                float x, float y, int pointer, int button) {
+                dragStart[0] = -1;
+            }
+        });
     }
 
     // ============================ Charts-Extended ============================
