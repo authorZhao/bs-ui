@@ -35,6 +35,8 @@ public final class BsLightTheme extends BsAbstractTheme {
         put("danger",           0xDC3545);
         put("warning",          0xFFC107);
         put("info",             0x0DCAF0);
+        put("light",            0xF8F9FA);
+        put("dark",             0x212529);
         // 特殊（含 alpha 用 8 位 hex）
         put("shadow",           0x66000000);  // #00000066
         put("overlay",          0x73000000);  // #00000073
