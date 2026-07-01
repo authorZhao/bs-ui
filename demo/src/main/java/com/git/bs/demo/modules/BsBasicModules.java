@@ -347,6 +347,12 @@ public class BsBasicModules {
         help.addItem("About...", () -> BsAboutDialog.show(stage, skin, "Bs UI 控件测试台", false));
         help.addItem("Docs...", () -> setStatus.accept("Help → Docs"));
 
+        BsMenuBar.BsMenu view = bar.addMenu("View");
+        view.addItem("Zoom In", () -> setStatus.accept("View → Zoom In"));
+        view.addItem("Zoom Out", () -> setStatus.accept("View → Zoom Out"));
+        view.addSeparator();
+        view.addItem("Toggle Theme", () -> setStatus.accept("View → Toggle Theme"));
+
         c.add(bar).growX().row();
 
         c.add(new Label("(状态栏会显示你点过的菜单项)", skin)).padTop(10).row();
