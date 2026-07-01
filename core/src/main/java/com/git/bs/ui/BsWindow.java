@@ -37,7 +37,11 @@ public class BsWindow extends Window {
         this.modal = modal;
         setMovable(true);
         setKeepWithinStage(true);
-        pad(8);
+        // libGDX Window 标题画在 padTop 区域内（紧贴内容区上方）。
+        // padTop 太小：标题 ascender 顶出窗口上边界；
+        // padTop 太大：标题与内容区间距过宽。
+        // 14 是平衡点：标题完整落在框内，且与内容间距自然（接近 BsModal 的 14）。
+        pad(18, 8, 8, 8);
     }
 
     /** 模态显示：盖 backdrop + 居中加到 stage。重复调用安全（先清理旧 backdrop）。 */
