@@ -295,7 +295,7 @@ public final class BsSkinExporter {
     private static Spec resolveRoundRectSpec(String key, Skin skin) {
         try {
             // 6 色循环：bs-{name}-(up|hover|active|disabled|outline-up|outline-hover|outline-active|checked|soft-bg)
-            String[] palette = {"primary", "secondary", "success", "danger", "warning", "info"};
+            String[] palette = {"primary", "secondary", "success", "danger", "warning", "info", "light", "dark"};
             for (String name : palette) {
                 if (!key.equals("bs-" + name + "-up") && !key.equals("bs-" + name + "-hover")
                         && !key.equals("bs-" + name + "-active") && !key.equals("bs-" + name + "-disabled")
@@ -311,7 +311,6 @@ public final class BsSkinExporter {
                 Color active = darken(main, 0.07f);
                 Color softBg = softBlend(main);
                 Color td = colorOf(skin, "bs-text-disabled");
-                Color be = colorOf(skin, "bs-bg-elevated");
                 Color outlineHover = main; // outline-hover 用主色填充
                 switch (key.substring(("bs-" + name + "-").length())) {
                     case "up":           return new Spec(main, main, 8, 1);
@@ -319,7 +318,7 @@ public final class BsSkinExporter {
                     case "active":       return new Spec(active, active, 8, 1);
                     case "disabled":     return new Spec(td, td, 8, 1);
                     case "checked":      return new Spec(active, active, 8, 1);
-                    case "outline-up":   return new Spec(be, main, 8, 1);
+                    case "outline-up":   return new Spec(Color.CLEAR, main, 8, 1);  // 透明底 + 主色描边
                     case "outline-hover":return new Spec(outlineHover, outlineHover, 8, 1);
                     case "outline-active":return new Spec(active, active, 8, 1);
                     case "soft-bg":      return new Spec(softBg, softBg, 6, 0);
