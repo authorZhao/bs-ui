@@ -256,7 +256,10 @@ public final class BsSkinFactory {
             mi.checked = skin.getDrawable("bs-menu-item-active");
             mi.font = font;
             mi.fontColor = darkText;
-            mi.overFontColor = skin.get("bs-text-on-dark", Color.class);
+            // over 背景（bh=bs-bg-hover）只是浅色调，不是主色填充：
+            // 字色保持与 up 一致（darkText 随主题），避免 light 主题下「浅底白字」看不清。
+            // 只有 down/checked（primary 蓝填充）才用白字。
+            mi.overFontColor = darkText;
             mi.downFontColor = Color.WHITE;
             mi.disabledFontColor = td;
             putStyle(skin, "bs-menu-item", mi);
