@@ -1,10 +1,12 @@
 package com.git.bs.ui;
 
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Scaling;
 
@@ -25,7 +27,7 @@ import com.badlogic.gdx.utils.Scaling;
  */
 public class BsButton extends TextButton {
 
-    public enum Variant { PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO }
+    public enum Variant { PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO, LIGHT, DARK }
     public enum Size { SM, MD, LG }
     public enum Style { SOLID, OUTLINE }
 
@@ -43,6 +45,20 @@ public class BsButton extends TextButton {
         float padV = sz == Size.SM ? 4 : sz == Size.LG ? 12 : 7;
         float padH = sz == Size.SM ? 12 : sz == Size.LG ? 20 : 14;
         pad(padV, padH, padV, padH);
+        // libGDX Button 默认点击会 toggle isChecked（点击后停在 checked 填充态，第二次点击才复原）。
+        // 仅 OUTLINE 风格做成 momentary：取消点击触发的 ChangeEvent → setChecked 内部翻转被回滚 → 点击后自动复原。
+        // SOLID 等其它风格保留 libGDX 原始 toggle 逻辑（不动）。
+        if (st == Style.OUTLINE) {
+            // setProgrammaticChangeEvents(false)：让 BsMenuBar / BsLayoutAdmin 等的「程序化 setChecked」
+            //   不触发 ChangeEvent，从而不受下面 cancel 影响（它们的选中态照常生效）。
+            setProgrammaticChangeEvents(false);
+            addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                    event.cancel();
+                }
+            });
+        }
     }
 
     private static String styleName(Variant v, Style st) {
