@@ -43,6 +43,8 @@ public final class BsDarkTheme extends BsAbstractTheme {
         put("danger",           0xE55B6B);
         put("warning",          0xFFCA2C);
         put("info",             0x4FD3E6);
+        put("light",            0xF8F9FA);
+        put("dark",             0x343A40);   // 比 bg-body(0x212529) 亮一档，暗底下才可见
         // 特殊
         put("shadow",           0x99000000);  // #00000099
         put("overlay",          0xB3000000);  // #000000B3
