@@ -43,6 +43,8 @@ public final class BsAdminTheme extends BsAbstractTheme {
         put("danger",           0xF56C6C);   // 红
         put("warning",          0xE6A23C);   // 黄
         put("info",             0x909399);   // 中灰（与 secondary 同）
+        put("light",            0xF0F2F5);   // 浅底
+        put("dark",             0x303133);   // 深底（admin 偏冷灰）
         // 特殊
         put("shadow",           0x66000000);  // 半透明黑阴影
         put("overlay",          0x99000000);  // 遮罩 60%
