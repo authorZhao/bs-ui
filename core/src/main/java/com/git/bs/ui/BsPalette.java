@@ -16,6 +16,8 @@ public final class BsPalette {
     public static final BsPalette DANGER    = new BsPalette("danger");
     public static final BsPalette WARNING   = new BsPalette("warning");
     public static final BsPalette INFO      = new BsPalette("info");
+    public static final BsPalette LIGHT     = new BsPalette("light");
+    public static final BsPalette DARK      = new BsPalette("dark");
 
     /** Variant key（"primary"/"secondary"/...）。 */
     public final String key;
@@ -32,7 +34,7 @@ public final class BsPalette {
     public Color getDisabled() { return BsTheme.td(); }
 
     public static BsPalette[] values() {
-        return new BsPalette[]{PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO};
+        return new BsPalette[]{PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO, LIGHT, DARK};
     }
 
     public String name() {
