@@ -186,7 +186,7 @@ public final class BsSkinFactory {
             putIfAbsent(skin, "bs-" + name + "-hover", roundRect(hover, hover, 8, 1));
             putIfAbsent(skin, "bs-" + name + "-active", roundRect(active, active, 8, 1));
             putIfAbsent(skin, "bs-" + name + "-disabled", roundRect(td, td, 8, 1));
-            putIfAbsent(skin, "bs-" + name + "-outline-up", roundRect(be, main, 8, 1));
+            putIfAbsent(skin, "bs-" + name + "-outline-up", outlineRoundRect(main, 8, 1));
             putIfAbsent(skin, "bs-" + name + "-outline-hover", roundRect(main, main, 8, 1));
             putIfAbsent(skin, "bs-" + name + "-outline-active", roundRect(active, active, 8, 1));
             putIfAbsent(skin, "bs-" + name + "-checked", roundRect(active, active, 8, 1));
@@ -211,9 +211,10 @@ public final class BsSkinFactory {
             if (!skin.has(solidKey, TextButtonStyle.class)) {
                 TextButtonStyle solid = new TextButtonStyle(
                         skin.getDrawable("bs-" + name + "-up"),
-                        skin.getDrawable("bs-" + name + "-hover"),
-                        skin.getDrawable("bs-" + name + "-active"),
+                        skin.getDrawable("bs-" + name + "-active"),    // down（按下）= active
+                        skin.getDrawable("bs-" + name + "-active"),    // checked
                         font);
+                solid.over = skin.getDrawable("bs-" + name + "-hover"); // over（悬停）= hover ★关键：原构造未设 over
                 solid.disabled = skin.getDrawable("bs-" + name + "-disabled");
                 solid.fontColor = textColorFor(p, true, skin);
                 solid.disabledFontColor = td;
@@ -221,13 +222,15 @@ public final class BsSkinFactory {
             }
             if (!skin.has(outlineKey, TextButtonStyle.class)) {
                 TextButtonStyle outline = new TextButtonStyle(
-                        skin.getDrawable("bs-" + name + "-outline-up"),
-                        skin.getDrawable("bs-" + name + "-outline-hover"),
-                        skin.getDrawable("bs-" + name + "-outline-active"),
+                        skin.getDrawable("bs-" + name + "-outline-up"),      // up：透明描边
+                        skin.getDrawable("bs-" + name + "-outline-active"),  // down（按下）= active 填充
+                        skin.getDrawable("bs-" + name + "-outline-active"),  // checked
                         font);
+                outline.over = skin.getDrawable("bs-" + name + "-outline-hover"); // over（悬停）= 主色填充 ★关键
                 outline.disabled = skin.getDrawable("bs-" + name + "-disabled");
-                outline.fontColor = textColorFor(p, false, skin);
-                outline.overFontColor = Color.WHITE;
+                outline.fontColor = textColorFor(p, false, skin);       // up：主色文字
+                outline.overFontColor = textColorFor(p, true, skin);    // 悬停填充：对比文字
+                outline.downFontColor = textColorFor(p, true, skin);    // 按下填充：对比文字
                 outline.disabledFontColor = td;
                 putStyle(skin, outlineKey, outline);
             }
@@ -461,11 +464,13 @@ public final class BsSkinFactory {
     }
 
     private static Color textColorFor(BsPalette p, boolean solid, Skin skin) {
-        boolean useDarkText = (p == BsPalette.WARNING || p == BsPalette.INFO);
+        // 浅填充（light / warning / info）需深色文字才达标对比度
+        boolean useDarkText = (p == BsPalette.WARNING || p == BsPalette.INFO || p == BsPalette.LIGHT);
         if (!solid) {
-            return useDarkText ? skin.get("bs-text-primary", Color.class)
-                    : skin.get("bs-" + p.key, Color.class);
+            // outline 未填充：文字 = 变体主色（与描边一致，对齐 Bootstrap）
+            return skin.get("bs-" + p.key, Color.class);
         }
+        // solid（及 outline hover/active 实色填充）：浅填充用深字，否则白字
         return useDarkText ? skin.get("bs-text-primary", Color.class) : Color.WHITE;
     }
 
@@ -493,6 +498,22 @@ public final class BsSkinFactory {
         return new NinePatchDrawable(np);
     }
 
+    /** 透明底 + 主色描边的圆角（Bootstrap outline-up 用）：内部用 alpha=0 挖空，透出父级背景。 */
+    static NinePatchDrawable outlineRoundRect(Color borderColor, int corner, int borderPx) {
+        int size = Math.max(8, corner * 3 + borderPx * 2);
+        Pixmap pix = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+        pix.setBlending(Blending.None);
+        fillRoundRect(pix, borderColor, 0, 0, size, size, corner);
+        if (borderPx > 0) {
+            fillRoundRect(pix, Color.CLEAR, borderPx, borderPx,
+                    size - 2 * borderPx, size - 2 * borderPx, Math.max(0, corner - borderPx));
+        }
+        Texture tex = new Texture(pix);
+        tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        pix.dispose();
+        return new NinePatchDrawable(new NinePatch(new TextureRegion(tex), corner, corner, corner, corner));
+    }
+
     private static int colorToHex(Color c) {
         int r = Math.round(c.r * 255) & 0xFF;
         int g = Math.round(c.g * 255) & 0xFF;
@@ -501,7 +522,12 @@ public final class BsSkinFactory {
     }
 
     private static void fillRoundRect(Pixmap pix, int fillHex, int x, int y, int w, int h, int r) {
-        pix.setColor(hexToColor(fillHex));
+        fillRoundRect(pix, hexToColor(fillHex), x, y, w, h, r);
+    }
+
+    /** Color 版（保留 alpha，供透明填充用）。 */
+    private static void fillRoundRect(Pixmap pix, Color c, int x, int y, int w, int h, int r) {
+        pix.setColor(c);
         pix.fillRectangle(x + r, y, w - 2 * r, h);
         pix.fillRectangle(x, y + r, r, h - 2 * r);
         pix.fillRectangle(x + w - r, y + r, r, h - 2 * r);
