@@ -209,5 +209,12 @@ public final class BsSkinLoader {
         return skin;
     }
 
+    public static Skin loadAndRegisterBsTheme(String skinCp, BsTheme bsTheme, Map<String, BitmapFont> fontCache) {
+        var fileHandle = Gdx.files.internal(skinCp + "/" + bsTheme.name() + ".json");
+        var skin = new BsSkin(fileHandle);
+        BsSkinFactory.augmentWithBsStyles(skin, bsTheme);
+        BsUI.registerTheme(bsTheme.name(), bsTheme, skin);
+        return skin;
+    }
 
 }
