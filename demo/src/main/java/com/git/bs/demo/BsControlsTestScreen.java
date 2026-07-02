@@ -22,6 +22,7 @@ import com.git.bs.demo.modules.BsWaveModules;
 import com.git.bs.game.BsControlsTestApp;
 import com.git.bs.ui.BsAdminTheme;
 import com.git.bs.ui.BsButton;
+import com.git.bs.ui.BsCheckBox;
 import com.git.bs.ui.BsDarkTheme;
 import com.git.bs.ui.BsLightTheme;
 import com.git.bs.ui.BsLineChart;
@@ -259,13 +260,16 @@ public class BsControlsTestScreen extends ScreenAdapter {
         charsBox.setItems(charsItems);
         charsBox.setSelectedIndex(0);
 
+        final BsCheckBox bitmapBox = new BsCheckBox("烘焙 BitmapFont（.fnt + .png）", skin);
+
         Table form = new Table(skin);
         form.defaults().pad(6).left().growX();
         form.add(new Label("导出名（生成 <名>.json / .atlas / .png）", skin)).row();
         form.add(nameField).growX().row();
         form.add(new Label("字符集（影响字体生成范围与加载速度）", skin)).padTop(4).row();
         form.add(charsBox).growX().left().row();
-        Label hint = new Label("目录：bs-skin-export/   ·   多主题共用字体与字符集，主题资源以导出名区分", skin);
+        form.add(bitmapBox).padTop(4).left().row();
+        Label hint = new Label("目录：bs-skin-export/   ·   多主题共用字体与字符集   ·   勾选「烘焙 BitmapFont」可让运行时免 FreeType/TTF/freetype.js", skin);
         hint.setColor(BsTheme.tm());
         hint.setFontScale(0.9f);
         hint.setWrap(true);
@@ -277,7 +281,8 @@ public class BsControlsTestScreen extends ScreenAdapter {
                 .separator(true)
                 .addButton("取消", () -> setStatus("导出取消"), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE)
                 .addButton("导出", () -> doExport(nameField.getText(),
-                                charsEntries.get(charsBox.getSelectedIndex())[1]),
+                                charsEntries.get(charsBox.getSelectedIndex())[1],
+                                bitmapBox.isChecked()),
                         BsButton.Variant.PRIMARY, BsButton.Style.SOLID)
                 .showModal(stage);
     }
@@ -289,7 +294,7 @@ public class BsControlsTestScreen extends ScreenAdapter {
      * @param nameRaw     导出名（生成 <名>.json/.atlas/.png）
      * @param charsCp     字符集文件 classpath 路径（如 com/git/bs/ui/skin/chinese.txt）
      */
-    private void doExport(String nameRaw, String charsCp) {
+    private void doExport(String nameRaw, String charsCp, boolean bitmapFont) {
         final String name = (nameRaw == null || nameRaw.trim().isEmpty()) ? "bs-skin" : nameRaw.trim();
         final BsControlsTestApp appRef = this.app;
         Gdx.app.postRunnable(() -> {
@@ -304,7 +309,7 @@ public class BsControlsTestScreen extends ScreenAdapter {
                         Gdx.files.internal(charsCp);
 
                 long t0 = System.currentTimeMillis();
-                BsSkinExporter.export(skin, outDir, name, ttfSource, charsFile);
+                BsSkinExporter.export(skin, outDir, name, ttfSource, charsFile, bitmapFont);
                 long elapsed = System.currentTimeMillis() - t0;
 
                 String charsName = charsFile.name();
