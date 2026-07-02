@@ -201,14 +201,16 @@ public final class BsSkinExporter {
                 : FreeTypeFontGenerator.DEFAULT_CHARS;
         String face = ttf.nameWithoutExtension();
         final int PAGE = 1024;
-        String[] suffixes = {"default", "sm", "md", "lg", "xl"};
-        int[] sizes = {18, 14, 18, 24, 32};
+        // default 与 md 字号相同（18px），烘焙时 default 复用 font-md.fnt，不重复烘焙
+        String[] suffixes = {"sm", "md", "lg", "xl"};
+        int[] sizes = {14, 18, 24, 32};
 
         FreeTypeFontGenerator gen = new FreeTypeFontGenerator(ttf);
         try {
+            String mdFntFile = null;
             for (int i = 0; i < suffixes.length; i++) {
-                String skinKey = i == 0 ? "default" : "font-" + suffixes[i];
-                String jsonKey = i == 0 ? "default-font" : "font-" + suffixes[i];
+                String suffix = suffixes[i];
+                String jsonKey = "font-" + suffix;
                 int size = sizes[i];
                 FreeTypeFontGenerator.FreeTypeFontParameter p = new FreeTypeFontGenerator.FreeTypeFontParameter();
                 p.size = size;
@@ -226,12 +228,16 @@ public final class BsSkinExporter {
                     FileHandle fntFile = outputDir.child(jsonKey + ".fnt");
                     BitmapFontWriter.writeFont(font.getData(), pageRefs, fntFile, info, PAGE, PAGE);
                     entries.put(jsonKey, jsonKey + ".fnt");
+                    // md 烘焙完成后记下文件名，default-font 复用它
+                    if ("md".equals(suffix)) mdFntFile = jsonKey + ".fnt";
                     log.info("BsSkinExporter: 烘焙 BitmapFont {} ({}px) -> {} 张页", jsonKey, size, pageRefs.length);
                 } finally {
                     font.dispose();
                     p.packer.dispose();
                 }
             }
+            // default-font 复用 font-md.fnt（字号相同，省一份烘焙产物）
+            entries.put("default-font", mdFntFile);
         } finally {
             gen.dispose();
         }
@@ -539,12 +545,14 @@ public final class BsSkinExporter {
             root.put("com.badlogic.gdx.graphics.g2d.BitmapFont", fontSection);
         } else if (ttfPath != null) {
             Map<String, Object> fontSection = new LinkedHashMap<>();
-            String[] suffixes = {"default", "sm", "md", "lg", "xl"};
-            int[] sizes = {18, 14, 18, 24, 32};
+            // default 与 md 字号相同（18px），default-font 复用 font-md 的配置
+            String[] suffixes = {"sm", "md", "lg", "xl"};
+            int[] sizes = {14, 18, 24, 32};
+            Map<String, Object> mdConfig = null;
             for (int i = 0; i < suffixes.length; i++) {
-                String skinKey = i == 0 ? "default" : "font-" + suffixes[i];
+                String skinKey = "font-" + suffixes[i];
                 if (skin.has(skinKey, BitmapFont.class)) {
-                    String jsonKey = i == 0 ? "default-font" : "font-" + suffixes[i];
+                    String jsonKey = "font-" + suffixes[i];
                     Map<String, Object> f = new LinkedHashMap<>();
                     f.put("font", ttfPath);
                     if (charsFile != null) f.put("characters", charsFile);
@@ -553,7 +561,12 @@ public final class BsSkinExporter {
                     f.put("minFilter", "Linear");
                     f.put("magFilter", "Linear");
                     fontSection.put(jsonKey, f);
+                    if ("md".equals(suffixes[i])) mdConfig = f;
                 }
+            }
+            // default-font 复用 font-md 配置（字号相同，省一份 FreeType 配置）
+            if (mdConfig != null) {
+                fontSection.put("default-font", new LinkedHashMap<>(mdConfig));
             }
             if (!fontSection.isEmpty()) {
                 root.put("com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator", fontSection);
@@ -782,6 +795,29 @@ public final class BsSkinExporter {
     }
 
     /**
+     * 从 skin BitmapFont 桶反查 BitmapFont 对象的 key 名（引用相等）。
+     * 找不到时返回 fallback（若 fallback 在 skin 中也不存在则返回 null，跳过该字段）。
+     * <p>注意：skin 桶里 default font 注册的 key 是 "default"（BsSkinFactory），
+     * 但 json font 段约定用 "default-font"（与手写 json 一致），通过 {@link #mapSkinFontKeyToJson} 映射。</p>
+     */
+    private static String resolveFontName(Skin skin, BitmapFont font, String fallback) {
+        if (font == null) return null;
+        ObjectMap<String, BitmapFont> fonts = skin.getAll(BitmapFont.class);
+        if (fonts != null) {
+            for (ObjectMap.Entry<String, BitmapFont> e : fonts) {
+                if (e.value == font) return mapSkinFontKeyToJson(e.key);
+            }
+        }
+        if (fallback != null && skin.has(fallback, BitmapFont.class)) return fallback;
+        return null;
+    }
+
+    /** skin 桶 key "default" → json key "default-font"；其余保持原样。 */
+    private static String mapSkinFontKeyToJson(String skinKey) {
+        return "default".equals(skinKey) ? "default-font" : skinKey;
+    }
+
+    /**
      * 把 drawable 字段写入 style map：反查优先，找不到用 fallback，再找不到跳过。
      * 同时把反查到的 key 加进 drawableToRegion（其实 atlas 阶段已收集，这里只是 no-op 占位）。
      */
@@ -800,6 +836,16 @@ public final class BsSkinExporter {
         if (name != null) v.put(field, name);
     }
 
+    /**
+     * 把 font 字段写入 style map：反查（引用相等）优先，找不到用 fallback，再找不到跳过。
+     * 修复：原来 9 处硬编码 "default-font"，导致字号信息（font-sm/font-lg 等）导出时丢失。
+     */
+    private static void putFont(Map<String, Object> v, String field, Skin skin,
+                                BitmapFont font, String fallback) {
+        String name = resolveFontName(skin, font, fallback);
+        if (name != null) v.put(field, name);
+    }
+
     // =================== 各 style section ===================
 
     private static void addTextButtonSection(Map<String, Object> root, Skin skin) {
@@ -810,7 +856,7 @@ public final class BsSkinExporter {
             TextButtonStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             // font
-            if (s.font != null) v.put("font", "default-font");
+            putFont(v, "font", skin, s.font, "default-font");
             // fontColor 全套（TextButtonStyle 本类）
             putColor(v, "fontColor", skin, s.fontColor);
             putColor(v, "downFontColor", skin, s.downFontColor);
@@ -851,7 +897,7 @@ public final class BsSkinExporter {
             CheckBoxStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             // font（CheckBoxStyle 继承 TextButtonStyle）
-            if (s.font != null) v.put("font", "default-font");
+            putFont(v, "font", skin, s.font, "default-font");
             // fontColor 全套（继承自 TextButtonStyle）
             putColor(v, "fontColor", skin, s.fontColor);
             putColor(v, "downFontColor", skin, s.downFontColor);
@@ -891,7 +937,7 @@ public final class BsSkinExporter {
         for (ObjectMap.Entry<String, LabelStyle> e : ss.entries()) {
             LabelStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
-            if (s.font != null) v.put("font", "default-font");
+            putFont(v, "font", skin, s.font, "default-font");
             putColor(v, "fontColor", skin, s.fontColor);
             if (s.background != null) putDrawable(v, "background", skin, s.background, null);
             section.put(e.key, v);
@@ -967,7 +1013,7 @@ public final class BsSkinExporter {
         for (ObjectMap.Entry<String, ListStyle> e : ss.entries()) {
             ListStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
-            if (s.font != null) v.put("font", "default-font");
+            putFont(v, "font", skin, s.font, "default-font");
             putColor(v, "fontColorSelected", skin, s.fontColorSelected);
             putColor(v, "fontColorUnselected", skin, s.fontColorUnselected);
             if (s.selection != null) putDrawable(v, "selection", skin, s.selection, "bs-list-selection");
@@ -986,11 +1032,11 @@ public final class BsSkinExporter {
         for (ObjectMap.Entry<String, TextFieldStyle> e : ss.entries()) {
             TextFieldStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
-            if (s.font != null) v.put("font", "default-font");
+            putFont(v, "font", skin, s.font, "default-font");
             putColor(v, "fontColor", skin, s.fontColor);
             putColor(v, "focusedFontColor", skin, s.focusedFontColor);
             putColor(v, "disabledFontColor", skin, s.disabledFontColor);
-            if (s.messageFont != null) v.put("messageFont", "default-font");
+            putFont(v, "messageFont", skin, s.messageFont, "default-font");
             putColor(v, "messageFontColor", skin, s.messageFontColor);
             if (s.background != null) putDrawable(v, "background", skin, s.background, "bs-text-field-bg");
             if (s.focusedBackground != null) putDrawable(v, "focusedBackground", skin, s.focusedBackground, "bs-text-field-focus");
@@ -1009,7 +1055,7 @@ public final class BsSkinExporter {
         for (ObjectMap.Entry<String, SelectBoxStyle> e : ss.entries()) {
             SelectBoxStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
-            if (s.font != null) v.put("font", "default-font");
+            putFont(v, "font", skin, s.font, "default-font");
             putColor(v, "fontColor", skin, s.fontColor);
             putColor(v, "overFontColor", skin, s.overFontColor);
             putColor(v, "disabledFontColor", skin, s.disabledFontColor);
@@ -1032,7 +1078,7 @@ public final class BsSkinExporter {
         for (ObjectMap.Entry<String, WindowStyle> e : ss.entries()) {
             WindowStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
-            if (s.titleFont != null) v.put("titleFont", "default-font");
+            putFont(v, "titleFont", skin, s.titleFont, "default-font");
             putColor(v, "titleFontColor", skin, s.titleFontColor);
             if (s.background != null) putDrawable(v, "background", skin, s.background, "bs-window-bg");
             if (s.stageBackground != null) putDrawable(v, "stageBackground", skin, s.stageBackground, "white");
@@ -1127,7 +1173,7 @@ public final class BsSkinExporter {
             ImageTextButton.ImageTextButtonStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             // 继承自 TextButtonStyle：font + fontColor 全套
-            if (s.font != null) v.put("font", "default-font");
+            putFont(v, "font", skin, s.font, "default-font");
             putColor(v, "fontColor", skin, s.fontColor);
             putColor(v, "downFontColor", skin, s.downFontColor);
             putColor(v, "overFontColor", skin, s.overFontColor);

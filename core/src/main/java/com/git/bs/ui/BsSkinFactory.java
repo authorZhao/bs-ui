@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
+import com.badlogic.gdx.utils.ObjectMap;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -40,6 +41,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class BsSkinFactory {
+
+    /** 尺寸档位（与 json 的 font-{size}.fnt 一一对应）。md 字号与 default 相同，但 key 仍要注册全。 */
+    private static final String[] SIZE_SUFFIXES = {"sm", "md", "lg", "xl"};
 
     private BsSkinFactory() {}
 
@@ -94,6 +98,14 @@ public final class BsSkinFactory {
         }
         if (!skin.has("font", BitmapFont.class)) {
             skin.add("font", font, BitmapFont.class);
+        }
+
+        // ===== Step 1.5: 确保 font-sm / font-md / font-lg / font-xl 四档可用 =====
+        // 优先复用 skin 已加载的（json 提供的 font-{size}.fnt）；
+        // 没有则降级为 default font（字号不准但不报错）。
+        // 决策：不在 core 强制 FreeType 依赖，正常路径走 json 加载 .fnt。
+        for (String size : SIZE_SUFFIXES) {
+            ensureSizeFont(skin, "font-" + size, font);
         }
 
         // ===== Step 2: 注册 white Drawable（用作 newDrawable 基础） =====
@@ -423,6 +435,12 @@ public final class BsSkinFactory {
             putStyle(skin, "default", ws);
             putStyle(skin, "bs-modal", ws);
         }
+
+        // ===== Step 9.5: 所有尺寸变体（sm/md/lg/xl）统一派生 =====
+        // 放在所有 default style（Step 6-9）注册完之后，按依赖顺序克隆 + 换 font。
+        // 依赖关系：label/list/window 只依赖 font；text-field/check-box/select-box 依赖各自的 default style；
+        //          bs-btn-{variant} 依赖 Step 6 的 solid/outline style。
+        registerAllSizeVariants(skin, tp);
     }
 
     // =================== putIfAbsent / putStyle ===================
@@ -464,6 +482,124 @@ public final class BsSkinFactory {
         } else if (style instanceof WindowStyle) {
             skin.add(key, (WindowStyle) style, WindowStyle.class);
         }
+    }
+
+    // =================== 尺寸变体 sm / md / lg / xl ===================
+
+    /**
+     * 确保 skin 里存在指定 key 的 BitmapFont：json 已加载则直接复用，否则降级为 defaultFont。
+     * 不强制 FreeType 依赖（避免运行时必须带 TTF）。
+     */
+    private static void ensureSizeFont(Skin skin, String key, BitmapFont defaultFont) {
+        if (skin.has(key, BitmapFont.class)) return;
+        skin.add(key, defaultFont, BitmapFont.class);
+    }
+
+    /**
+     * 派生所有尺寸变体（sm/md/lg/xl）。必须在 Step 6-9 的 default style 全部注册完后调用。
+     * <p>依赖关系：</p>
+     * <ul>
+     *   <li>label / list / window：只依赖 font + Color，无 style 依赖</li>
+     *   <li>text-field：依赖 default TextFieldStyle（Step 9）</li>
+     *   <li>check-box：依赖 default CheckBoxStyle（Step 8）</li>
+     *   <li>select-box：依赖 default SelectBoxStyle（Step 9）</li>
+     *   <li>bs-btn-{variant}：依赖 Step 6 的 solid/outline TextButtonStyle</li>
+     * </ul>
+     * <p>drawable 完全复用（NinePatch 可拉伸，视觉尺寸靠 font 大小共同体现），仅替换 font 字段。</p>
+     * <p>功能型 style（menu-item / menu-title / color-picker / link）跳过，不派生尺寸变体。</p>
+     */
+    private static void registerAllSizeVariants(Skin skin, Color tp) {
+        for (String size : SIZE_SUFFIXES) {
+            BitmapFont f = skin.getFont("font-" + size);
+            String suf = "-" + size;
+
+            // A. LabelStyle
+            String labelKey = "label" + suf;
+            if (!skin.has(labelKey, LabelStyle.class)) {
+                putStyle(skin, labelKey, new LabelStyle(f, tp));
+            }
+
+            // B. TextFieldStyle（依赖 default）
+            if (skin.has("default", TextFieldStyle.class)) {
+                String tfKey = "text-field" + suf;
+                if (!skin.has(tfKey, TextFieldStyle.class)) {
+                    TextFieldStyle tf = new TextFieldStyle(skin.get("default", TextFieldStyle.class));
+                    tf.font = f;
+                    if (tf.messageFont != null) tf.messageFont = f;
+                    putStyle(skin, tfKey, tf);
+                }
+            }
+
+            // C. CheckBoxStyle（依赖 default）
+            if (skin.has("default", CheckBoxStyle.class)) {
+                String cbKey = "check-box" + suf;
+                if (!skin.has(cbKey, CheckBoxStyle.class)) {
+                    CheckBoxStyle cb = new CheckBoxStyle(skin.get("default", CheckBoxStyle.class));
+                    cb.font = f;
+                    putStyle(skin, cbKey, cb);
+                }
+            }
+
+            // D. ListStyle（依赖 default，default 的 font 也一并替换）
+            if (skin.has("default", ListStyle.class)) {
+                String lsKey = "list" + suf;
+                if (!skin.has(lsKey, ListStyle.class)) {
+                    ListStyle ls = new ListStyle(skin.get("default", ListStyle.class));
+                    ls.font = f;
+                    putStyle(skin, lsKey, ls);
+                }
+            }
+
+            // E. SelectBoxStyle（依赖 default）
+            if (skin.has("default", SelectBoxStyle.class)) {
+                String sbKey = "select-box" + suf;
+                if (!skin.has(sbKey, SelectBoxStyle.class)) {
+                    SelectBoxStyle sb = new SelectBoxStyle(skin.get("default", SelectBoxStyle.class));
+                    sb.font = f;
+                    putStyle(skin, sbKey, sb);
+                }
+            }
+
+            // F. WindowStyle（依赖 default，替换 titleFont）
+            if (skin.has("default", WindowStyle.class)) {
+                String wsKey = "window" + suf;
+                if (!skin.has(wsKey, WindowStyle.class)) {
+                    WindowStyle ws = new WindowStyle(skin.get("default", WindowStyle.class));
+                    ws.titleFont = f;
+                    putStyle(skin, wsKey, ws);
+                }
+            }
+
+            // G. TextButtonStyle：遍历 bs-btn-* 派生（含 solid 与 outline）
+            ObjectMap<String, TextButtonStyle> tbss = skin.getAll(TextButtonStyle.class);
+            if (tbss != null) {
+                // 收集需要派生的 key（遍历中不能直接修改 ObjectMap，先收集）
+                com.badlogic.gdx.utils.Array<String> deriveKeys = new com.badlogic.gdx.utils.Array<>();
+                for (ObjectMap.Entry<String, TextButtonStyle> e : tbss) {
+                    String k = e.key;
+                    if (!k.startsWith("bs-btn-")) continue;
+                    // 已是尺寸变体的不再派生
+                    if (isSizeSuffix(k)) continue;
+                    // 目标 key 已存在（json 已提供）也跳过
+                    if (skin.has(k + suf, TextButtonStyle.class)) continue;
+                    deriveKeys.add(k);
+                }
+                for (String key : deriveKeys) {
+                    TextButtonStyle base = skin.get(key, TextButtonStyle.class);
+                    TextButtonStyle variant = new TextButtonStyle(base);
+                    variant.font = f;
+                    putStyle(skin, key + suf, variant);
+                }
+            }
+        }
+    }
+
+    /** 判断 key 是否已带尺寸后缀（避免对 bs-btn-primary-sm 再派生 -sm/-lg）。 */
+    private static boolean isSizeSuffix(String key) {
+        for (String size : SIZE_SUFFIXES) {
+            if (key.endsWith("-" + size)) return true;
+        }
+        return false;
     }
 
     private static Color textColorFor(BsPalette p, boolean solid, Skin skin) {
@@ -784,18 +920,27 @@ public final class BsSkinFactory {
     }
 
     /**
-     * 用指定颜色构造一个纯色 Drawable（Pixmap 1×1 染色，包成 TextureRegionDrawable）。
+     * 用指定颜色构造一个纯色 Drawable（Pixmap 2×2 染色，包成 TextureRegionDrawable）。
      * <p>比 {@code skin.newDrawable("white", color)} 更可靠——不依赖 skin 里 "white" drawable 的存在与类型，
      * 用于 setBackground 等需要纯色背景的场景。</p>
+     * <p>调用方不持有 Texture 引用，Texture 随 Drawable 生命周期泄漏（适用一次性场景）；
+     * 需要自行释放 Texture 的调用方用 {@link #solidTexture(Color)}。</p>
      */
     public static com.badlogic.gdx.scenes.scene2d.utils.Drawable drawableOf(Color color) {
-        Pixmap pix = new Pixmap(2, 2,
-                Pixmap.Format.RGBA8888);
+        return new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(
+                new TextureRegion(solidTexture(color)));
+    }
+
+    /**
+     * 用指定颜色构造一个纯色 2×2 Texture（Pixmap 染色），返回给调用方自行 dispose。
+     * <p>用于需要生命周期管理（如浮层 close 时统一释放）的场景；{@link #drawableOf} 是对本方法的简单包装。</p>
+     */
+    public static Texture solidTexture(Color color) {
+        Pixmap pix = new Pixmap(2, 2, Pixmap.Format.RGBA8888);
         pix.setColor(color);
         pix.fill();
         Texture tex = new Texture(pix);
         pix.dispose();
-        return new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(
-                new TextureRegion(tex));
+        return tex;
     }
 }

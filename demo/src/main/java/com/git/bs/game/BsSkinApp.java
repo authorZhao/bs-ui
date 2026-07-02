@@ -118,13 +118,13 @@ public class BsSkinApp extends Game {
     public void create() {
         log.info("BsControlsTest init: 同步加载 default 字体 + 分帧预热 4 档字号");
         BsUI.init();
+        log.info("BsControlsTest 所有主题皮肤加载完毕");
         long t0 = System.currentTimeMillis();
-        skin = BsSkinLoader.loadAndRegisterBsTheme(SKIN_CP, currentTheme, new HashMap<>());
+        BsUI.setTheme(currentTheme);
+        skin = BsUI.getSkin();
+
         var fontCache = SkinUtil.getFontCache(skin);
         fonts.putAll(fontCache);
-        BsSkinLoader.loadAndRegisterBsTheme(SKIN_CP, BsLightTheme.INSTANCE, fontCache);
-        BsSkinLoader.loadAndRegisterBsTheme(SKIN_CP, BsAdminTheme.INSTANCE, fontCache);
-
 
         // ③ 旋转器 overlay stage（独立）
         overlayStage = new Stage(new ScreenViewport());

@@ -92,42 +92,18 @@ public class AdminApp extends Game {
 
     @Override
     public void create() {
-        log.info("AdminApp init: 同步加载 default 字体 + 分帧预热 4 档字号");
-        BsUI.init();
         long t0 = System.currentTimeMillis();
-        chars = loadChars();
+        log.info("AdminApp init: 同步加载 default 字体 + 分帧预热 4 档字号 t={}", t0);
+        BsUI.init();
+        long t1 = System.currentTimeMillis();
+        log.info("BsControlsTest 所有主题皮肤加载完毕 t1={}", t1);
 
-        // 加载 admin 皮肤（bs-admin.json + bs-admin.atlas + bs-admin.png）
-        var skinFileHandle = Gdx.files.internal(SKIN_CP + "/bs-admin.json");
+        BsUI.setTheme(currentTheme);
+        skin = BsUI.getSkin();
 
+        var fontCache = SkinUtil.getFontCache(skin);
+        fonts.putAll(fontCache);
 
-        var defaultSkin = BsSkinLoader.loadAndAugmentWithCache(skinFileHandle, currentTheme);
-
-        BitmapFont defaultFont = defaultSkin.getFont("default");
-        fonts.put("default", defaultFont);
-
-        log.info("default 字体就绪，UI 可启动，耗时 {}ms", System.currentTimeMillis() - t0);
-
-        skin = defaultSkin;
-        BsUI.registerTheme(currentTheme.name(), currentTheme, skin);
-        bindDefaultFontStyles(skin, defaultFont);
-        log.info("AdminApp 当前激活主题: {}", BsUI.currentThemeName());
-
-        // 同步注册其他主题（不依赖字号字体预热），避免启动早期切换失效
-        // admin（自身已注册，跳过）；dark / light 同步构建一份备用
-        registerExtraTheme(BsDarkTheme.INSTANCE, defaultFont);
-        registerExtraTheme(BsLightTheme.INSTANCE, defaultFont);
-
-
-        setFontsReadyListener(() -> {
-            // 字号字体生成完成后，把 sm/md/lg/xl 样式同时绑定到所有 skin
-            for (Skin s : BsUI.registeredSkins()) {
-                for (String suffix : new String[]{"sm", "md", "lg", "xl"}) {
-                    BitmapFont f = fonts.get(suffix);
-                    if (f != null) BsSkinLoader.bindFontStyles(s, suffix, f);
-                }
-            }
-        });
 
         overlayStage = new Stage(new ScreenViewport());
         buildLoadingOverlay();
@@ -135,56 +111,12 @@ public class AdminApp extends Game {
         // 进入登录页（与 BsSkinApp 的唯一差别）
         setScreen(new AdminLoginScreen(this));
 
-        scheduleRemainingFonts(0);
-
         BsUI.get().addOnThemeChangeListener(theme ->
                 Gdx.app.postRunnable(() -> applyTheme(theme)));
     }
 
-    private void scheduleRemainingFonts(int idx) {
-        if (idx >= FONT_SIZES.length) {
-            log.info("✓ 所有 {} 档字号加载完成", FONT_SIZES.length);
-            if (fontsReadyListener != null) {
-                try { fontsReadyListener.onFontsReady(); } catch (Throwable e) { log.warn("onFontsReady", e); }
-            }
-            return;
-        }
-        final int nextIdx = idx;
-        Gdx.app.postRunnable(() -> {
-            String suffix = FONT_SIZES[nextIdx][0];
-            int size = Integer.parseInt(FONT_SIZES[nextIdx][1]);
-            try {
-                long t = System.currentTimeMillis();
-                BitmapFont f = generateFont(chars, size);
-                log.info("分帧字体生成完成 [{}] size={} 耗时={}ms", suffix, size, System.currentTimeMillis() - t);
-                fonts.put(suffix, f);
-                BsSkinLoader.bindFontStyles(skin, suffix, f);
-                loadedCount++;
-            } catch (Throwable e) {
-                log.warn("字体生成失败 size=" + size, e);
-            }
-            scheduleRemainingFonts(nextIdx + 1);
-        });
-    }
 
-    private String loadChars() {
-        return Gdx.files.internal(CHARS).readString(StandardCharsets.UTF_8.name());
-    }
 
-    private BitmapFont generateFont(String chars, int size) {
-        FreeTypeFontGenerator gen = new FreeTypeFontGenerator(Gdx.files.internal(TTF));
-        try {
-            FreeTypeFontGenerator.FreeTypeFontParameter p = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            p.size = size;
-            p.minFilter = Texture.TextureFilter.Linear;
-            p.magFilter = Texture.TextureFilter.Linear;
-            p.hinting = FreeTypeFontGenerator.Hinting.AutoMedium;
-            p.characters = chars;
-            return gen.generateFont(p);
-        } finally {
-            gen.dispose();
-        }
-    }
 
     /** 主题切换：重建 screen。必须在 GL 线程调用。 */
     public synchronized void applyTheme(BsTheme theme) {

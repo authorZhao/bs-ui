@@ -156,10 +156,20 @@ public final class BsUI {
      * 适合应用启动时第一次注册。
      */
     public static void registerDefaultSkin(com.badlogic.gdx.graphics.g2d.BitmapFont font) {
-        Skin skin = new Skin();
-        skin.add("default", font, com.badlogic.gdx.graphics.g2d.BitmapFont.class);
-        skin.add("font", font, com.badlogic.gdx.graphics.g2d.BitmapFont.class);
-        BsSkinFactory.augmentWithBsStyles(skin, BsLightTheme.INSTANCE);
+        registerDefaultSkin(font, null);
+    }
+
+    /**
+     * 注册 default skin（Light 主题），可附带尺寸字体（sm/md/lg/xl）。
+     * <p>尺寸字体会在 augmentWithBsStyles 之前注册进 skin 桶，这样派生 label-sm / bs-btn-primary-sm
+     * 等尺寸变体时拿到的就是真字号 font，而不是 default 兜底。</p>
+     *
+     * @param font      default 字体（必需）
+     * @param sizeFonts 尺寸字体映射，key 为 "sm"/"md"/"lg"/"xl"；为 null 则不注册尺寸字体
+     */
+    public static void registerDefaultSkin(com.badlogic.gdx.graphics.g2d.BitmapFont font,
+                                           java.util.Map<String, com.badlogic.gdx.graphics.g2d.BitmapFont> sizeFonts) {
+        Skin skin = buildSkin(BsLightTheme.INSTANCE, font, sizeFonts);
         registerTheme("light", BsLightTheme.INSTANCE, skin);
         currentTheme = BsLightTheme.INSTANCE;
         currentSkin = skin;
@@ -225,9 +235,26 @@ public final class BsUI {
 
     /** 用指定主题构建一个新 Skin（注册主题色 + 字体 + bs-* 资源）。 */
     public static Skin buildSkin(BsTheme theme, BitmapFont font) {
+        return buildSkin(theme, font, null);
+    }
+
+    /**
+     * 用指定主题构建一个新 Skin，可附带尺寸字体（sm/md/lg/xl）。
+     * <p>尺寸字体在 augmentWithBsStyles 之前注册进 skin 桶，保证派生尺寸变体时字号正确。</p>
+     */
+    public static Skin buildSkin(BsTheme theme, BitmapFont font,
+                                 java.util.Map<String, com.badlogic.gdx.graphics.g2d.BitmapFont> sizeFonts) {
         Skin skin = new Skin();
         skin.add("default", font, com.badlogic.gdx.graphics.g2d.BitmapFont.class);
         skin.add("font", font, com.badlogic.gdx.graphics.g2d.BitmapFont.class);
+        // 尺寸字体先注册进桶，BsSkinFactory.augmentWithBsStyles 的 ensureSizeFont 见到就跳过（保留真字号）
+        if (sizeFonts != null) {
+            for (java.util.Map.Entry<String, com.badlogic.gdx.graphics.g2d.BitmapFont> e : sizeFonts.entrySet()) {
+                if (e.getValue() != null) {
+                    skin.add("font-" + e.getKey(), e.getValue(), com.badlogic.gdx.graphics.g2d.BitmapFont.class);
+                }
+            }
+        }
         BsSkinFactory.augmentWithBsStyles(skin, theme);
         return skin;
     }

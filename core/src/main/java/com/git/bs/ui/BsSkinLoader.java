@@ -72,8 +72,7 @@ public final class BsSkinLoader {
             if (BsUI.hasTheme(theme)) {
                 continue;
             }
-            var lightSkin = BsSkinLoader.loadAndRegisterTheme(SKIN_CP, theme, fontHashMap);
-            BsUI.registerTheme(theme.name(), theme, lightSkin);
+            BsSkinLoader.loadAndRegisterBsTheme(SKIN_CP, theme, fontHashMap);
         }
     }
 

@@ -109,6 +109,25 @@ public class BsBasicModules {
         BsButton disabled = new BsButton("Disabled（不可点击）", skin, BsButton.Variant.SECONDARY, BsButton.Style.SOLID, BsButton.Size.MD);
         disabled.setDisabled(true);
         c.add(disabled).row();
+
+        // 尺寸变体：直接用 skin style name（bs-btn-{variant}-{size}）—— 验证 font-sm/lg 真正生效
+        c.add(new Label("Skin 级尺寸变体（bs-btn-primary-sm/md/lg/xl，字号真实变化）:", skin)).padTop(12).row();
+        Table btnSizeRow = new Table();
+        btnSizeRow.defaults().pad(6);
+        for (String size : new String[]{"sm", "md", "lg", "xl"}) {
+            com.badlogic.gdx.scenes.scene2d.ui.TextButton tb =
+                    new com.badlogic.gdx.scenes.scene2d.ui.TextButton("primary-" + size, skin, "bs-btn-primary-" + size);
+            btnSizeRow.add(tb);
+        }
+        c.add(btnSizeRow).row();
+
+        // outline 变体也验证一下（运行时派生）
+        c.add(new Label("Outline 尺寸变体（bs-btn-outline-danger-sm/lg）:", skin)).padTop(8).row();
+        Table outlineRow = new Table();
+        outlineRow.defaults().pad(6);
+        outlineRow.add(new com.badlogic.gdx.scenes.scene2d.ui.TextButton("outline-danger-sm", skin, "bs-btn-outline-danger-sm"));
+        outlineRow.add(new com.badlogic.gdx.scenes.scene2d.ui.TextButton("outline-danger-lg", skin, "bs-btn-outline-danger-lg"));
+        c.add(outlineRow).row();
     }
 
     // ============================ Image Buttons ============================
@@ -163,6 +182,18 @@ public class BsBasicModules {
         BsTextArea ta = new BsTextArea("第一行默认文本\n第二行……", skin);
         ta.setMessageText("多行输入");
         c.add(ta).width(600).height(120).row();
+
+        // 尺寸变体：text-field-sm / md / lg / xl（直接用原生 TextField + skin style name）
+        c.add(new Label("TextField 尺寸变体（text-field-sm/md/lg/xl）:", skin)).padTop(12).row();
+        Table tfSizeRow = new Table();
+        tfSizeRow.defaults().pad(6).left();
+        for (String size : new String[]{"sm", "md", "lg", "xl"}) {
+            com.badlogic.gdx.scenes.scene2d.ui.TextField tfSize =
+                    new com.badlogic.gdx.scenes.scene2d.ui.TextField("", skin, "text-field-" + size);
+            tfSize.setMessageText("text-field-" + size);
+            tfSizeRow.add(tfSize).width(220);
+        }
+        c.add(tfSizeRow).row();
     }
 
     // ============================ Selects ============================
@@ -192,6 +223,33 @@ public class BsBasicModules {
         listScroll.setFadeScrollBars(false);
         listScroll.setScrollingDisabled(true, false);
         c.add(listScroll).width(220).height(140).row();
+
+        // 尺寸变体：SelectBox sm / lg（原生组件 + skin style name）
+        c.add(new Label("SelectBox 尺寸变体（select-box-sm / lg）:", skin)).padTop(12).row();
+        Table sbSizeRow = new Table();
+        sbSizeRow.defaults().pad(6).left();
+        for (String size : new String[]{"sm", "lg"}) {
+            com.badlogic.gdx.scenes.scene2d.ui.SelectBox<String> sbSize =
+                    new com.badlogic.gdx.scenes.scene2d.ui.SelectBox<>(skin, "select-box-" + size);
+            sbSize.setItems(items(Arrays.asList("SM 项", "LG 项", "选项 3")));
+            sbSizeRow.add(sbSize).width(180);
+        }
+        c.add(sbSizeRow).row();
+
+        // 尺寸变体：List sm / lg（原生组件）
+        c.add(new Label("List 尺寸变体（list-sm / lg）:", skin)).padTop(8).row();
+        Table listSizeRow = new Table();
+        listSizeRow.defaults().pad(6).left();
+        for (String size : new String[]{"sm", "lg"}) {
+            com.badlogic.gdx.scenes.scene2d.ui.List<String> listSize =
+                    new com.badlogic.gdx.scenes.scene2d.ui.List<>(skin, "list-" + size);
+            listSize.setItems(items(Arrays.asList(size + "-苹果", size + "-香蕉", size + "-橙子")));
+            BsScrollPane scr = new BsScrollPane(listSize, skin);
+            scr.setFadeScrollBars(false);
+            scr.setScrollingDisabled(true, false);
+            listSizeRow.add(scr).width(160).height(110);
+        }
+        c.add(listSizeRow).row();
     }
 
     // ============================ Radio & Check ============================
@@ -232,6 +290,20 @@ public class BsBasicModules {
             rbRow.add(rb).padRight(20);
         }
         c.add(rbRow).row();
+
+        // 尺寸变体：CheckBox sm / lg（原生组件 + skin style name）
+        c.add(new Label("CheckBox 尺寸变体（check-box-sm / lg）:", skin)).padTop(12).row();
+        Table cbSizeRow = new Table();
+        cbSizeRow.defaults().pad(6).left();
+        com.badlogic.gdx.scenes.scene2d.ui.CheckBox cbSm =
+                new com.badlogic.gdx.scenes.scene2d.ui.CheckBox("check-box-sm", skin, "check-box-sm");
+        com.badlogic.gdx.scenes.scene2d.ui.CheckBox cbLg =
+                new com.badlogic.gdx.scenes.scene2d.ui.CheckBox("check-box-lg", skin, "check-box-lg");
+        cbSm.setChecked(true);
+        cbLg.setChecked(true);
+        cbSizeRow.add(cbSm).padRight(20);
+        cbSizeRow.add(cbLg);
+        c.add(cbSizeRow).row();
     }
 
     // ============================ Sliders ============================

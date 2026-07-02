@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -62,6 +63,10 @@ public class BsColorPickerPopup {
             0x20C997, 0x0DCAF0, 0x50C878, 0x95A5A6
     };
 
+    /** 预设色 Drawable 静态缓存（按 RGB int 为 key），跨实例复用，避免每次 show 都重建 16 个 Texture。
+     *  <p>生命周期跟随应用；退出时调 {@link #disposePresetCache()} 释放。参见 {@link BsModal#disposePathCache()}。 */
+    private static final java.util.Map<Integer, TextureRegionDrawable> PRESET_CACHE = new java.util.HashMap<>();
+
     private static final int SV_SIZE = 140;
     private static final int HUE_W = 24;
     private static final int HUE_H = SV_SIZE;
@@ -86,6 +91,8 @@ public class BsColorPickerPopup {
     private Image previewImage;
     private Drawable previewDrawable;   // 白底，靠 Image.setColor 染色
     private TextField hexField;
+    /** makeSolidDrawable 创建的 Texture 列表（2×2 小图，preview/cursor/knob/预设色板），close 时统一释放。 */
+    private final Array<Texture> solidTextures = new Array<>();
 
     public BsColorPickerPopup(Skin skin) {
     }
@@ -236,8 +243,9 @@ public class BsColorPickerPopup {
             Color c = new Color(((hex >> 16) & 0xFF) / 255f,
                     ((hex >> 8) & 0xFF) / 255f, (hex & 0xFF) / 255f, 1f);
             // 预设色块用 Image（不是 TextButton）+ ClickListener；
-            // TextButton 会被 style.up（default=蓝色）覆盖 setBackground，导致全蓝
-            Image swatch = new Image(makeSolidDrawable(c));
+            // TextButton 会被 style.up（default=蓝色）覆盖 setBackground，导致全蓝。
+            // Drawable 走静态缓存 PRESET_CACHE（按 hex 复用），避免每次 show 重建 16 个 Texture。
+            Image swatch = new Image(presetDrawable(hex, c));
             swatch.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
             swatch.addListener(new ClickListener() {
                 @Override public void clicked(InputEvent event, float x, float y) {
@@ -414,13 +422,31 @@ public class BsColorPickerPopup {
     }
 
     /**
-     * 纯色 drawable：复用 skin 的 "white" Texture（{@code skin.newDrawable} 只 new 视图对象，
-     * 不创建新 Texture），避免每次调用都 new Texture 导致 GPU 内存泄漏。
+     * 纯色 drawable：自建 Pixmap 染色（不依赖 skin 的 "white" drawable），Texture 登记
+     * 到 {@link #solidTextures}，close 时统一释放。
      *
-     * <p>调用方若需特定颜色，给返回的 Image 调 {@code setColor}，或在此处 tint —— 二者都不会新建 Texture。</p>
+     * <p>不能改用 {@code skin.newDrawable("white", c)}：在浮层里反复 tint 同名 drawable 会命中
+     * libgdx 的 TintedDrawable 缓存，导致预设色板色块渲染为透明/错误颜色（看不见）。
+     * 故走 {@link BsSkinFactory#solidTexture} 自建 Texture，再登记生命周期。</p>
      */
-    private static Drawable makeSolidDrawable(Color c) {
-        return BsUI.getSkin().newDrawable("white", c);
+    private Drawable makeSolidDrawable(Color c) {
+        Texture tex = BsSkinFactory.solidTexture(c);
+        solidTextures.add(tex);
+        return new TextureRegionDrawable(new TextureRegion(tex));
+    }
+
+    /**
+     * 预设色 Drawable：按 RGB int 查静态缓存 {@link #PRESET_CACHE}，命中则复用，未命中则建并登记。
+     * <p>预设色是常量、跨实例共享，故走缓存而非 {@link #makeSolidDrawable}（后者每次新建并随 close 释放）。
+     * 应用退出时由 {@link #disposePresetCache()} 统一释放。</p>
+     */
+    private static Drawable presetDrawable(int hex, Color c) {
+        TextureRegionDrawable d = PRESET_CACHE.get(hex);
+        if (d == null) {
+            d = new TextureRegionDrawable(new TextureRegion(BsSkinFactory.solidTexture(c)));
+            PRESET_CACHE.put(hex, d);
+        }
+        return d;
     }
 
     public void close() {
@@ -429,11 +455,26 @@ public class BsColorPickerPopup {
         if (root != null) { root.remove(); root = null; }
         if (svTexture != null) { svTexture.dispose(); svTexture = null; }
         if (hueTexture != null) { hueTexture.dispose(); hueTexture = null; }
+        // 释放本实例 makeSolidDrawable 产物（preview/cursor/knob，3 个 2×2 小 Texture）。
+        // 预设色板走静态缓存 PRESET_CACHE，不在此释放。
+        for (Texture t : solidTextures) {
+            t.dispose();
+        }
+        solidTextures.clear();
         open = false;
         if (onClose != null) {
             try { onClose.run(); } catch (Throwable t) { log.warn("onClose error", t); }
             onClose = null;
         }
+    }
+
+    /** 释放预设色板静态缓存（应用退出时调用）。参见 {@link BsModal#disposePathCache()}。 */
+    public static void disposePresetCache() {
+        for (TextureRegionDrawable d : PRESET_CACHE.values()) {
+            Texture t = d.getRegion().getTexture();
+            if (t != null) t.dispose();
+        }
+        PRESET_CACHE.clear();
     }
 
     public boolean isOpen() { return open; }
