@@ -12,6 +12,8 @@ import com.badlogic.gdx.graphics.g2d.PixmapPacker;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker.PixmapPackerRectangle;
 import com.badlogic.gdx.graphics.g2d.PixmapPacker.Bounds;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.Texture;
+import com.git.bs.ui.bmfont.BitmapFontWriter;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
@@ -84,16 +86,26 @@ public final class BsSkinExporter {
     private BsSkinExporter() {}
 
     /**
+     * 导出 Skin 到指定目录（FreeType 模式：写 FreeTypeFontGenerator 配置，运行时生成字体）。
+     */
+    public static void export(Skin skin, FileHandle outputDir, String name,
+                              FileHandle ttfSource, FileHandle charsFile) {
+        export(skin, outputDir, name, ttfSource, charsFile, false);
+    }
+
+    /**
      * 导出 Skin 到指定目录。
      *
      * @param skin       要导出的 Skin
      * @param outputDir  输出目录（FileHandle，必须可写）
      * @param name       皮肤名（用作 json/atlas/png 文件名前缀）
-     * @param ttfSource  FreeType TTF 源文件（可空，null 时不导出 TTF 配置）
-     * @param charsFile  字符集 .txt 文件（可空，null 时不写 characters 字段）
+     * @param ttfSource  TTF 源文件（bitmap 模式用于烘焙；FreeType 模式复制并写配置）
+     * @param charsFile  字符集 .txt 文件（可空）
+     * @param bitmapFont true=烘焙 BitmapFont（.fnt+.png，运行时直接加载，无需 FreeType/TTF/freetype.js）；
+     *                   false=写 FreeTypeFontGenerator 配置（运行时生成）。
      */
     public static void export(Skin skin, FileHandle outputDir, String name,
-                              FileHandle ttfSource, FileHandle charsFile) {
+                              FileHandle ttfSource, FileHandle charsFile, boolean bitmapFont) {
 
 
 
@@ -142,30 +154,88 @@ public final class BsSkinExporter {
             log.warn("写 atlas 失败", t);
         }
 
-        // ===== 3. 复制 TTF + 字符集（扁平结构：与 json 同级，多主题共用同一份） =====
-        // 字体放在 outputDir 根目录（不再用 ttf/ 子目录），导出多个主题时同一份 ttf 只复制一次。
-        // json 内对字体的引用路径也相应改为同目录下的 <ttf 文件名>。
-        if (ttfSource != null && ttfSource.exists()) {
-            FileHandle ttfDest = outputDir.child(ttfSource.name());
-            if (!ttfDest.exists()) ttfSource.copyTo(ttfDest);
-            log.info("BsSkinExporter: TTF 复制到 {}", ttfDest.path());
-        }
-        // 字符集也放根目录，保留原文件名（不再写死 chinese.txt），多主题共用同一份。
-        if (charsFile != null && charsFile.exists()) {
-            FileHandle charsDest = outputDir.child(charsFile.name());
-            if (!charsDest.exists()) charsFile.copyTo(charsDest);
-            log.info("BsSkinExporter: 字符集复制到 {}", charsDest.path());
+        // ===== 3. 字体 =====
+        Map<String, String> bitmapFonts = null;
+        if (bitmapFont) {
+            // 烘焙 BitmapFont（.fnt + .png）。运行时不再需要 TTF / chinese.txt / freetype.js。
+            bitmapFonts = generateBitmapFonts(outputDir, ttfSource, charsFile);
+        } else {
+            // FreeType 模式：复制 TTF + 字符集到 outputDir（运行时生成需要）
+            if (ttfSource != null && ttfSource.exists()) {
+                FileHandle ttfDest = outputDir.child(ttfSource.name());
+                if (!ttfDest.exists()) ttfSource.copyTo(ttfDest);
+                log.info("BsSkinExporter: TTF 复制到 {}", ttfDest.path());
+            }
+            if (charsFile != null && charsFile.exists()) {
+                FileHandle charsDest = outputDir.child(charsFile.name());
+                if (!charsDest.exists()) charsFile.copyTo(charsDest);
+                log.info("BsSkinExporter: 字符集复制到 {}", charsDest.path());
+            }
         }
 
         // ===== 4. 写 json =====
         FileHandle jsonFile = outputDir.child(name + ".json");
         writeJsonFile(jsonFile, skin,
-                ttfSource != null ? ttfSource.name() : null,
-                charsFile != null ? charsFile.name() : null);
+                bitmapFont ? null : (ttfSource != null ? ttfSource.name() : null),
+                bitmapFont ? null : (charsFile != null ? charsFile.name() : null),
+                bitmapFonts);
         log.info("BsSkinExporter: json 写入 {}", jsonFile.path());
 
         packer.dispose();
         log.info("BsSkinExporter: 导出完成");
+    }
+
+    /**
+     * 烘焙各字号 BitmapFont 到 .fnt + .png（FreeType 生成 → BitmapFontWriter 落盘）。
+     * 字号/键与 writeJsonFile 的 FreeType 段保持一致：default-font(18) / font-sm(14) / font-md(18) / font-lg(24) / font-xl(32)。
+     * 返回 jsonKey → .fnt 文件名，供 writeJsonFile 写 BitmapFont 段。
+     */
+    private static Map<String, String> generateBitmapFonts(FileHandle outputDir, FileHandle ttf, FileHandle charsFile) {
+        Map<String, String> entries = new LinkedHashMap<>();
+        if (ttf == null || !ttf.exists()) {
+            log.warn("BsSkinExporter: bitmap 模式需要 TTF 源，跳过字体烘焙");
+            return entries;
+        }
+        String charset = (charsFile != null && charsFile.exists())
+                ? charsFile.readString(java.nio.charset.StandardCharsets.UTF_8.name())
+                : FreeTypeFontGenerator.DEFAULT_CHARS;
+        String face = ttf.nameWithoutExtension();
+        final int PAGE = 1024;
+        String[] suffixes = {"default", "sm", "md", "lg", "xl"};
+        int[] sizes = {18, 14, 18, 24, 32};
+
+        FreeTypeFontGenerator gen = new FreeTypeFontGenerator(ttf);
+        try {
+            for (int i = 0; i < suffixes.length; i++) {
+                String skinKey = i == 0 ? "default" : "font-" + suffixes[i];
+                String jsonKey = i == 0 ? "default-font" : "font-" + suffixes[i];
+                int size = sizes[i];
+                FreeTypeFontGenerator.FreeTypeFontParameter p = new FreeTypeFontGenerator.FreeTypeFontParameter();
+                p.size = size;
+                p.characters = charset;
+                p.hinting = FreeTypeFontGenerator.Hinting.AutoMedium;
+                p.minFilter = Texture.TextureFilter.Linear;
+                p.magFilter = Texture.TextureFilter.Linear;
+                p.packer = new PixmapPacker(PAGE, PAGE, Pixmap.Format.RGBA8888, 2, false, new PixmapPacker.SkylineStrategy());
+                BitmapFont font = gen.generateFont(p);
+                try {
+                    BitmapFontWriter.FontInfo info = new BitmapFontWriter.FontInfo(face, size);
+                    info.padding = new BitmapFontWriter.Padding(0, 0, 0, 0);
+                    info.overrideMetrics(font.getData());
+                    String[] pageRefs = BitmapFontWriter.writePixmaps(p.packer.getPages(), outputDir, jsonKey);
+                    FileHandle fntFile = outputDir.child(jsonKey + ".fnt");
+                    BitmapFontWriter.writeFont(font.getData(), pageRefs, fntFile, info, PAGE, PAGE);
+                    entries.put(jsonKey, jsonKey + ".fnt");
+                    log.info("BsSkinExporter: 烘焙 BitmapFont {} ({}px) -> {} 张页", jsonKey, size, pageRefs.length);
+                } finally {
+                    font.dispose();
+                    p.packer.dispose();
+                }
+            }
+        } finally {
+            gen.dispose();
+        }
+        return entries;
     }
 
     // =================== 占位 Pixmap 生成（带圆角） ===================
@@ -454,11 +524,20 @@ public final class BsSkinExporter {
      * 用 fastjson2 序列化 skin 为 libgdx skin json 格式。
      * <p>fastjson2 对 Map<String, Object> 只输出实际内容，不写 class 类型标签。</p>
      */
-    private static void writeJsonFile(FileHandle out, Skin skin, String ttfPath, String charsFile) {
+    private static void writeJsonFile(FileHandle out, Skin skin, String ttfPath, String charsFile,
+                                      Map<String, String> bitmapFonts) {
         Map<String, Object> root = new LinkedHashMap<>();
 
-        // ===== BitmapFont 桶（FreeType 引用） =====
-        if (ttfPath != null) {
+        // ===== 字体段：bitmap 模式写 BitmapFont（.fnt 引用），否则写 FreeTypeFontGenerator 配置 =====
+        if (bitmapFonts != null && !bitmapFonts.isEmpty()) {
+            Map<String, Object> fontSection = new LinkedHashMap<>();
+            for (Map.Entry<String, String> e : bitmapFonts.entrySet()) {
+                Map<String, Object> f = new LinkedHashMap<>();
+                f.put("file", e.getValue());
+                fontSection.put(e.getKey(), f);
+            }
+            root.put("com.badlogic.gdx.graphics.g2d.BitmapFont", fontSection);
+        } else if (ttfPath != null) {
             Map<String, Object> fontSection = new LinkedHashMap<>();
             String[] suffixes = {"default", "sm", "md", "lg", "xl"};
             int[] sizes = {18, 14, 18, 24, 32};
