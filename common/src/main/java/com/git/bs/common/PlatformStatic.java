@@ -1,5 +1,7 @@
 package com.git.bs.common;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,8 +9,9 @@ import java.util.Map;
  * @author authorZhao
  * @since 2025-08-12
  */
+@Slf4j
 public class PlatformStatic {
-    private static Map<Class<?>,?> classObjectMap = new HashMap<>();
+    private static final Map<Class<?>,Object> CLASS_OBJECT_MAP = new HashMap<>();
     private static Class<? extends Platform> platformClazz;
     private static Platform platform;
 
@@ -37,6 +40,20 @@ public class PlatformStatic {
             }
             return platform;
         }catch (Exception e){
+            System.err.println("getPlatform error");
+            throw new RuntimeException();
+        }
+    }
+
+    public static <T> T getInstance(Class<T> clazz) {
+        try {
+            Object o = CLASS_OBJECT_MAP.get(clazz);
+            if (o == null) {
+                o = clazz.getConstructors()[0].newInstance();
+            }
+            CLASS_OBJECT_MAP.put(clazz, o);
+            return (T) o;
+        } catch (Exception e) {
             System.err.println("getPlatform error");
             throw new RuntimeException();
         }
