@@ -216,4 +216,11 @@ public final class BsSkinLoader {
         return skin;
     }
 
+    public static Skin loadAndRegisterBsTheme(FileHandle skinCp, BsTheme bsTheme) {
+        var skin = new BsSkin(skinCp);
+        BsSkinFactory.augmentWithBsStyles(skin, bsTheme);
+        BsUI.registerTheme(bsTheme.name(), bsTheme, skin);
+        return skin;
+    }
+
 }

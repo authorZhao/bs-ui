@@ -58,4 +58,13 @@ public class PlatformStatic {
             throw new RuntimeException();
         }
     }
+
+    public static <T> void setInstance(T t) {
+        try {
+            CLASS_OBJECT_MAP.put(t.getClass(), t);
+        } catch (Exception e) {
+            System.err.println("getPlatform error");
+            throw new RuntimeException();
+        }
+    }
 }
