@@ -53,7 +53,7 @@ public class PlatformStatic {
             if (o == null) {
                 o = CLASS_OBJECT_MAP.values().stream().filter(i -> clazz.isAssignableFrom(i.getClass())).findFirst().orElse(null);
                 if (o != null) {
-                    CLASS_OBJECT_MAP.put(o.getClass(), o);
+                    CLASS_OBJECT_MAP.put(clazz, o);
                 }
             }
 
