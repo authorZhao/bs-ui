@@ -11,7 +11,7 @@ import java.util.Map;
  */
 @Slf4j
 public class PlatformStatic {
-    private static final Map<Class<?>,Object> CLASS_OBJECT_MAP = new HashMap<>();
+    private static final Map<Class<?>, Object> CLASS_OBJECT_MAP = new HashMap<>();
     private static Class<? extends Platform> platformClazz;
     private static Platform platform;
 
@@ -23,15 +23,15 @@ public class PlatformStatic {
      * 因此各 Launcher 应优先调用 {@link #registerInstance(Platform)} 直接注入实例。
      * </p>
      */
-    public static void registerInstance(Platform instance){
+    public static void registerInstance(Platform instance) {
         platform = instance;
     }
 
-    public static <T extends Platform> void registerImpl(Class<T> clazz){
+    public static <T extends Platform> void registerImpl(Class<T> clazz) {
         platformClazz = clazz;
     }
 
-    public static Platform getPlatform(){
+    public static Platform getPlatform() {
         try {
             if (platform == null && platformClazz != null) {
                 // fallback：仅在未通过 registerInstance 注入时走反射。
@@ -39,7 +39,7 @@ public class PlatformStatic {
                 platform = (Platform) platformClazz.getConstructors()[0].newInstance();
             }
             return platform;
-        }catch (Exception e){
+        } catch (Exception e) {
             System.err.println("getPlatform error");
             throw new RuntimeException();
         }
@@ -48,11 +48,16 @@ public class PlatformStatic {
     public static <T> T getInstance(Class<T> clazz) {
         try {
             Object o = CLASS_OBJECT_MAP.get(clazz);
+
+
             if (o == null) {
-                o = clazz.getConstructors()[0].newInstance();
+                o = CLASS_OBJECT_MAP.values().stream().filter(i -> clazz.isAssignableFrom(i.getClass())).findFirst().orElse(null);
+                if (o != null) {
+                    CLASS_OBJECT_MAP.put(o.getClass(), o);
+                }
             }
-            CLASS_OBJECT_MAP.put(clazz, o);
-            return (T) o;
+
+            return clazz.cast(o);
         } catch (Exception e) {
             System.err.println("getPlatform error");
             throw new RuntimeException();
