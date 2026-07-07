@@ -85,27 +85,123 @@ public final class BsSkinExporter {
 
     private BsSkinExporter() {}
 
+    /** 全部 6 档字号后缀（顺序与 BsControlsTestApp.FONT_SIZES 一致）。 */
+    private static final String[] ALL_SIZE_SUFFIXES = {"xs", "sm", "md", "lg", "xl", "xxl"};
+    /** 全部 6 档字号数值（与 ALL_SIZE_SUFFIXES 一一对应）。 */
+    private static final int[]    ALL_SIZE_VALUES   = {12, 14, 18, 24, 32, 48};
+
     /**
-     * 导出 Skin 到指定目录（FreeType 模式：写 FreeTypeFontGenerator 配置，运行时生成字体）。
+     * 把外部传入的 sizeSuffixes 规范化：
+     * <ul>
+     *   <li>{@code null} → 全部 6 档（默认行为，向后兼容）</li>
+     *   <li>非空集合 → 过滤掉非法值（仅保留 xs/sm/md/lg/xl/xxl），并保持 ALL_SIZE_SUFFIXES 顺序</li>
+     *   <li>结果为空集合 → 调用方（generateBitmapFonts / writeJsonFile）会跳过所有字号，
+     *       此时若 {@code includeDefaultFont=true}，default-font 仍会独立写入</li>
+     * </ul>
      */
+    private static java.util.Set<String> normalizeSizeSuffixes(java.util.Set<String> input) {
+        java.util.LinkedHashSet<String> legal = new java.util.LinkedHashSet<>();
+        if (input != null) {
+            for (String s : input) {
+                if (s == null) continue;
+                String t = s.trim().toLowerCase();
+                for (String ok : ALL_SIZE_SUFFIXES) {
+                    if (ok.equals(t)) { legal.add(t); break; }
+                }
+            }
+            // 保持规范顺序：按 ALL_SIZE_SUFFIXES 重排
+            java.util.LinkedHashSet<String> ordered = new java.util.LinkedHashSet<>();
+            for (String ok : ALL_SIZE_SUFFIXES) {
+                if (legal.contains(ok)) ordered.add(ok);
+            }
+            return ordered;
+        }
+        // null → 全部
+        java.util.LinkedHashSet<String> all = new java.util.LinkedHashSet<>();
+        for (String ok : ALL_SIZE_SUFFIXES) all.add(ok);
+        return all;
+    }
+
+    /** 默认字号（与 BsControlsTestApp 启动 generateFont(chars, 18) 一致）。 */
+    private static final int DEFAULT_FONT_SIZE_FALLBACK = 18;
+
+    /** 字体烘焙默认页尺寸（pow2，兼容性最好）。 */
+    private static final int DEFAULT_FONT_PAGE_SIZE = 1024;
+    /** 允许的字体页尺寸（OpenGL ES 2 至少支持 2048，桌面/teaVM ≥ 4096）。 */
+    private static final int[] ALLOWED_FONT_PAGE_SIZES = {512, 1024, 2048, 4096};
+
+    /** 校验字体页尺寸：只接受 {@link #ALLOWED_FONT_PAGE_SIZES} 中的值，否则回退到 1024。 */
+    private static int normalizeFontPageSize(int input) {
+        for (int ok : ALLOWED_FONT_PAGE_SIZES) {
+            if (ok == input) return input;
+        }
+        return DEFAULT_FONT_PAGE_SIZE;
+    }
+
+    /** 导出 Skin（FreeType 模式：写 FreeTypeFontGenerator 配置，运行时生成字体）。 */
     public static void export(Skin skin, FileHandle outputDir, String name,
                               FileHandle ttfSource, FileHandle charsFile) {
         export(skin, outputDir, name, ttfSource, charsFile, false);
     }
 
     /**
-     * 导出 Skin 到指定目录。
+     * 导出 Skin（按指定字号子集）。
      *
-     * @param skin       要导出的 Skin
-     * @param outputDir  输出目录（FileHandle，必须可写）
-     * @param name       皮肤名（用作 json/atlas/png 文件名前缀）
-     * @param ttfSource  TTF 源文件（bitmap 模式用于烘焙；FreeType 模式复制并写配置）
-     * @param charsFile  字符集 .txt 文件（可空）
-     * @param bitmapFont true=烘焙 BitmapFont（.fnt+.png，运行时直接加载，无需 FreeType/TTF/freetype.js）；
-     *                   false=写 FreeTypeFontGenerator 配置（运行时生成）。
+     * @see #export(Skin, FileHandle, String, FileHandle, FileHandle, boolean, Set, boolean, int, int)
      */
     public static void export(Skin skin, FileHandle outputDir, String name,
                               FileHandle ttfSource, FileHandle charsFile, boolean bitmapFont) {
+        export(skin, outputDir, name, ttfSource, charsFile, bitmapFont, null);
+    }
+
+    /**
+     * 导出 Skin（按指定字号子集）。
+     *
+     * @param sizeSuffixes 要导出的字号后缀集合（如 {@code {"sm","lg"}}）；元素取值限定
+     *                     {@code xs/sm/md/lg/xl/xxl}。<b>null 或包含全部 6 档 = 导出全部</b>；
+     *                     <b>空集合 = 不导出任何 font-* 字号档位</b>。
+     *                     <p>注意：调用方传子集时只影响"字体烘焙/FreeType 配置写入"，
+     *                     Color/Drawable/Style 桶不受影响（始终全量导出，否则加载端会缺样式）。</p>
+     */
+    public static void export(Skin skin, FileHandle outputDir, String name,
+                              FileHandle ttfSource, FileHandle charsFile, boolean bitmapFont,
+                              java.util.Set<String> sizeSuffixes) {
+        export(skin, outputDir, name, ttfSource, charsFile, bitmapFont, sizeSuffixes,
+                true, DEFAULT_FONT_SIZE_FALLBACK);
+    }
+
+    /**
+     * 导出 Skin 到指定目录（9 参版，字体页尺寸 = 1024 默认值）。
+     * @see #export(Skin, FileHandle, String, FileHandle, FileHandle, boolean, Set, boolean, int, int)
+     */
+    public static void export(Skin skin, FileHandle outputDir, String name,
+                              FileHandle ttfSource, FileHandle charsFile, boolean bitmapFont,
+                              java.util.Set<String> sizeSuffixes,
+                              boolean includeDefaultFont, int defaultFontSize) {
+        export(skin, outputDir, name, ttfSource, charsFile, bitmapFont, sizeSuffixes,
+                includeDefaultFont, defaultFontSize, DEFAULT_FONT_PAGE_SIZE);
+    }
+
+    /**
+     * 导出 Skin 到指定目录（完整参数版）。
+     *
+     * @param sizeSuffixes      要导出的字号后缀集合；{@code null} = 全部 6 档，空集合 = 不导出 font-* 档位
+     * @param includeDefaultFont 是否独立写入 {@code default-font} 段。
+     *                           <b>true</b> = 用 {@code defaultFontSize} 独立烘焙一份
+     *                           {@code default-font.fnt}（或 FreeType 配置）；
+     *                           <b>false</b> = 不写 default-font 段。
+     * @param defaultFontSize   default 字体的实际像素字号。若恰好等于某个已选档位的字号，
+     *                           烘焙时复用那一份 .fnt，不重复产物。
+     * @param fontPageSize      字体烘焙页尺寸（pow2）。仅接受 {@code 512/1024/2048/4096}，
+     *                           其他值回退到 1024。<b>不影响 atlas/png 那张 drawable 图集</b>（始终 1024）。
+     *                           <p>页尺寸越大，单个字号产出的 png 越少（CJK 字符多时差异明显）；
+     *                           但运行时单张纹理越大，老设备 OpenGL ES 2.0 上限 2048。</p>
+     */
+    public static void export(Skin skin, FileHandle outputDir, String name,
+                              FileHandle ttfSource, FileHandle charsFile, boolean bitmapFont,
+                              java.util.Set<String> sizeSuffixes,
+                              boolean includeDefaultFont, int defaultFontSize,
+                              int fontPageSize) {
 
 
 
@@ -155,10 +251,17 @@ public final class BsSkinExporter {
         }
 
         // ===== 3. 字体 =====
+        // 解析 sizeSuffixes：null → 全部 6 档；保证后续逻辑只用 effectiveSizes 判断
+        java.util.Set<String> effectiveSizes = normalizeSizeSuffixes(sizeSuffixes);
+        int effectivePageSize = normalizeFontPageSize(fontPageSize);
+        log.info("BsSkinExporter: 字号导出 = {}, default-font独立={} (size={}), 页尺寸={}",
+                effectiveSizes, includeDefaultFont, defaultFontSize, effectivePageSize);
+
         Map<String, String> bitmapFonts = null;
         if (bitmapFont) {
             // 烘焙 BitmapFont（.fnt + .png）。运行时不再需要 TTF / chinese.txt / freetype.js。
-            bitmapFonts = generateBitmapFonts(outputDir, ttfSource, charsFile);
+            bitmapFonts = generateBitmapFonts(outputDir, ttfSource, charsFile, effectiveSizes,
+                    includeDefaultFont, defaultFontSize, effectivePageSize);
         } else {
             // FreeType 模式：复制 TTF + 字符集到 outputDir（运行时生成需要）
             if (ttfSource != null && ttfSource.exists()) {
@@ -178,7 +281,7 @@ public final class BsSkinExporter {
         writeJsonFile(jsonFile, skin,
                 bitmapFont ? null : (ttfSource != null ? ttfSource.name() : null),
                 bitmapFont ? null : (charsFile != null ? charsFile.name() : null),
-                bitmapFonts);
+                bitmapFonts, effectiveSizes, includeDefaultFont, defaultFontSize);
         log.info("BsSkinExporter: json 写入 {}", jsonFile.path());
 
         packer.dispose();
@@ -187,61 +290,92 @@ public final class BsSkinExporter {
 
     /**
      * 烘焙各字号 BitmapFont 到 .fnt + .png（FreeType 生成 → BitmapFontWriter 落盘）。
-     * 字号/键与 writeJsonFile 的 FreeType 段保持一致：default-font(18) / font-sm(14) / font-md(18) / font-lg(24) / font-xl(32)。
-     * 返回 jsonKey → .fnt 文件名，供 writeJsonFile 写 BitmapFont 段。
+     *
+     * @param effectiveSizes      已规范化的字号后缀集合（非 null，可能为空集合 = 不烘焙任何 font-* 档位）
+     * @param includeDefaultFont 是否独立烘焙 {@code default-font}
+     * @param defaultFontSize    default 字号（includeDefaultFont=true 时用）
+     * @param page               字体页尺寸（已规范化，pow2）
      */
-    private static Map<String, String> generateBitmapFonts(FileHandle outputDir, FileHandle ttf, FileHandle charsFile) {
+    private static Map<String, String> generateBitmapFonts(FileHandle outputDir, FileHandle ttf, FileHandle charsFile,
+                                                            java.util.Set<String> effectiveSizes,
+                                                            boolean includeDefaultFont, int defaultFontSize,
+                                                            int page) {
         Map<String, String> entries = new LinkedHashMap<>();
         if (ttf == null || !ttf.exists()) {
             log.warn("BsSkinExporter: bitmap 模式需要 TTF 源，跳过字体烘焙");
             return entries;
         }
+
         String charset = (charsFile != null && charsFile.exists())
                 ? charsFile.readString(java.nio.charset.StandardCharsets.UTF_8.name())
                 : FreeTypeFontGenerator.DEFAULT_CHARS;
         String face = ttf.nameWithoutExtension();
-        final int PAGE = 1024;
-        // default 与 md 字号相同（18px），烘焙时 default 复用 font-md.fnt，不重复烘焙
-        String[] suffixes = {"sm", "md", "lg", "xl"};
-        int[] sizes = {14, 18, 24, 32};
+
+        // 找出 default 字号是否恰好等于某档位（命中则复用，不重复烘焙）
+        String reuseSuffixForDefault = null;
+        if (includeDefaultFont) {
+            for (int i = 0; i < ALL_SIZE_SUFFIXES.length; i++) {
+                if (ALL_SIZE_VALUES[i] == defaultFontSize) {
+                    reuseSuffixForDefault = ALL_SIZE_SUFFIXES[i];
+                    break;
+                }
+            }
+            // 复用必须在 effectiveSizes 里才有效；否则还是要独立烘焙
+            if (reuseSuffixForDefault != null && !effectiveSizes.contains(reuseSuffixForDefault)) {
+                reuseSuffixForDefault = null;
+            }
+        }
 
         FreeTypeFontGenerator gen = new FreeTypeFontGenerator(ttf);
         try {
-            String mdFntFile = null;
-            for (int i = 0; i < suffixes.length; i++) {
-                String suffix = suffixes[i];
+            // 按 ALL_SIZE_SUFFIXES 顺序烘焙 effectiveSizes 中的字号
+            for (int i = 0; i < ALL_SIZE_SUFFIXES.length; i++) {
+                String suffix = ALL_SIZE_SUFFIXES[i];
+                if (!effectiveSizes.contains(suffix)) continue;
+                int size = ALL_SIZE_VALUES[i];
                 String jsonKey = "font-" + suffix;
-                int size = sizes[i];
-                FreeTypeFontGenerator.FreeTypeFontParameter p = new FreeTypeFontGenerator.FreeTypeFontParameter();
-                p.size = size;
-                p.characters = charset;
-                p.hinting = FreeTypeFontGenerator.Hinting.AutoMedium;
-                p.minFilter = Texture.TextureFilter.Linear;
-                p.magFilter = Texture.TextureFilter.Linear;
-                p.packer = new PixmapPacker(PAGE, PAGE, Pixmap.Format.RGBA8888, 2, false, new PixmapPacker.SkylineStrategy());
-                BitmapFont font = gen.generateFont(p);
-                try {
-                    BitmapFontWriter.FontInfo info = new BitmapFontWriter.FontInfo(face, size);
-                    info.padding = new BitmapFontWriter.Padding(0, 0, 0, 0);
-                    info.overrideMetrics(font.getData());
-                    String[] pageRefs = BitmapFontWriter.writePixmaps(p.packer.getPages(), outputDir, jsonKey);
-                    FileHandle fntFile = outputDir.child(jsonKey + ".fnt");
-                    BitmapFontWriter.writeFont(font.getData(), pageRefs, fntFile, info, PAGE, PAGE);
-                    entries.put(jsonKey, jsonKey + ".fnt");
-                    // md 烘焙完成后记下文件名，default-font 复用它
-                    if ("md".equals(suffix)) mdFntFile = jsonKey + ".fnt";
-                    log.info("BsSkinExporter: 烘焙 BitmapFont {} ({}px) -> {} 张页", jsonKey, size, pageRefs.length);
-                } finally {
-                    font.dispose();
-                    p.packer.dispose();
+                bakeOneFont(gen, outputDir, charset, face, page, jsonKey, size, entries);
+                // 命中复用：default-font 指向同一份 .fnt
+                if (suffix.equals(reuseSuffixForDefault)) {
+                    entries.put("default-font", entries.get(jsonKey));
+                    log.info("BsSkinExporter: default-font 复用 {} ({}px)", jsonKey, size);
                 }
             }
-            // default-font 复用 font-md.fnt（字号相同，省一份烘焙产物）
-            entries.put("default-font", mdFntFile);
+            // 独立烘焙 default-font（default 字号不等于任何已选档位时）
+            if (includeDefaultFont && reuseSuffixForDefault == null) {
+                bakeOneFont(gen, outputDir, charset, face, page, "default-font", defaultFontSize, entries);
+            }
         } finally {
             gen.dispose();
         }
         return entries;
+    }
+
+    /** 烘焙单个字号到 .fnt + .png；写入 entries（jsonKey → .fnt 文件名）。 */
+    private static void bakeOneFont(FreeTypeFontGenerator gen, FileHandle outputDir, String charset,
+                                     String face, int page, String jsonKey, int size,
+                                     Map<String, String> entries) {
+        FreeTypeFontGenerator.FreeTypeFontParameter p = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        p.size = size;
+        p.characters = charset;
+        p.hinting = FreeTypeFontGenerator.Hinting.AutoMedium;
+        p.minFilter = Texture.TextureFilter.Linear;
+        p.magFilter = Texture.TextureFilter.Linear;
+        p.packer = new PixmapPacker(page, page, Pixmap.Format.RGBA8888, 2, false, new PixmapPacker.SkylineStrategy());
+        BitmapFont font = gen.generateFont(p);
+        try {
+            BitmapFontWriter.FontInfo info = new BitmapFontWriter.FontInfo(face, size);
+            info.padding = new BitmapFontWriter.Padding(0, 0, 0, 0);
+            info.overrideMetrics(font.getData());
+            String[] pageRefs = BitmapFontWriter.writePixmaps(p.packer.getPages(), outputDir, jsonKey);
+            FileHandle fntFile = outputDir.child(jsonKey + ".fnt");
+            BitmapFontWriter.writeFont(font.getData(), pageRefs, fntFile, info, page, page);
+            entries.put(jsonKey, jsonKey + ".fnt");
+            log.info("BsSkinExporter: 烘焙 BitmapFont {} ({}px, 页{}) -> {} 张页", jsonKey, size, page, pageRefs.length);
+        } finally {
+            font.dispose();
+            p.packer.dispose();
+        }
     }
 
     // =================== 占位 Pixmap 生成（带圆角） ===================
@@ -531,11 +665,13 @@ public final class BsSkinExporter {
      * <p>fastjson2 对 Map<String, Object> 只输出实际内容，不写 class 类型标签。</p>
      */
     private static void writeJsonFile(FileHandle out, Skin skin, String ttfPath, String charsFile,
-                                      Map<String, String> bitmapFonts) {
+                                      Map<String, String> bitmapFonts, java.util.Set<String> effectiveSizes,
+                                      boolean includeDefaultFont, int defaultFontSize) {
         Map<String, Object> root = new LinkedHashMap<>();
 
         // ===== 字体段：bitmap 模式写 BitmapFont（.fnt 引用），否则写 FreeTypeFontGenerator 配置 =====
         if (bitmapFonts != null && !bitmapFonts.isEmpty()) {
+            // bitmap 模式：bitmapFonts 已按规则（effectiveSizes + default-font）烘焙好，直接写
             Map<String, Object> fontSection = new LinkedHashMap<>();
             for (Map.Entry<String, String> e : bitmapFonts.entrySet()) {
                 Map<String, Object> f = new LinkedHashMap<>();
@@ -544,29 +680,43 @@ public final class BsSkinExporter {
             }
             root.put("com.badlogic.gdx.graphics.g2d.BitmapFont", fontSection);
         } else if (ttfPath != null) {
+            // FreeType 模式：按 effectiveSizes 写 font-{size} 段；
+            // default-font 按 includeDefaultFont + defaultFontSize 决定（独立写或复用同字号档位）
             Map<String, Object> fontSection = new LinkedHashMap<>();
-            // default 与 md 字号相同（18px），default-font 复用 font-md 的配置
-            String[] suffixes = {"sm", "md", "lg", "xl"};
-            int[] sizes = {14, 18, 24, 32};
-            Map<String, Object> mdConfig = null;
-            for (int i = 0; i < suffixes.length; i++) {
-                String skinKey = "font-" + suffixes[i];
+            // 记录 size → fontSection 的 entry，方便 default 字号命中时复用
+            java.util.Map<Integer, Map<String, Object>> sizeToConfig = new java.util.HashMap<>();
+            for (int i = 0; i < ALL_SIZE_SUFFIXES.length; i++) {
+                String suffix = ALL_SIZE_SUFFIXES[i];
+                if (!effectiveSizes.contains(suffix)) continue;
+                String skinKey = "font-" + suffix;
                 if (skin.has(skinKey, BitmapFont.class)) {
-                    String jsonKey = "font-" + suffixes[i];
+                    String jsonKey = "font-" + suffix;
                     Map<String, Object> f = new LinkedHashMap<>();
                     f.put("font", ttfPath);
                     if (charsFile != null) f.put("characters", charsFile);
-                    f.put("size", sizes[i]);
+                    f.put("size", ALL_SIZE_VALUES[i]);
                     f.put("hinting", "AutoMedium");
                     f.put("minFilter", "Linear");
                     f.put("magFilter", "Linear");
                     fontSection.put(jsonKey, f);
-                    if ("md".equals(suffixes[i])) mdConfig = f;
+                    sizeToConfig.put(ALL_SIZE_VALUES[i], f);
                 }
             }
-            // default-font 复用 font-md 配置（字号相同，省一份 FreeType 配置）
-            if (mdConfig != null) {
-                fontSection.put("default-font", new LinkedHashMap<>(mdConfig));
+            // default-font：优先复用同字号档位，否则独立写一份 size=defaultFontSize 的配置
+            if (includeDefaultFont) {
+                Map<String, Object> reuse = sizeToConfig.get(defaultFontSize);
+                if (reuse != null) {
+                    fontSection.put("default-font", new LinkedHashMap<>(reuse));
+                } else {
+                    Map<String, Object> f = new LinkedHashMap<>();
+                    f.put("font", ttfPath);
+                    if (charsFile != null) f.put("characters", charsFile);
+                    f.put("size", defaultFontSize);
+                    f.put("hinting", "AutoMedium");
+                    f.put("minFilter", "Linear");
+                    f.put("magFilter", "Linear");
+                    fontSection.put("default-font", f);
+                }
             }
             if (!fontSection.isEmpty()) {
                 root.put("com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator", fontSection);

@@ -42,8 +42,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class BsSkinFactory {
 
-    /** 尺寸档位（与 json 的 font-{size}.fnt 一一对应）。md 字号与 default 相同，但 key 仍要注册全。 */
-    private static final String[] SIZE_SUFFIXES = {"sm", "md", "lg", "xl"};
+    /** 尺寸档位（与 json 的 font-{size}.fnt 一一对应，6 档）。md 字号与 default 相同，但 key 仍要注册全。 */
+    private static final String[] SIZE_SUFFIXES = {"xs", "sm", "md", "lg", "xl", "xxl"};
 
     private BsSkinFactory() {}
 

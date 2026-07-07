@@ -77,6 +77,33 @@ public class BsSkinApp extends Game {
         return entries;
     }
 
+    /**
+     * 返回当前 skin 里真实存在的字号后缀（xs/sm/md/lg/xl/xxl）。
+     * 用于导出对话框的「字号多选」：让用户只勾选确实存在的档位。
+     *
+     * @return 有序集合（按 xs→xxl 排序），元素形如 {@code "xs"}；空集合表示 skin 里没有任何 font-* 字体
+     */
+    public java.util.List<String> availableFontSizes() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        if (skin == null) return out;
+        String[] all = {"xs", "sm", "md", "lg", "xl", "xxl"};
+        for (String s : all) {
+            if (skin.has("font-" + s, BitmapFont.class)) out.add(s);
+        }
+        return out;
+    }
+
+    /**
+     * 返回 skin 里 {@code default} 字体的实际字号（px）。
+     * 用于导出对话框的「独立烘焙 default-font」：让用户改了默认字号代码后，
+     * 导出端能正确生成 default-font 配置（不再写死复用 md）。
+     * <p>默认返回 18（与 BsControlsTestApp 启动时 generateFont(chars, 18) 一致）；
+     * 用户改字号后请在子类覆盖此方法返回真实值。</p>
+     */
+    public int defaultFontSize() {
+        return 18;
+    }
+
     @Getter
     private Skin skin;
 

@@ -291,6 +291,16 @@ public class BsControlsSkinScreen extends ScreenAdapter {
         statusLine.setText(text);
     }
 
+    /** 把对话框页尺寸下拉索引映射成像素值（顺序与 showExportDialog 中 pageSizeItems 一致）。 */
+    private static int parsePageSize(int selectedIndex) {
+        switch (selectedIndex) {
+            case 1:  return 2048;
+            case 2:  return 4096;
+            case 3:  return 512;
+            default: return 1024;
+        }
+    }
+
     // =================== 皮肤导出 ===================
 
     /**
@@ -312,12 +322,52 @@ public class BsControlsSkinScreen extends ScreenAdapter {
 
         final BsCheckBox bitmapBox = new BsCheckBox("烘焙 BitmapFont（.fnt + .png）", skin);
 
+        // 字号多选：基于 skin 实际存在的 font-{suffix} 生成；缺档不暴露给用户
+        final java.util.List<String> availableSizes = app.availableFontSizes();
+        final java.util.Map<String, BsCheckBox> sizeBoxes = new java.util.LinkedHashMap<>();
+        if (!availableSizes.isEmpty()) {
+            // 默认全选
+            for (String suf : availableSizes) {
+                BsCheckBox cb = new BsCheckBox(suf, skin);
+                cb.setChecked(true);
+                sizeBoxes.put(suf, cb);
+            }
+        }
+
+        // 独立烘焙 default-font：默认勾选。default 字号从 App 取（用户改字号代码后此值同步变）
+        final int defaultSize = app.defaultFontSize();
+        final BsCheckBox defaultFontBox = new BsCheckBox(
+                "独立烘焙 default-font (" + defaultSize + "px)", skin);
+        defaultFontBox.setChecked(true);
+
+        // 字体页尺寸：默认 1024，可选 512/1024/2048/4096。页越大产 png 越少，但单纹理越大
+        final com.badlogic.gdx.scenes.scene2d.ui.SelectBox<String> pageSizeBox =
+                new com.badlogic.gdx.scenes.scene2d.ui.SelectBox<>(skin);
+        com.badlogic.gdx.utils.Array<String> pageSizeItems = new com.badlogic.gdx.utils.Array<>();
+        pageSizeItems.add("1024 × 1024（默认，兼容性最好）");
+        pageSizeItems.add("2048 × 2048（页更少，推荐桌面/teaVM）");
+        pageSizeItems.add("4096 × 4096（极大，仅高内存设备）");
+        pageSizeItems.add("512 × 512（极小，仅 ASCII 场景）");
+        pageSizeBox.setItems(pageSizeItems);
+        pageSizeBox.setSelectedIndex(0);
+
         Table form = new Table(skin);
         form.defaults().pad(6).left().growX();
         form.add(new Label("导出名（生成 <名>.json / .atlas / .png）", skin)).row();
         form.add(nameField).growX().row();
         form.add(new Label("字符集（影响字体生成范围与加载速度）", skin)).padTop(4).row();
         form.add(charsBox).growX().left().row();
+        if (!sizeBoxes.isEmpty()) {
+            form.add(new Label("导出字号（缺档不显示）", skin)).padTop(4).row();
+            Table sizeRow = new Table(skin);
+            for (BsCheckBox cb : sizeBoxes.values()) {
+                sizeRow.add(cb).padRight(8);
+            }
+            form.add(sizeRow).growX().left().row();
+        }
+        form.add(defaultFontBox).padTop(4).left().row();
+        form.add(new Label("字体页尺寸（仅烘焙模式；页越大字体 png 越少）", skin)).padTop(4).row();
+        form.add(pageSizeBox).growX().left().row();
         form.add(bitmapBox).padTop(4).left().row();
         Label hint = new Label("目录：bs-skin-export/   ·   多主题共用字体与字符集   ·   勾选「烘焙 BitmapFont」可让运行时免 FreeType/TTF/freetype.js", skin);
         hint.setColor(BsTheme.tm());
@@ -330,17 +380,37 @@ public class BsControlsSkinScreen extends ScreenAdapter {
                 .contentWidth(440)
                 .separator(true)
                 .addButton("取消", () -> setStatus("导出取消"), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE)
-                .addButton("导出", () -> doExport(nameField.getText(),
+                .addButton("导出", () -> {
+                        // 收集勾选的字号；空集 → BsSkinExporter 不导出任何 font-* 档位
+                        java.util.Set<String> picked = new java.util.LinkedHashSet<>();
+                        for (java.util.Map.Entry<String, BsCheckBox> en : sizeBoxes.entrySet()) {
+                            if (en.getValue().isChecked()) picked.add(en.getKey());
+                        }
+                        int pageSize = parsePageSize(pageSizeBox.getSelectedIndex());
+                        doExport(nameField.getText(),
                                 charsEntries.get(charsBox.getSelectedIndex())[1],
-                                bitmapBox.isChecked()),
+                                bitmapBox.isChecked(),
+                                picked,
+                                defaultFontBox.isChecked(),
+                                defaultSize,
+                                pageSize);
+                    },
                         BsButton.Variant.PRIMARY, BsButton.Style.SOLID)
                 .showModal(stage);
     }
 
     /**
      * 执行导出：在 GL 线程同步导出（含 PixmapPacker / 文件 IO），完成后更新状态栏。
+     *
+     * @param sizeSuffixes      要导出的字号后缀集合（{@code null} = 全部，空集合 = 不导出任何 font-* 档位）
+     * @param includeDefaultFont 是否独立写入 default-font 段
+     * @param defaultFontSize   default 字号（includeDefaultFont=true 时用）
+     * @param fontPageSize      字体页尺寸（1024/2048/4096/512）
      */
-    private void doExport(String nameRaw, String charsCp, boolean bitmapFont) {
+    private void doExport(String nameRaw, String charsCp, boolean bitmapFont,
+                          java.util.Set<String> sizeSuffixes,
+                          boolean includeDefaultFont, int defaultFontSize,
+                          int fontPageSize) {
         final String name = (nameRaw == null || nameRaw.trim().isEmpty()) ? "bs-skin" : nameRaw.trim();
         final BsSkinApp appRef = this.app;
         Gdx.app.postRunnable(() -> {
@@ -355,7 +425,8 @@ public class BsControlsSkinScreen extends ScreenAdapter {
                         Gdx.files.internal(charsCp);
 
                 long t0 = System.currentTimeMillis();
-                BsSkinExporter.export(skin, outDir, name, ttfSource, charsFile, bitmapFont);
+                BsSkinExporter.export(skin, outDir, name, ttfSource, charsFile, bitmapFont,
+                        sizeSuffixes, includeDefaultFont, defaultFontSize, fontPageSize);
                 long elapsed = System.currentTimeMillis() - t0;
 
                 String charsName = charsFile.name();
