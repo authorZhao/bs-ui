@@ -95,8 +95,8 @@ public class BsLineChart extends BsChart {
         // 水平网格
         if (showGrid) {
             sr.setColor(gridColor);
-            for (int i = 0; i <= 5; i++) {
-                float y = baseY + plotH * i / 5f;
+            for (int i = 0; i <= yTickCount; i++) {
+                float y = baseY + plotH * i / (float) yTickCount;
                 rectLine(sr, leftX, y, rightX, y, 1);
             }
         }
