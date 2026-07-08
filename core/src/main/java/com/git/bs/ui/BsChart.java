@@ -112,6 +112,9 @@ public abstract class BsChart extends Actor {
     protected float minX, maxX, minY, maxY;
     protected boolean axesVisible = true;
     protected boolean gridVisible = true;
+    /** Y/X 轴刻度等分数（默认 5，小图可调小避免密集重叠）。 */
+    protected int yTickCount = 5;
+    protected int xTickCount = 5;
     /** V2：颜色存放在 skin Color 桶，字段初始化时无法访问 skin，先 null，draw 时按需从 skin 取。 */
     protected Color axisColor;
     protected Color gridColor;
@@ -260,6 +263,10 @@ public abstract class BsChart extends Actor {
     }
     public BsChart setAxesVisible(boolean v) { this.axesVisible = v; return this; }
     public BsChart setGridVisible(boolean v) { this.gridVisible = v; return this; }
+    /** Y 轴刻度等分数（默认 5，小图设 2 避免密集重叠看不清）。 */
+    public BsChart setYTickCount(int n) { this.yTickCount = Math.max(1, n); return this; }
+    /** X 轴刻度等分数。 */
+    public BsChart setXTickCount(int n) { this.xTickCount = Math.max(1, n); return this; }
     public BsChart setAxisColor(Color c) { this.axisColor = c; return this; }
     public BsChart setGridColor(Color c) { this.gridColor = c; return this; }
     public BsChart setTextColor(Color c) { this.textColor = c; return this; }
@@ -368,21 +375,21 @@ public abstract class BsChart extends Actor {
 
         float plotH = getHeight() - padTop - padBottom - legendPadTop - legendPadBottom;
         float baseY = padBottom + legendPadBottom;
-        // Y 轴：5 等分刻度，标签靠左
-        for (int i = 0; i <= 5; i++) {
-            float v = minY + (maxY - minY) * i / 5f;
-            float sy = baseY + plotH * i / 5f;
+        // Y 轴：yTickCount 等分刻度，标签靠左
+        for (int i = 0; i <= yTickCount; i++) {
+            float v = minY + (maxY - minY) * i / (float) yTickCount;
+            float sy = baseY + plotH * i / (float) yTickCount;
             String text = fmt(v);
             glyphLayout.setText(font, text);
             font.draw(batch, text,
                     getX() + padLeft + legendPadLeft - glyphLayout.width - 6,
                     getY() + sy + glyphLayout.height / 2f);
         }
-        // X 轴：5 等分刻度，标签靠下
+        // X 轴：xTickCount 等分刻度，标签靠下
         float plotW = getWidth() - padLeft - padRight - legendPadLeft - legendPadRight;
-        for (int i = 0; i <= 5; i++) {
-            float v = minX + (maxX - minX) * i / 5f;
-            float sx = padLeft + legendPadLeft + plotW * i / 5f;
+        for (int i = 0; i <= xTickCount; i++) {
+            float v = minX + (maxX - minX) * i / (float) xTickCount;
+            float sx = padLeft + legendPadLeft + plotW * i / (float) xTickCount;
             String text = fmt(v);
             glyphLayout.setText(font, text);
             font.draw(batch, text,
