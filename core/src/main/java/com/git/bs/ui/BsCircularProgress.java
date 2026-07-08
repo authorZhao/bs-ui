@@ -32,21 +32,29 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 /// 按 percent 决定每点是 progress 色还是 track 色（纯 Batch，不依赖 ShapeRenderer）。
 /// **圆点优先取 skin 的 `bs-circle`**（由 `BsSkinFactory.circleDrawable` 统一生成、
 /// 可随 skin 导出/换主题）；skin 缺失时才用同一生成器兜底（兜底 Texture 由本组件 dispose）。
+///
+/// <p><b>扩展</b>：需要更平滑的圆环（大屏仪表盘等场景，离散圆点会"发虚"）用子类
+/// {@link BsRingProgress} —— 它用 ShapeRenderer 画三角形带连续环弧。本类保持默认行为不变。</p>
+///
+/// 字段/常量/method 多为 protected，便于子类（如 BsRingProgress）复用，对调用者无影响。
 public class BsCircularProgress extends Actor {
 
     public enum Variant { PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO }
 
     private static final int SEGMENTS = 48;
-    private static final float INDET_SPEED_DEG = 270f;
-    private static final float INDET_SWEEP_DEG = 90f;
+    /** 供子类（BsRingProgress）复用。 */
+    protected static final float INDET_SPEED_DEG = 270f;
+    /** 供子类复用。 */
+    protected static final float INDET_SWEEP_DEG = 90f;
 
-    private final GlyphLayout glyph = new GlyphLayout();
+    /** 供子类绘制 label 时复用。 */
+    protected final GlyphLayout glyph = new GlyphLayout();
 
-    private float percent = 0f;
-    private boolean indeterminate = false;
-    private float indetAngle = 0f;
-    private boolean showLabel = false;
-    private Variant variant = Variant.PRIMARY;
+    protected float percent = 0f;
+    protected boolean indeterminate = false;
+    protected float indetAngle = 0f;
+    protected boolean showLabel = false;
+    protected Variant variant = Variant.PRIMARY;
 
     /// skin 无 `bs-circle` 时的兜底圆点（由本组件自管 dispose）。
     private Drawable dotFallback;
@@ -103,7 +111,8 @@ public class BsCircularProgress extends Actor {
 
     // =================== 内部 ===================
 
-    private Color progressColor() {
+    /** variant → 主色（protected 供子类复用）。 */
+    protected Color progressColor() {
         switch (variant) {
             case PRIMARY:   return BsPalette.PRIMARY.getMain();
             case SECONDARY: return BsPalette.SECONDARY.getMain();
@@ -168,17 +177,22 @@ public class BsCircularProgress extends Actor {
         }
 
         if (showLabel && !indeterminate) {
-            String text = Math.round(percent * 100) + "%";
-            BitmapFont font = skin.getFont("default");
-            Color tp = skin.get("bs-text-primary", Color.class);
-            Color oldFont = font.getColor();
-            glyph.setText(font, text);
-            font.setColor(tp.r, tp.g, tp.b, alpha);
-            batch.setColor(Color.WHITE);
-            font.draw(batch, text, cx - glyph.width / 2f, cy + glyph.height / 2f);
-            font.setColor(oldFont);
+            drawCenterLabel(batch, alpha, skin, cx - getX(), cy - getY());
         }
 
         batch.setColor(Color.WHITE);
+    }
+
+    /** 中心百分比文字（actor 局部坐标 cx/cy）。protected 供子类复用。 */
+    protected void drawCenterLabel(Batch batch, float alpha, Skin skin, float cx, float cy) {
+        String text = Math.round(percent * 100) + "%";
+        BitmapFont font = skin.getFont("default");
+        Color tp = skin.get("bs-text-primary", Color.class);
+        Color oldFont = font.getColor();
+        glyph.setText(font, text);
+        font.setColor(tp.r, tp.g, tp.b, alpha);
+        batch.setColor(Color.WHITE);
+        font.draw(batch, text, getX() + cx - glyph.width / 2f, getY() + cy + glyph.height / 2f);
+        font.setColor(oldFont);
     }
 }
