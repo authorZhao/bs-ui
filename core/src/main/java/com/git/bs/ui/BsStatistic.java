@@ -1,6 +1,7 @@
 package com.git.bs.ui;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -90,6 +91,18 @@ public class BsStatistic extends Table {
 
     public BsStatistic value(String v) {
         valueLabel.setText(v);
+        return this;
+    }
+
+    /**
+     * 自定义数值字体（如大屏的运行时大数字 TTF），不传或 null 则沿用 skin 默认。
+     * 用于 KPI 大字号场景 —— app 层用 FreeType 生成纯 ASCII 大字体注入，避免为 CJK 大字号付内存代价。
+     */
+    public BsStatistic valueFont(BitmapFont f) {
+        if (f == null) return this;
+        Label.LabelStyle ls = new Label.LabelStyle(valueLabel.getStyle());
+        ls.font = f;
+        valueLabel.setStyle(ls);
         return this;
     }
 
