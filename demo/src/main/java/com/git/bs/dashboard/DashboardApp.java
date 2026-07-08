@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.git.bs.ui.BsDarkTheme;
+import com.git.bs.ui.BsLightTheme;
 import com.git.bs.ui.BsUI;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +41,7 @@ public class DashboardApp extends Game {
     public void create() {
         // 1. 加载烘焙 skin（含 4 档 CJK 字体 + drawable + style），切 dark
         BsUI.init();
-        BsUI.setTheme(BsDarkTheme.INSTANCE);
+        BsUI.setTheme(BsLightTheme.INSTANCE);
 
         // 2. 运行时生成大数字字体（纯 ASCII 64px），注册进所有主题 skin 公用
         bigNumFont = generateAsciiFont(64);

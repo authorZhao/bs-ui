@@ -50,8 +50,8 @@ public class AdminLoginScreen extends ScreenAdapter {
         Table root = new Table();
         root.setFillParent(true);
         // 加载背景图作为 root 背景（Table.setBackground 会自动拉伸铺满）
-        bgTexture = new Texture(Gdx.files.internal("img/hei_wu_kong.jpg"));
-        root.setBackground(new TextureRegionDrawable(bgTexture));
+        //bgTexture = new Texture(Gdx.files.internal("img/hei_wu_kong.jpg"));
+        //root.setBackground(new TextureRegionDrawable(bgTexture));
         root.top().center();
 
         // 顶部品牌区（大屏下不显空旷）

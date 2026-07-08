@@ -10,8 +10,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.git.bs.ui.BsAreaChart;
+import com.git.bs.ui.BsBarChart;
 import com.git.bs.ui.BsChart;
 import com.git.bs.ui.BsCircularProgress;
+import com.git.bs.ui.BsDoughnutChart;
 import com.git.bs.ui.BsLineChart;
 import com.git.bs.ui.BsRingProgress;
 import com.git.bs.ui.BsScrollPane;
@@ -19,24 +22,42 @@ import com.git.bs.ui.BsStatistic;
 import com.git.bs.ui.BsText;
 import com.git.bs.ui.BsTheme;
 import com.git.bs.ui.BsUI;
+import com.git.bs.ui.layout.BsCol;
+import com.git.bs.ui.layout.BsFlow;
+import com.git.bs.ui.layout.BsGrid;
+import com.git.bs.ui.layout.BsRow;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 /**
- * 运维监控大屏主屏幕（铺满版）。
+ * 运维监控大屏主屏幕（铺满版）—— 全面采用 bsui 四种基础布局组件。
  *
  * <p>三栏布局，所有模块由 {@link MockMonitorDataSource} 每秒 tick 驱动：</p>
  * <ul>
- *   <li><b>左栏</b>：服务节点列表（状态灯 + CPU%）+ 机房环境（温湿度）</li>
- *   <li><b>中栏</b>：6 个 KPI 大数字（64px bigNum 字体）+ CPU/内存折线 + JVM（堆仪表+GC+线程+堆时序）</li>
- *   <li><b>右栏</b>：实时访问日志（滚动）+ 告警时间线</li>
+ *   <li><b>左栏</b>：服务节点列表（{@link BsCol} 纵排）
+ *       + 节点负载徽章云（{@link BsFlow} 流式，宽度变化自动换行）
+ *       + 机房环境（{@link BsCol}）</li>
+ *   <li><b>中栏</b>：6 个 KPI（{@link BsGrid} 6 列网格）
+ *       + CPU/内存折线（{@link BsCol}）
+ *       + JVM（{@link BsRow} 横排）
+ *       + 底部三图（{@link BsGrid} 3 列网格）</li>
+ *   <li><b>右栏</b>：实时访问日志 + 告警时间线（{@link BsCol} + ScrollPane）</li>
  * </ul>
  *
- * <p>文字统一用 {@link BsText}（setVariant 改 style.fontColor，避免裸 Label 的 setColor 被默认
- * fontColor 遮盖导致偏色）。KPI 数值用运行时生成的 font-big-num（64px ASCII）。</p>
+ * <p>四种布局语义对照：</p>
+ * <table>
+ *   <tr><th>布局</th><th>用途</th><th>本屏使用处</th></tr>
+ *   <tr><td>{@link BsRow}</td><td>横排</td><td>顶部 header、JVM 行、每行节点状态</td></tr>
+ *   <tr><td>{@link BsCol}</td><td>纵排</td><td>左栏、CPU/内存折线卡、日志/告警列表</td></tr>
+ *   <tr><td>{@link BsGrid}</td><td>格子</td><td>6 个 KPI、底部 3 张图表</td></tr>
+ *   <tr><td>{@link BsFlow}</td><td>流式</td><td>节点负载徽章云</td></tr>
+ * </table>
+ *
+ * <p>KPI 数值用运行时生成的 font-big-num（64px ASCII）；所有图表均开启 hover tooltip。</p>
  */
 public class DashboardScreen implements Screen {
 
@@ -55,10 +76,16 @@ public class DashboardScreen implements Screen {
     private BsText gcText, threadText;
     // 节点（[status, cpu]）
     private final List<BsText[]> nodeRows = new ArrayList<>();
+    // 节点负载徽章云（流式）：每个节点一个 BsText
+    private final List<BsText> nodeChips = new ArrayList<>();
     // 环境
     private BsText tempText, humText, clock;
     // 日志 / 告警容器
     private Table logTable, alertTable;
+    // 底部图表
+    private BsBarChart nodeQpsChart;
+    private BsDoughnutChart httpStatusChart;
+    private BsAreaChart netChart;
 
     @Override
     public void show() {
@@ -77,11 +104,12 @@ public class DashboardScreen implements Screen {
 
         root.add(buildHeader()).growX().padBottom(8).row();
 
+        // body 三栏各自独立垂直滚动 —— 任一栏内容超出视口自己滚，互不挤压（右栏不会再被中栏借走高度）
         Table body = new Table();
-        body.defaults().top().left();
-        body.add(buildLeft(skin)).width(230).growY().padRight(8);
-        body.add(buildCenter(skin)).grow().growY().padRight(8);
-        body.add(buildRight(skin)).width(310).growY();
+        body.defaults().top().left().growY();
+        body.add(makeScroll(skin, buildLeft(skin))).width(230).padRight(8);
+        body.add(makeScroll(skin, buildCenter(skin))).growX();
+        body.add(makeScroll(skin, buildRight(skin))).width(310);
         root.add(body).growX().growY().padBottom(8).row();
 
         stage.addActor(root);
@@ -92,135 +120,199 @@ public class DashboardScreen implements Screen {
 
     // =================== 布局 ===================
 
-    private Table buildHeader() {
-        Table h = new Table();
-        h.left();
-        h.defaults().left();
-        h.add(new BsText("运维监控大屏", BsText.Size.XL).bold()).padRight(20);
-        h.add(new BsText("Real-time Operations Dashboard", BsText.Size.SM, BsText.Variant.MUTED)).padRight(20);
+    /** 顶部 header：用 BsRow 横排（标题 + 副标题 + 时钟，整体左对齐）。 */
+    private Actor buildHeader() {
         clock = new BsText("", BsText.Size.MD, BsText.Variant.SECONDARY);
-        h.add(clock);
-        h.add().growX();
-        return h;
+        return new BsRow()
+                .gap(20)
+                .align("center")      // 垂直方向居中（标题大、副标题小）
+                .pad(2)
+                .add(new BsText("运维监控大屏", BsText.Size.XL).bold())
+                .add(new BsText("Real-time Operations Dashboard", BsText.Size.SM, BsText.Variant.MUTED))
+                .add(clock);
     }
 
-    private Table buildLeft(Skin skin) {
+    private Actor buildLeft(Skin skin) {
+        // 外层用 Table（要配 Cell 的 growX/height），内部子结构用 4 种布局组件
         Table col = new Table();
         col.top().left();
         col.defaults().growX().left().top();
 
         col.add(sectionTitle("服务节点")).padBottom(6).row();
-        Table nodeList = new Table();
-        nodeList.top().left();
+        // 节点列表：每行用 BsRow（状态 + CPU%）
+        BsCol nodeList = new BsCol().gap(2).align("left");
         nodeRows.clear();
         for (MockMonitorDataSource.NodeStatus n : data.nodes) {
             BsText status = new BsText("● " + n.name, BsText.Size.DEFAULT);
             BsText cpu = new BsText("--%", BsText.Size.SM);
-            Table row = new Table();
-            row.defaults().left();
-            row.add(status).width(120);
-            row.add(cpu).width(55);
-            row.add().growX();
-            nodeList.add(row).growX().pad(3).row();
+            BsRow row = new BsRow().gap(6).align("center")
+                    .add(status).add(cpu);
+            nodeList.add(row);
             nodeRows.add(new BsText[]{status, cpu});
         }
-        col.add(wrapCard(skin, nodeList)).growX().top().padBottom(8).row();
+        col.add(wrapCard(skin, nodeList)).padBottom(8).row();
+
+        col.add(sectionTitle("节点负载")).padBottom(6).row();
+        // 节点负载徽章云：BsFlow 流式 —— 宽度不够自动换行
+        BsFlow flow = new BsFlow().gap(6).rowGap(4).align("topleft").pad(4);
+        nodeChips.clear();
+        for (int i = 0; i < data.nodes.size(); i++) {
+            BsText chip = new BsText("--", BsText.Size.SM, BsText.Variant.SECONDARY);
+            nodeChips.add(chip);
+            flow.add(chip);
+        }
+        col.add(wrapCard(skin, flow)).padBottom(8).row();
 
         col.add(sectionTitle("机房环境")).padBottom(6).row();
-        Table env = new Table();
-        env.left().top();
-        env.defaults().left().pad(4);
+        // 环境温湿度：2 个键值对，用 BsCol 纵排，每行内 BsRow（label + value）
+        BsCol env = new BsCol().gap(4).align("left").pad(4);
         tempText = new BsText("--", BsText.Size.LG);
         humText = new BsText("--", BsText.Size.LG);
-        env.add(new BsText("温度", BsText.Size.SM, BsText.Variant.SECONDARY)).padRight(10);
-        env.add(tempText).row();
-        env.add(new BsText("湿度", BsText.Size.SM, BsText.Variant.SECONDARY)).padRight(10);
-        env.add(humText).row();
+        env.add(new BsRow().gap(10).align("center")
+                .add(new BsText("温度", BsText.Size.SM, BsText.Variant.SECONDARY))
+                .add(tempText));
+        env.add(new BsRow().gap(10).align("center")
+                .add(new BsText("湿度", BsText.Size.SM, BsText.Variant.SECONDARY))
+                .add(humText));
         col.add(wrapCard(skin, env)).growX().top().row();
-        col.add().growY();
         return col;
     }
 
-    private Table buildCenter(Skin skin) {
+    private Actor buildCenter(Skin skin) {
         Table col = new Table();
         col.top().left();
         col.defaults().growX().left().top();
 
-        // KPI 行 6 个大数字
-        Table kpiRow = new Table();
-        kpiRow.defaults().pad(2);
+        // KPI 行 6 个：BsGrid 6 列网格（BsStatistic 自带卡片背景，直接放入，避免双层边框）
+        BsGrid kpiGrid = new BsGrid(6).gap(4).pad(0).growX();
         cpuStat = kpi("CPU %");
         memStat = kpi("内存 %");
         netStat = kpi("网络 Mbps");
         qpsStat = kpi("QPS");
         userStat = kpi("在线用户");
         errStat = kpi("错误率 %");
-        kpiRow.add(wrapCard(skin, cpuStat)).growX();
-        kpiRow.add(wrapCard(skin, memStat)).growX();
-        kpiRow.add(wrapCard(skin, netStat)).growX();
-        kpiRow.add(wrapCard(skin, qpsStat)).growX();
-        kpiRow.add(wrapCard(skin, userStat)).growX();
-        kpiRow.add(wrapCard(skin, errStat)).growX();
-        col.add(kpiRow).growX().height(115).padBottom(8).row();
+        kpiGrid.append(cpuStat, memStat, netStat, qpsStat, userStat, errStat);
+        // 不写死 height —— BsStatistic 用 64px bigNum 字体 + pad(16,20,16,20)，内容高度约 130px，
+        // 写死 115 会导致大数字下半部分溢出叠到 CPU 折线卡上。改为 minHeight 保底、内容自适应。
+        col.add(kpiGrid).growX().minHeight(120).padBottom(8).row();
 
-        // CPU + 内存 折线（叠放在一个卡里）
+        // CPU + 内存 折线：Table 纵排（要 Cell.height 控制图高），加大高度与间距
         Table chartBox = new Table();
         chartBox.top().left();
         chartBox.defaults().growX().left();
         chartBox.add(sectionTitle("CPU 使用率 (%)")).padBottom(4).row();
         cpuChart = makeLineChart();
-        chartBox.add(cpuChart).growX().height(170).row();
-        chartBox.add(sectionTitle("内存使用率 (%)")).padTop(6).padBottom(4).row();
+        chartBox.add(cpuChart).height(210).row();
+        chartBox.add(sectionTitle("内存使用率 (%)")).padTop(10).padBottom(4).row();
         memChart = makeLineChart();
-        chartBox.add(memChart).growX().height(170).padBottom(8).row();
+        chartBox.add(memChart).height(210).padBottom(4).row();
         col.add(wrapCard(skin, chartBox)).growX().top().padBottom(8).row();
 
-        // JVM 行
+        // JVM 行：Table 横排（ring + stats + heapChart，要 Cell 的 size/grow/height）
         col.add(sectionTitle("JVM 监控")).padBottom(6).row();
-        Table jvm = new Table();
-        jvm.left().top();
-        jvm.defaults().pad(6).left();
+        Table jvmRow = new Table();
+        jvmRow.left().top();
+        jvmRow.defaults().pad(6).left();
         heapRing = new BsRingProgress(skin, BsCircularProgress.Variant.PRIMARY);
         heapRing.setShowLabel(true);
-        jvm.add(heapRing).size(96).padRight(14);
-        Table jvmStats = new Table();
-        jvmStats.left().top();
-        jvmStats.defaults().left().pad(2);
+        jvmRow.add(heapRing).size(116).padRight(14);
+
+        // JVM 文本标签用 BsCol 纵排（无需 Cell 尺寸）
+        BsCol jvmStats = new BsCol().gap(2).align("left");
         gcText = new BsText("GC: --", BsText.Size.DEFAULT);
         threadText = new BsText("Threads: --", BsText.Size.DEFAULT);
-        jvmStats.add(new BsText("堆内存", BsText.Size.SM, BsText.Variant.MUTED)).row();
-        jvmStats.add(gcText).padBottom(6).row();
-        jvmStats.add(new BsText("Full GC 累计 / 活动线程", BsText.Size.SM, BsText.Variant.MUTED)).row();
+        jvmStats.add(new BsText("堆内存", BsText.Size.SM, BsText.Variant.MUTED));
+        jvmStats.add(gcText);
+        jvmStats.add(new BsText("Full GC 累计 / 活动线程", BsText.Size.SM, BsText.Variant.MUTED));
         jvmStats.add(threadText);
-        jvm.add(jvmStats).growY();
+        jvmRow.add(jvmStats).growY();
+
         heapChart = makeLineChart();
-        heapChart.setYTickCount(2).setXTickCount(2);   // 小图刻度稀疏，避免密集重叠看不清
-        jvm.add(wrapCard(skin, heapChart)).growX().height(110);
-        col.add(wrapCard(skin, jvm)).growX().top().row();
-        col.add().growY();
+        heapChart.setYTickCount(2).setXTickCount(2);
+        jvmRow.add(wrapCard(skin, heapChart)).growX().height(150);
+        col.add(wrapCard(skin, jvmRow)).growX().top().height(170).padBottom(8).row();
+
+        // 底部三图：BsGrid 3 列网格
+        col.add(buildBottomCharts(skin)).growX().top().row();
         return col;
     }
 
-    private Table buildRight(Skin skin) {
+    private Actor buildBottomCharts(Skin skin) {
+        BsGrid row = new BsGrid(3).gap(8).pad(0).growX();
+
+        // 1) 节点 QPS 柱状图
+        Table nodeBox = new Table();
+        nodeBox.top().left();
+        nodeBox.defaults().growX().left();
+        nodeBox.add(sectionTitle("节点 QPS")).padBottom(4).row();
+        nodeQpsChart = new BsBarChart();
+        nodeQpsChart.setSkinFont(skin);
+        nodeQpsChart.setOrientation(BsBarChart.Orientation.VERTICAL);
+        nodeQpsChart.setHoverEnabled(true);
+        nodeQpsChart.setLegendVisible(false);
+        String[] nodeNames = new String[data.nodes.size()];
+        for (int i = 0; i < data.nodes.size(); i++) nodeNames[i] = data.nodes.get(i).name;
+        nodeQpsChart.setCategories(nodeNames);
+        nodeQpsChart.setMultiSeries(Arrays.asList(
+                new BsChart.Series("QPS", BsChart.pointsOfY(new float[nodeNames.length]))));
+        nodeBox.add(nodeQpsChart).height(150).row();
+        row.add(wrapCard(skin, nodeBox));
+
+        // 2) HTTP 状态码 环形图
+        Table httpBox = new Table();
+        httpBox.top().left();
+        httpBox.defaults().growX().left();
+        httpBox.add(sectionTitle("HTTP 状态码")).padBottom(4).row();
+        httpStatusChart = new BsDoughnutChart();
+        httpStatusChart.setSkinFont(skin);
+        httpStatusChart.setHoverEnabled(true);
+        httpStatusChart.setLegendVisible(true);
+        httpStatusChart.setLegendPlacement(BsChart.LegendPlacement.BOTTOM);
+        httpStatusChart.setCenterLabel("请求", "--");
+        httpStatusChart.setSlices("2xx", 1, "3xx", 0, "4xx", 0, "5xx", 0);
+        httpBox.add(httpStatusChart).height(150).row();
+        row.add(wrapCard(skin, httpBox));
+
+        // 3) 网络流量 面积图（双系列入/出）
+        Table netBox = new Table();
+        netBox.top().left();
+        netBox.defaults().growX().left();
+        netBox.add(sectionTitle("网络流量 (Mbps)")).padBottom(4).row();
+        netChart = new BsAreaChart();
+        netChart.setSkinFont(skin);
+        netChart.setHoverEnabled(true);
+        netChart.setLegendVisible(true);
+        netChart.setLegendPlacement(BsChart.LegendPlacement.BOTTOM);
+        netChart.setMultiSeries(Arrays.asList(
+                new BsChart.Series("入站", BsChart.pointsOfY(new float[MockMonitorDataSource.HISTORY]),
+                        BsTheme.colorOf("primary")),
+                new BsChart.Series("出站", BsChart.pointsOfY(new float[MockMonitorDataSource.HISTORY]),
+                        BsTheme.colorOf("success"))));
+        netBox.add(netChart).height(150).row();
+        row.add(wrapCard(skin, netBox));
+
+        return row;
+    }
+
+    private Actor buildRight(Skin skin) {
+        // 右栏整体由外层 makeScroll 统一垂直滚动，内部不再嵌 ScrollPane（避免嵌套滚动）
         Table col = new Table();
         col.top().left();
         col.defaults().growX().left().top();
 
+        // 日志区
         col.add(sectionTitle("实时访问日志")).padBottom(6).row();
         logTable = new Table();
         logTable.top().left();
         logTable.defaults().left();
-        BsScrollPane logScroll = new BsScrollPane(logTable, skin);
-        logScroll.setScrollingDisabled(true, false);
-        logScroll.setFadeScrollBars(false);
-        col.add(wrapCard(skin, logScroll)).growX().height(340).padBottom(8).row();
+        col.add(wrapCard(skin, logTable)).growX().top().padBottom(8).row();
 
+        // 告警区
         col.add(sectionTitle("告警时间线")).padBottom(6).row();
         alertTable = new Table();
         alertTable.top().left();
         alertTable.defaults().left();
-        col.add(wrapCard(skin, alertTable)).growX().top().row();
-        col.add().growY();
+        col.add(wrapCard(skin, alertTable)).growX().top();
         return col;
     }
 
@@ -230,7 +322,8 @@ public class DashboardScreen implements Screen {
         BsLineChart c = new BsLineChart();
         c.setSkinFont(BsUI.getSkin());
         c.setLegendVisible(false);
-        c.setHoverEnabled(false);
+        c.setHoverEnabled(true);     // 开启鼠标悬停：显示数据点高亮 + x/y 数值 tooltip
+        c.setHitRadius(20);          // 放大命中半径，鼠标靠近即可触发
         return c;
     }
 
@@ -250,6 +343,23 @@ public class DashboardScreen implements Screen {
         card.pad(8);
         card.add(body).grow();
         return card;
+    }
+
+    /**
+     * 把一栏内容包成可垂直滚动的 ScrollPane：栏内容 prefHeight 不受限，
+     * 超出视口高度时纵向滚动；横向锁定（栏宽固定，不出现水平滚动条）。
+     * <p>widget 用 Table 是为了在 ScrollPane 里能 growX 撑满栏宽。</p>
+     */
+    private BsScrollPane makeScroll(Skin skin, Actor content) {
+        Table holder = new Table();
+        holder.top().left();
+        holder.add(content).growX().top().left();
+        BsScrollPane sp = new BsScrollPane(holder, skin);
+        sp.setScrollingDisabled(true, false);   // 仅纵向滚动
+        sp.setFadeScrollBars(false);
+        sp.setForceScroll(false, true);
+        sp.setScrollbarsOnTop(false);
+        return sp;
     }
 
     // =================== 刷新 ===================
@@ -280,7 +390,7 @@ public class DashboardScreen implements Screen {
         gcText.setText("GC: " + data.gc);
         threadText.setText("Threads: " + data.threads);
 
-        // 节点
+        // 节点列表
         for (int i = 0; i < nodeRows.size() && i < data.nodes.size(); i++) {
             MockMonitorDataSource.NodeStatus n = data.nodes.get(i);
             BsText status = nodeRows.get(i)[0];
@@ -292,29 +402,38 @@ public class DashboardScreen implements Screen {
             cpu.setVariant(n.cpu > 85 ? BsText.Variant.DANGER : BsText.Variant.SECONDARY);
         }
 
+        // 节点负载徽章云（流式）：每秒刷新文字 + 颜色
+        for (int i = 0; i < nodeChips.size() && i < data.nodes.size(); i++) {
+            MockMonitorDataSource.NodeStatus n = data.nodes.get(i);
+            BsText chip = nodeChips.get(i);
+            chip.setText(n.name + " " + Math.round(n.cpu) + "%");
+            chip.setVariant(!n.online ? BsText.Variant.DANGER
+                    : n.cpu > 85 ? BsText.Variant.WARNING
+                    : n.cpu > 60 ? BsText.Variant.WARNING : BsText.Variant.SUCCESS);
+        }
+
         // 环境
         tempText.setText(String.format("%.1f ℃", data.temp));
         humText.setText(String.format("%.1f%%", data.humidity));
 
-        // 日志重建（最近 18 条）
+        // 底部图表
+        refreshBottomCharts();
+
+        // 日志重建（最近 30 条，全部入表，滚动查看）
         logTable.clearChildren();
-        int li = 0;
         for (MockMonitorDataSource.LogEntry e : data.logs) {
-            if (li++ >= 18) break;
             String path = e.path.length() > 16 ? e.path.substring(0, 16) + "~" : e.path;
             String line = e.time + "  " + e.status + "  " + path + "  " + Math.round(e.cost) + "ms";
             BsText l = new BsText(line, BsText.Size.SM,
                     e.status >= 500 ? BsText.Variant.DANGER
                     : e.status == 404 ? BsText.Variant.WARNING : BsText.Variant.SECONDARY);
             l.setWrap(true);
-            logTable.add(l).width(275).left().row();
+            logTable.add(l).width(275).left().padTop(2).row();
         }
 
-        // 告警重建（最近 6 条）
+        // 告警重建（全部 8 条，滚动查看）
         alertTable.clearChildren();
-        int ai = 0;
         for (MockMonitorDataSource.Alert a : data.alerts) {
-            if (ai++ >= 6) break;
             boolean critical = a.level.equals("严重") || a.level.equals("错误");
             BsText l = new BsText(a.time + " [" + a.level + "] " + a.msg, BsText.Size.SM,
                     critical ? BsText.Variant.DANGER : BsText.Variant.WARNING);
@@ -323,6 +442,39 @@ public class DashboardScreen implements Screen {
         }
 
         if (clock != null) clock.setText(clockFmt.format(new Date()));
+    }
+
+    /** 刷新底部三图：节点 QPS 柱状、HTTP 状态环形、网络流量面积。 */
+    private void refreshBottomCharts() {
+        // 节点 QPS
+        float[] qpsVals = new float[data.nodes.size()];
+        for (int i = 0; i < data.nodes.size(); i++) qpsVals[i] = data.nodes.get(i).qps;
+        nodeQpsChart.setMultiSeries(Arrays.asList(
+                new BsChart.Series("QPS", BsChart.pointsOfY(qpsVals))));
+
+        // HTTP 状态码：按 2xx/3xx/4xx/5xx 统计 logs
+        int c2 = 0, c3 = 0, c4 = 0, c5 = 0;
+        for (MockMonitorDataSource.LogEntry e : data.logs) {
+            if (e.status >= 500) c5++;
+            else if (e.status >= 400) c4++;
+            else if (e.status >= 300) c3++;
+            else c2++;
+        }
+        int total = c2 + c3 + c4 + c5;
+        httpStatusChart.setCenterLabel("请求", String.valueOf(total));
+        // 全 0 时给 2xx 一个占位 1，避免空图
+        httpStatusChart.setSlices(
+                "2xx", total == 0 ? 1 : c2,
+                "3xx", c3,
+                "4xx", c4,
+                "5xx", c5);
+
+        // 网络流量（双系列）
+        netChart.setMultiSeries(Arrays.asList(
+                new BsChart.Series("入站", BsChart.pointsOfY(toArray(data.netInHistory)),
+                        BsTheme.colorOf("primary")),
+                new BsChart.Series("出站", BsChart.pointsOfY(toArray(data.netOutHistory)),
+                        BsTheme.colorOf("success"))));
     }
 
     private static float[] toArray(FloatArray a) {
