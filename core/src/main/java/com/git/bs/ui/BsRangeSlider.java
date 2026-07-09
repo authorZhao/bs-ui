@@ -41,6 +41,10 @@ public class BsRangeSlider extends Actor {
     private final float min;
     private final float max;
     private final float step;
+    /// 区间填充 Drawable（primary 色纯色块）。构造时创建一次缓存，
+    /// 避免在 draw() 里每帧 new Pixmap+Texture 导致 GPU 内存泄漏。
+    /// track/knob 走 skin 单例（skin.getDrawable 不分配），无需缓存。
+    private final Drawable fill = BsSkinFactory.drawableOf(BsPalette.PRIMARY.getMain());
 
     private float low;
     private float high;
@@ -177,7 +181,6 @@ public class BsRangeSlider extends Actor {
     public void draw(Batch batch, float parentAlpha) {
         Skin skin = BsUI.getSkin();
         Drawable track = skin.getDrawable("bs-slider-bg");
-        Drawable fill = BsSkinFactory.drawableOf(BsPalette.PRIMARY.getMain());
         Drawable knob = skin.getDrawable("bs-slider-knob");
 
         float w = getWidth();
