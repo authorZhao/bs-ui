@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -64,7 +65,7 @@ public class BsLoadingOverlay extends Table {
         card.add(spinWrap).size(36, 36).row();
 
         // 文字
-        label = new Label("加载中...", skin);
+        label = new Label(BsI18n.get("core.loading", "加载中..."), skin);
         label.setColor(BsTheme.tp());
         card.add(label).padTop(8).row();
 

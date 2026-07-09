@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Consumer;
@@ -76,7 +77,7 @@ public class BsInspectorPanel extends Table {
         iconImage.setScaling(com.badlogic.gdx.utils.Scaling.fit);
         titleBar.add(iconImage).size(20).padRight(8).left();
 
-        titleLabel = new Label("(未选中)", skin);
+        titleLabel = new Label(BsI18n.get("inspector.unselected", "(未选中)"), skin);
         titleLabel.setColor(BsTheme.tp());
         titleLabel.setFontScale(1.1f);
         titleBar.add(titleLabel).left();
@@ -130,7 +131,7 @@ public class BsInspectorPanel extends Table {
     /** 设置当前检视的目标。 */
     public BsInspectorPanel setTarget(String name, String type,
                                       com.badlogic.gdx.scenes.scene2d.utils.Drawable icon) {
-        titleLabel.setText(name == null ? "(未选中)" : name);
+        titleLabel.setText(name == null ? BsI18n.get("inspector.unselected", "(未选中)") : name);
         typeBadge.setText(type == null || type.isEmpty() ? "" : type);
         typeBadge.setVisible(type != null && !type.isEmpty());
         if (icon != null) {

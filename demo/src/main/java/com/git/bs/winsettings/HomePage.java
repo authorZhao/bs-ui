@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import com.git.bs.ui.BsButton;
 import com.git.bs.ui.BsDarkTheme;
 import com.git.bs.ui.BsLightTheme;
@@ -69,6 +70,11 @@ public class HomePage extends SettingsPage {
         };
     }
 
+    /** 当前语言对应的下拉显示标签（"中文"/"English"）。 */
+    private static String currentLangLabel() {
+        return "zh_cn".equals(BsI18n.currentLocale()) ? "中文" : "English";
+    }
+
     private BsButton outlineBtn(String text, Runnable r) {
         BsButton b = new BsButton(text, skin, BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE, BsButton.Size.SM);
         b.addListener(click(r));
@@ -83,7 +89,7 @@ public class HomePage extends SettingsPage {
         Table lock = new Table();
         lock.setBackground(skin.newDrawable("white", BsTheme.tm()));
         lock.defaults().center();
-        lock.add(new BsText("锁屏图片", BsText.Size.SM, BsText.Variant.MUTED));
+        lock.add(new BsText(BsI18n.get("home.lock_screen"), BsText.Size.SM, BsText.Variant.MUTED));
         card.add(lock).width(160).height(90).padRight(16).top();
 
         Table right = new Table();
@@ -92,15 +98,15 @@ public class HomePage extends SettingsPage {
         Table nameRow = new Table();
         nameRow.left();
         nameRow.defaults().left();
-        nameRow.add(new BsText("DESKTOP-BSUI", BsText.Size.LG).bold()).padRight(10);
-        nameRow.add(outlineBtn("重命名", () -> log.info("[主页] 重命名设备")));
+        nameRow.add(new BsText(BsI18n.get("home.device_name"), BsText.Size.LG).bold()).padRight(10);
+        nameRow.add(outlineBtn(BsI18n.get("home.rename"), () -> log.info("[主页] 重命名设备")));
         right.add(nameRow).row();
 
         Table status = new Table();
         status.left();
         status.defaults().left().padRight(24);
-        status.add(new BsText("🌐 以太网  已连接", BsText.Size.SM, BsText.Variant.SECONDARY));
-        status.add(new BsText("⟳ Windows 更新  最新", BsText.Size.SM, BsText.Variant.SUCCESS));
+        status.add(new BsText(BsI18n.get("home.network_connected"), BsText.Size.SM, BsText.Variant.SECONDARY));
+        status.add(new BsText(BsI18n.get("home.update_latest"), BsText.Size.SM, BsText.Variant.SUCCESS));
         right.add(status).padTop(10).row();
         card.add(right).growX().top();
         return card;
@@ -112,8 +118,8 @@ public class HomePage extends SettingsPage {
         Table col = new Table();
         col.left().top();
         col.defaults().growX().left().top();
-        col.add(new BsText("所有功能尽在 Microsoft 账户", BsText.Size.DEFAULT).bold()).row();
-        col.add(new BsText("使用 Microsoft 账户登录以同步设置、文件和首选项", BsText.Size.SM, BsText.Variant.MUTED)).padTop(3).row();
+        col.add(new BsText(BsI18n.get("home.ms_account_title"), BsText.Size.DEFAULT).bold()).row();
+        col.add(new BsText(BsI18n.get("home.ms_account_desc"), BsText.Size.SM, BsText.Variant.MUTED)).padTop(3).row();
         card.add(col).growX();
         card.setTouchable(Touchable.enabled);
         card.addListener(click(() -> router.navigate("accounts")));
@@ -131,24 +137,25 @@ public class HomePage extends SettingsPage {
         Table head = new Table();
         head.left();
         head.defaults().left();
-        head.add(new BsText("推荐设置", BsText.Size.DEFAULT).bold()).padRight(12);
-        head.add(new BsText("最近使用的和常用的设置", BsText.Size.SM, BsText.Variant.MUTED));
+        head.add(new BsText(BsI18n.get("home.recommended_title"), BsText.Size.DEFAULT).bold()).padRight(12);
+        head.add(new BsText(BsI18n.get("home.recommended_desc"), BsText.Size.SM, BsText.Variant.MUTED));
         col.add(head).padBottom(4).row();
 
-        // 一行一行：{图标, 标题, 描述, 跳转 key}，用 WinRow.nav（hover 微亮 + 箭头 + 点击跳转）
+        // 一行一行：{图标, 标题key, 描述key, 跳转 key}，用 WinRow.nav（hover 微亮 + 箭头 + 点击跳转）
         String[][] items = {
-                {"⚡", "电源和电池",    "管理电源模式、屏幕和睡眠",       "system"},
-                {"🔊", "声音",         "输出/输入设备、音量、空间音频",  "system"},
-                {"🔒", "锁屏界面",      "锁屏背景、屏幕保护、状态",       "personalization"},
-                {"🖥", "显示",         "分辨率、缩放、夜间模式",         "system"},
-                {"🎨", "个性化",       "背景、颜色、主题、字体",         "personalization"},
-                {"ⓑ", "蓝牙和其他设备", "管理已连接设备、鼠标、键盘",     "bluetooth"},
-                {"⊞", "已安装的应用",   "添加或删除应用、默认应用",       "apps"},
-                {"⟳", "Windows 更新",  "检查更新、更新历史、暂停",       "update"},
+                {"⚡", "home.power_title",       "home.power_desc",       "system"},
+                {"🔊", "home.sound_title",      "home.sound_desc",      "system"},
+                {"🔒", "home.lockscreen_title", "home.lockscreen_desc", "personalization"},
+                {"🖥", "home.display_title",    "home.display_desc",    "system"},
+                {"🎨", "home.personalization_title", "home.personalization_desc", "personalization"},
+                {"ⓑ", "home.bluetooth_title",  "home.bluetooth_desc",  "bluetooth"},
+                {"⊞", "home.apps_title",       "home.apps_desc",       "apps"},
+                {"⟳", "home.update_title",     "home.update_desc",     "update"},
         };
         for (String[] it : items) {
-            final String key = it[3];
-            col.add(WinRow.nav(skin, it[0], it[1], it[2], () -> router.navigate(key))).growX().row();
+            final String navKey = it[3];
+            col.add(WinRow.nav(skin, it[0], BsI18n.get(it[1]), BsI18n.get(it[2]),
+                    () -> router.navigate(navKey))).growX().row();
         }
         card.add(col).growX();
         return card;
@@ -160,10 +167,10 @@ public class HomePage extends SettingsPage {
         Table col = new Table();
         col.left().top();
         col.defaults().growX().left().top();
-        col.add(new BsText("蓝牙和其他设备", BsText.Size.DEFAULT).bold()).row();
-        col.add(new BsText("管理已连接设备、鼠标、键盘、笔、自动播放", BsText.Size.SM, BsText.Variant.MUTED))
+        col.add(new BsText(BsI18n.get("home.bluetooth_card_title"), BsText.Size.DEFAULT).bold()).row();
+        col.add(new BsText(BsI18n.get("home.bluetooth_card_desc"), BsText.Size.SM, BsText.Variant.MUTED))
                 .padTop(3).padBottom(8).row();
-        col.add(new BsText("● 蓝牙耳机   ● 鼠标   ● 键盘   已连接", BsText.Size.SM, BsText.Variant.SECONDARY)).row();
+        col.add(new BsText(BsI18n.get("home.bluetooth_devices"), BsText.Size.SM, BsText.Variant.SECONDARY)).row();
         card.add(col).growX();
         card.setTouchable(Touchable.enabled);
         card.addListener(click(() -> router.navigate("bluetooth")));
@@ -176,7 +183,7 @@ public class HomePage extends SettingsPage {
         Table col = new Table();
         col.left().top();
         col.defaults().growX().left().top();
-        col.add(new BsText("个性化", BsText.Size.DEFAULT).bold()).padBottom(10).row();
+        col.add(new BsText(BsI18n.get("home.personalization_card_title"), BsText.Size.DEFAULT).bold()).padBottom(10).row();
 
         // 背景缩略图
         Table thumbs = new Table();
@@ -203,29 +210,49 @@ public class HomePage extends SettingsPage {
         Table modeRow = new Table();
         modeRow.left();
         modeRow.defaults().left();
-        modeRow.add(new BsText("色彩模式", BsText.Size.DEFAULT)).padRight(10);
+        modeRow.add(new BsText(BsI18n.get("home.color_mode"), BsText.Size.DEFAULT)).padRight(10);
         BsSelectBox<String> mode = new BsSelectBox<>(skin);
-        mode.setItems("亮", "暗", "自定义");
-        mode.setSelected(BsUI.currentTheme().isDark() ? "暗" : "亮");   // 初始跟随当前主题
+        mode.setItems(BsI18n.get("home.color_mode_light"), BsI18n.get("home.color_mode_dark"), BsI18n.get("home.color_mode_custom"));
+        mode.setSelected(BsUI.currentTheme().isDark()
+                ? BsI18n.get("home.color_mode_dark") : BsI18n.get("home.color_mode_light"));   // 初始跟随当前主题
         mode.addListener(new ChangeListener() {
             @Override public void changed(ChangeEvent e, Actor a) {
                 String m = mode.getSelected();
                 log.info("[个性化] 色彩模式 = {}", m);
                 // 真实换肤：选亮/暗 → BsUI.setTheme → App 监听器重建 screen
-                if ("暗".equals(m)) BsUI.setTheme(BsDarkTheme.INSTANCE);
-                else if ("亮".equals(m)) BsUI.setTheme(BsLightTheme.INSTANCE);
+                if (BsI18n.get("home.color_mode_dark").equals(m)) BsUI.setTheme(BsDarkTheme.INSTANCE);
+                else if (BsI18n.get("home.color_mode_light").equals(m)) BsUI.setTheme(BsLightTheme.INSTANCE);
             }
         });
         modeRow.add(mode);
         col.add(modeRow).padBottom(10).row();
 
+        // 语言切换（验证 i18n：选语言 → BsI18n.setLocale → App 监听器重建 screen）
+        Table langRow = new Table();
+        langRow.left();
+        langRow.defaults().left();
+        langRow.add(new BsText(BsI18n.get("home.language"), BsText.Size.DEFAULT)).padRight(10);
+        BsSelectBox<String> lang = new BsSelectBox<>(skin);
+        lang.setItems("中文", "English");
+        lang.setSelected("中文".equals(currentLangLabel()) ? "中文" : "English");
+        lang.addListener(new ChangeListener() {
+            @Override public void changed(ChangeEvent e, Actor a) {
+                String sel = lang.getSelected();
+                String locale = "中文".equals(sel) ? "zh_cn" : "en_us";
+                log.info("[个性化] 语言 = {}", locale);
+                BsI18n.setLocale(locale);
+            }
+        });
+        langRow.add(lang);
+        col.add(langRow).padBottom(10).row();
+
         // 链接
         Table links = new Table();
         links.left();
         links.defaults().left().padRight(24);
-        BsLink browseBg = new BsLink("浏览更多背景", skin);
+        BsLink browseBg = new BsLink(BsI18n.get("home.browse_backgrounds"), skin);
         browseBg.addListener(click(() -> router.navigate("personalization")));
-        BsLink colorTheme = new BsLink("颜色和主题", skin);
+        BsLink colorTheme = new BsLink(BsI18n.get("home.colors_and_theme"), skin);
         colorTheme.addListener(click(() -> router.navigate("personalization")));
         links.add(browseBg);
         links.add(colorTheme);
@@ -240,9 +267,9 @@ public class HomePage extends SettingsPage {
         Table row = new Table();
         row.left();
         row.defaults().left().padRight(24);
-        BsLink help = new BsLink("获取帮助", skin);
+        BsLink help = new BsLink(BsI18n.get("home.help"), skin);
         help.addListener(click(() -> log.info("[主页] 获取帮助")));
-        BsLink feedback = new BsLink("提供反馈", skin);
+        BsLink feedback = new BsLink(BsI18n.get("home.feedback"), skin);
         feedback.addListener(click(() -> log.info("[主页] 提供反馈")));
         row.add(help);
         row.add(feedback);

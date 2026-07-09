@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalTime;
@@ -99,8 +100,8 @@ public class BsTimePicker extends BsTextField {
 
         // 快捷 + 确定
         Table bar = new Table();
-        TextButton now = new TextButton("现在", skin, "bs-btn-secondary");
-        TextButton ok = new TextButton("确定", skin, "bs-btn-primary");
+        TextButton now = new TextButton(BsI18n.get("core.time.now", "现在"), skin, "bs-btn-secondary");
+        TextButton ok = new TextButton(BsI18n.get("btn.ok", "确定"), skin, "bs-btn-primary");
         now.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 LocalTime n = LocalTime.now();

@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class BsTagInput extends Table {
         chipsWrap.left();
         add(chipsWrap).left();
         field = new BsTextField("", skin);
-        field.setMessageText("输入后回车");
+        field.setMessageText(BsI18n.get("core.tag.placeholder", "输入后回车"));
         // 让 TextField 不带自己的边框背景
         field.setStyle(skin.get(com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle.class));
         add(field).width(fieldWidth);

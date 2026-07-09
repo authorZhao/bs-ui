@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,7 +54,7 @@ public class BsAlertDialog extends BsModal {
         content(msg).contentWidth(380);
 
         // 底部"知道了"按钮（颜色按级别）
-        addButton("知道了", () -> {
+        addButton(BsI18n.get("btn.got_it", "知道了"), () -> {
             if (onClose != null) {
                 try { onClose.run(); } catch (Throwable t) { log.warn("onClose error", t); }
             }
@@ -130,11 +131,11 @@ public class BsAlertDialog extends BsModal {
     /** 级别 → 标题文字（title 为 null 时使用）。 */
     public static String levelText(Level l) {
         switch (l) {
-            case NOTICE:  return "通知";
-            case WARNING: return "警告";
-            case ERROR:   return "错误";
-            case SUCCESS: return "成功";
-            default:      return "提示";
+            case NOTICE:  return BsI18n.get("alert.notice", "通知");
+            case WARNING: return BsI18n.get("alert.warning", "警告");
+            case ERROR:   return BsI18n.get("alert.error", "错误");
+            case SUCCESS: return BsI18n.get("alert.success", "成功");
+            default:      return BsI18n.get("alert.info", "提示");
         }
     }
 

@@ -1,6 +1,7 @@
 package com.git.bs.winsettings;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -12,41 +13,41 @@ import lombok.extern.slf4j.Slf4j;
 public class GamingPage extends CategoryPage {
 
     public GamingPage(Skin skin) {
-        super("游戏", skin);
+        super(BsI18n.get("nav.gaming"), skin);
 
         group("Xbox Game Bar",
-                SettingItem.toggle("使用 Xbox Game Bar", "录制游戏片段、截图、与好友聊天", true),
-                SettingItem.value("打开快捷键", "", "Win + G"),
-                SettingItem.toggle("使用控制器打开", "按控制器上的 Xbox 按钮打开", true),
-                SettingItem.link("Game Bar 设置", "在游戏中覆盖界面", "设置")
+                SettingItem.toggle(BsI18n.get("gaming.use_game_bar"), BsI18n.get("gaming.use_game_bar_desc"), true),
+                SettingItem.value(BsI18n.get("gaming.open_shortcut"), "", "Win + G"),
+                SettingItem.toggle(BsI18n.get("gaming.open_with_controller"), BsI18n.get("gaming.open_with_controller_desc"), true),
+                SettingItem.link(BsI18n.get("gaming.game_bar_settings"), BsI18n.get("gaming.game_bar_settings_desc"), BsI18n.get("gaming.settings"))
         );
 
-        group("捕获",
-                SettingItem.toggle("录制游戏", "在游戏中录制片段", true),
-                SettingItem.select("捕获质量", "", new String[]{"标准 (720p)","高 (1080p)","极高 (1080p, 高码率)"}, "高 (1080p)"),
-                SettingItem.select("视频帧率", "", new String[]{"30 fps","60 fps"}, "60 fps"),
-                SettingItem.select("音频质量", "", new String[]{"128 kbps","160 kbps","192 kbps"}, "192 kbps"),
-                SettingItem.toggle("录制时打开麦克风", "", true),
-                SettingItem.value("保存位置", "", "C:\\Users\\author\\Videos\\Captures"),
-                SettingItem.button("打开保存位置", "查看捕获的文件", "打开")
+        group(BsI18n.get("gaming.group_capture"),
+                SettingItem.toggle(BsI18n.get("gaming.record_game"), BsI18n.get("gaming.record_game_desc"), true),
+                SettingItem.select(BsI18n.get("gaming.capture_quality"), "", new String[]{BsI18n.get("gaming.quality_standard"), BsI18n.get("gaming.quality_high"), BsI18n.get("gaming.quality_ultra")}, BsI18n.get("gaming.quality_high")),
+                SettingItem.select(BsI18n.get("gaming.video_framerate"), "", new String[]{"30 fps", "60 fps"}, "60 fps"),
+                SettingItem.select(BsI18n.get("gaming.audio_quality"), "", new String[]{"128 kbps", "160 kbps", "192 kbps"}, "192 kbps"),
+                SettingItem.toggle(BsI18n.get("gaming.open_mic_when_recording"), "", true),
+                SettingItem.value(BsI18n.get("gaming.save_location"), "", "C:\\Users\\author\\Videos\\Captures"),
+                SettingItem.button(BsI18n.get("gaming.open_save_location"), BsI18n.get("gaming.open_save_location_desc"), BsI18n.get("common.open"))
         );
 
-        group("游戏模式",
-                SettingItem.toggle("游戏模式", "优化 PC 进行游戏", true),
-                SettingItem.value("状态", "", "已启用 (将停止后台任务)"),
-                SettingItem.toggle("动态照明", "控制 RGB 设备", false)
+        group(BsI18n.get("gaming.group_game_mode"),
+                SettingItem.toggle(BsI18n.get("gaming.game_mode"), BsI18n.get("gaming.game_mode_desc"), true),
+                SettingItem.value(BsI18n.get("gaming.status"), "", BsI18n.get("gaming.status_enabled")),
+                SettingItem.toggle(BsI18n.get("gaming.dynamic_lighting"), BsI18n.get("gaming.dynamic_lighting_desc"), false)
         );
 
-        group("游戏控制器",
-                SettingItem.value("已连接控制器", "", "1 个 Xbox 无线控制器"),
-                SettingItem.button("管理控制器", "查看/配置连接的控制器", "管理"),
-                SettingItem.link("控制器设置", "震动、按钮映射", "设置")
+        group(BsI18n.get("gaming.group_controllers"),
+                SettingItem.value(BsI18n.get("gaming.connected_controllers"), "", BsI18n.get("gaming.connected_controllers_value")),
+                SettingItem.button(BsI18n.get("gaming.manage_controllers"), BsI18n.get("gaming.manage_controllers_desc"), BsI18n.get("gaming.manage")),
+                SettingItem.link(BsI18n.get("gaming.controller_settings"), BsI18n.get("gaming.controller_settings_desc"), BsI18n.get("gaming.settings"))
         );
 
-        group("相关设置",
-                SettingItem.link("HDCP 设置", "HDMI 高带宽数字内容保护", "打开"),
-                SettingItem.link("Display Gamma", "调整显示器 Gamma", "调整"),
-                SettingItem.button("游戏疑难解答", "诊断游戏问题", "运行")
+        group(BsI18n.get("gaming.group_related"),
+                SettingItem.link("HDCP " + BsI18n.get("gaming.hdcp_settings"), BsI18n.get("gaming.hdcp_desc"), BsI18n.get("common.open")),
+                SettingItem.link("Display Gamma", BsI18n.get("gaming.display_gamma_desc"), BsI18n.get("gaming.adjust")),
+                SettingItem.button(BsI18n.get("gaming.game_troubleshoot"), BsI18n.get("gaming.game_troubleshoot_desc"), BsI18n.get("update.run"))
         );
     }
 }

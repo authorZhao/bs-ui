@@ -3,6 +3,7 @@ package com.git.bs.ui;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Consumer;
@@ -26,7 +27,7 @@ public class BsConfirmDialog extends BsModal {
     private final Consumer<Boolean> onResult;
 
     public BsConfirmDialog(String title, String message, Skin skin, Consumer<Boolean> onResult) {
-        super(title == null ? "请确认" : title, skin);
+        super(title == null ? BsI18n.get("dialog.confirm_title", "请确认") : title, skin);
         this.onResult = onResult;
 
         // 标题前问号色块（蓝色，象征询问）
@@ -41,8 +42,8 @@ public class BsConfirmDialog extends BsModal {
         separator(true);
 
         // 是 / 否
-        addButton("否", () -> reply(false), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE);
-        addButton("是", () -> reply(true), BsButton.Variant.PRIMARY, BsButton.Style.SOLID);
+        addButton(BsI18n.get("btn.no", "否"), () -> reply(false), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE);
+        addButton(BsI18n.get("btn.yes", "是"), () -> reply(true), BsButton.Variant.PRIMARY, BsButton.Style.SOLID);
 
         closeOnBackdrop(false);  // 确认框点背景不关，强制用户选择
         setEnterAnimation(m -> BsAnimations.fadeIn(m, 0.22f));

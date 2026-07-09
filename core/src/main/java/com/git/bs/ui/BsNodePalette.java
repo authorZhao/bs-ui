@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class BsNodePalette extends Table {
 
         // 搜索框
         searchField = new BsTextField("", skin);
-        searchField.setMessageText("搜索节点...");
+        searchField.setMessageText(BsI18n.get("core.node.search", "搜索节点..."));
         searchField.setTextFieldListener((f, c) -> refreshList());
         add(searchField).growX().padBottom(8).row();
 
@@ -117,7 +118,7 @@ public class BsNodePalette extends Table {
             }
         }
         if (filter.isEmpty() && categories.isEmpty()) {
-            Label empty = new Label("(无分类，请用 addCategory 添加)", skin);
+            Label empty = new Label(BsI18n.get("core.node.no_category", "(无分类，请用 addCategory 添加)"), skin);
             empty.setColor(Color.GRAY);
             listArea.add(empty).padTop(20).row();
         } else if (!filter.isEmpty()) {

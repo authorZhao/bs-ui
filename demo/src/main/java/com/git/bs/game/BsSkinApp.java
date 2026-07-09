@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.git.bs.common.SkinUtil;
 import com.git.bs.demo.BsControlsSkinScreen;
 import com.git.bs.demo.BsControlsTestScreen;
+import com.git.bs.i18n.BsI18n;
 import com.git.bs.ui.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -69,10 +70,10 @@ public class BsSkinApp extends Game {
     public java.util.List<String[]> availableCharsEntries() {
         java.util.List<String[]> entries = new java.util.ArrayList<>();
         if (Gdx.files.internal(CHARS_COMMON).exists()) {
-            entries.add(new String[]{"精简字符集 (common.txt)", CHARS_COMMON});
+            entries.add(new String[]{BsI18n.get("app.charset_common"), CHARS_COMMON});
         }
         if (Gdx.files.internal(CHARS).exists()) {
-            entries.add(new String[]{"完整字符集 (chinese.txt)", CHARS});
+            entries.add(new String[]{BsI18n.get("app.charset_full"), CHARS});
         }
         return entries;
     }
@@ -145,6 +146,8 @@ public class BsSkinApp extends Game {
     public void create() {
         log.info("BsControlsTest init: 同步加载 default 字体 + 分帧预热 4 档字号");
         BsUI.init();
+        BsI18n.addBundle("com/git/bs/demo/i18n/");
+        BsI18n.init();
         log.info("BsControlsTest 所有主题皮肤加载完毕");
         long t0 = System.currentTimeMillis();
         BsUI.setTheme(currentTheme);
@@ -224,7 +227,7 @@ public class BsSkinApp extends Game {
         loadingOverlay.setBackground(new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(
                 makeSolidTexture(new Color(0, 0, 0, 0.5f))));
         // "切换主题中..." + 旋转点
-        Label label = new Label("正在切换主题", new Label.LabelStyle(
+        Label label = new Label(BsI18n.get("app.switching_theme"), new Label.LabelStyle(
                 fonts.get("default"), Color.WHITE));
         loadingOverlay.add(label).padBottom(20).row();
         // 旋转点（3 个圆点循环 alpha）

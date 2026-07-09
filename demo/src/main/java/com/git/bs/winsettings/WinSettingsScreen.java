@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.git.bs.ui.BsButton;
+import com.git.bs.i18n.BsI18n;
 import com.git.bs.ui.BsScrollPane;
 import com.git.bs.ui.BsText;
 import com.git.bs.ui.BsTextField;
@@ -49,20 +50,20 @@ public class WinSettingsScreen implements Screen, Router {
     /** 当前所在页 key（主题切换重建时用它保持页面）。 */
     private String current;
 
-    /** {key, 图标符号, 导航文字} —— 与 HomePage 卡片 key 对齐。 */
+    /** {key, 图标符号, 导航文案的 i18n key} —— 渲染时调 BsI18n.get 取文案，与 HomePage 卡片 key 对齐。 */
     private static final String[][] NAV = {
-            {"home", "⌂", "主页"},
-            {"system", "🖥", "系统"},
-            {"bluetooth", "ⓑ", "蓝牙和其他设备"},
-            {"network", "📶", "网络和 Internet"},
-            {"personalization", "🎨", "个性化"},
-            {"apps", "⊞", "应用"},
-            {"accounts", "👤", "账户"},
-            {"timelanguage", "🕐", "时间和语言"},
-            {"gaming", "🎮", "游戏"},
-            {"accessibility", "♿", "辅助功能"},
-            {"privacy", "🔒", "隐私和安全性"},
-            {"update", "⟳", "Windows 更新"},
+            {"home",           "⌂", "nav.home"},
+            {"system",         "🖥", "nav.system"},
+            {"bluetooth",      "ⓑ", "nav.bluetooth"},
+            {"network",        "📶", "nav.network"},
+            {"personalization","🎨", "nav.personalization"},
+            {"apps",           "⊞", "nav.apps"},
+            {"accounts",       "👤", "nav.accounts"},
+            {"timelanguage",   "🕐", "nav.timelanguage"},
+            {"gaming",         "🎮", "nav.gaming"},
+            {"accessibility",  "♿", "nav.accessibility"},
+            {"privacy",        "🔒", "nav.privacy"},
+            {"update",         "⟳", "nav.update"},
     };
 
     public WinSettingsScreen() {
@@ -109,7 +110,7 @@ public class WinSettingsScreen implements Screen, Router {
         pages.put("system/display", new DisplayPage(skin));
         pages.put("system/sound", new SoundPage(skin));
         for (String[] n : NAV) {
-            pages.putIfAbsent(n[0], new PlaceholderPage(n[2], skin));
+            pages.putIfAbsent(n[0], new PlaceholderPage(BsI18n.get(n[2]), skin));
         }
 
         Table root = new Table();
@@ -150,7 +151,7 @@ public class WinSettingsScreen implements Screen, Router {
         nav.add(profile).growX().row();
 
         BsTextField search = new BsTextField("", skin);
-        search.setMessageText("搜索设置");
+        search.setMessageText(BsI18n.get("nav.search"));
         nav.add(search).growX().pad(12).row();
 
         Table navList = new Table();
@@ -159,7 +160,7 @@ public class WinSettingsScreen implements Screen, Router {
         navItems = new NavItem[NAV.length];
         for (int i = 0; i < NAV.length; i++) {
             final String key = NAV[i][0];
-            NavItem item = new NavItem(skin, key, NAV[i][1], NAV[i][2], () -> navigate(key));
+            NavItem item = new NavItem(skin, key, NAV[i][1], BsI18n.get(NAV[i][2]), () -> navigate(key));
             navList.add(item).growX().row();
             navItems[i] = item;
         }

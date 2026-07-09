@@ -1,6 +1,7 @@
 package com.git.bs.winsettings;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -12,50 +13,50 @@ import lombok.extern.slf4j.Slf4j;
 public class AccountsPage extends CategoryPage {
 
     public AccountsPage(Skin skin) {
-        super("账户", skin);
+        super(BsI18n.get("nav.accounts"), skin);
 
-        group("你的信息",
-                SettingItem.value("账户", "", "authorZhao (Microsoft 账户)"),
-                SettingItem.value("账户类型", "", "管理员"),
-                SettingItem.value("已登录设备", "", "同步到 OneDrive"),
-                SettingItem.button("管理账户", "管理 Microsoft 账户", "管理"),
-                SettingItem.button("改用本地账户", "切换到本地账户登录", "改用本地账户")
+        group(BsI18n.get("accounts.group_your_info"),
+                SettingItem.value(BsI18n.get("accounts.account"), "", "authorZhao (Microsoft " + BsI18n.get("accounts.account_suffix") + ")"),
+                SettingItem.value(BsI18n.get("accounts.account_type"), "", BsI18n.get("accounts.administrator")),
+                SettingItem.value(BsI18n.get("accounts.logged_in_devices"), "", BsI18n.get("accounts.sync_to_onedrive")),
+                SettingItem.button(BsI18n.get("accounts.manage_account"), BsI18n.get("accounts.manage_microsoft_account"), BsI18n.get("accounts.manage")),
+                SettingItem.button(BsI18n.get("accounts.use_local_account"), BsI18n.get("accounts.use_local_account_desc"), BsI18n.get("accounts.use_local_account"))
         );
 
-        group("登录选项",
-                SettingItem.value("Windows Hello (人脸)", "Windows Hello 人脸识别", "已设置"),
-                SettingItem.toggle("Windows Hello (指纹)", "指纹登录", true),
-                SettingItem.value("PIN", "Windows Hello PIN", "已设置 (数字)"),
-                SettingItem.button("添加/更改 PIN", "", "更改"),
-                SettingItem.toggle("动态锁", "手机离开时自动锁定 PC", false),
-                SettingItem.select("无密码登录", "仅允许 Windows Hello / PIN", new String[]{"禁用","启用"}, "启用"),
-                SettingItem.select("屏幕超时锁定", "无操作多久锁屏", new String[]{"从不","1 分钟","3 分钟","5 分钟","15 分钟"}, "5 分钟")
+        group(BsI18n.get("accounts.group_signin_options"),
+                SettingItem.value(BsI18n.get("accounts.windows_hello_face"), BsI18n.get("accounts.windows_hello_face_desc"), BsI18n.get("accounts.configured")),
+                SettingItem.toggle(BsI18n.get("accounts.windows_hello_fingerprint"), BsI18n.get("accounts.windows_hello_fingerprint_desc"), true),
+                SettingItem.value("PIN", BsI18n.get("accounts.windows_hello_pin"), BsI18n.get("accounts.pin_configured")),
+                SettingItem.button(BsI18n.get("accounts.add_change_pin"), "", BsI18n.get("accounts.change")),
+                SettingItem.toggle(BsI18n.get("accounts.dynamic_lock"), BsI18n.get("accounts.dynamic_lock_desc"), false),
+                SettingItem.select(BsI18n.get("accounts.passwordless_signin"), BsI18n.get("accounts.passwordless_signin_desc"), new String[]{BsI18n.get("common.disabled"), BsI18n.get("common.enabled")}, BsI18n.get("common.enabled")),
+                SettingItem.select(BsI18n.get("accounts.screen_timeout_lock"), BsI18n.get("accounts.screen_timeout_lock_desc"), new String[]{BsI18n.get("common.never"), BsI18n.get("accounts.1min"), BsI18n.get("accounts.3min"), BsI18n.get("common.5min"), BsI18n.get("common.15min")}, BsI18n.get("common.5min"))
         );
 
-        group("电子邮件和账户",
-                SettingItem.value("主账户", "", "author@outlook.com"),
-                SettingItem.button("添加账户", "添加工作或学校账户", "添加账户"),
-                SettingItem.value("已添加账户", "", "1 个 Microsoft, 2 个工作账户")
+        group(BsI18n.get("accounts.group_email_accounts"),
+                SettingItem.value(BsI18n.get("accounts.primary_account"), "", "author@outlook.com"),
+                SettingItem.button(BsI18n.get("accounts.add_account"), BsI18n.get("accounts.add_work_school_account"), BsI18n.get("accounts.add_account")),
+                SettingItem.value(BsI18n.get("accounts.added_accounts"), "", BsI18n.get("accounts.added_accounts_value"))
         );
 
-        group("家庭和其他用户",
-                SettingItem.value("其他用户", "", "2 个标准用户"),
-                SettingItem.button("添加账户", "添加家庭成员或其他用户", "添加账户",
+        group(BsI18n.get("accounts.group_family_others"),
+                SettingItem.value(BsI18n.get("accounts.other_users"), "", BsI18n.get("accounts.other_users_value")),
+                SettingItem.button(BsI18n.get("accounts.add_account"), BsI18n.get("accounts.add_family_or_other"), BsI18n.get("accounts.add_account"),
                         () -> log.info("添加用户账户")),
-                SettingItem.button("设置工作或学校账户", "连接组织账户", "连接"),
-                SettingItem.toggle("允许家人/其他用户设置锁屏轮播", "", false)
+                SettingItem.button(BsI18n.get("accounts.set_work_school_account"), BsI18n.get("accounts.set_work_school_account_desc"), BsI18n.get("accounts.connect")),
+                SettingItem.toggle(BsI18n.get("accounts.allow_family_slideshow"), "", false)
         );
 
-        group("Windows 备份",
-                SettingItem.value("备份状态", "", "已同步到 OneDrive"),
-                SettingItem.button("备份设置", "备份应用/凭据/设置到 OneDrive", "备份", () -> log.info("Windows 备份")),
-                SettingItem.button("记住我的应用", "新设备恢复应用", "管理")
+        group(BsI18n.get("accounts.group_windows_backup"),
+                SettingItem.value(BsI18n.get("accounts.backup_status"), "", BsI18n.get("accounts.sync_to_onedrive")),
+                SettingItem.button(BsI18n.get("accounts.backup_settings"), BsI18n.get("accounts.backup_settings_desc"), BsI18n.get("accounts.backup"), () -> log.info("Windows 备份")),
+                SettingItem.button(BsI18n.get("accounts.remember_my_apps"), BsI18n.get("accounts.remember_my_apps_desc"), BsI18n.get("accounts.manage"))
         );
 
-        group("凭据与恢复",
-                SettingItem.button("凭据管理器", "查看/管理保存的设备凭据", "管理"),
-                SettingItem.value("账户恢复", "配置备用恢复方式", "已配置"),
-                SettingItem.link("查看账户活动", "Microsoft 账户最近登录", "查看")
+        group(BsI18n.get("accounts.group_credentials"),
+                SettingItem.button(BsI18n.get("accounts.credential_manager"), BsI18n.get("accounts.credential_manager_desc"), BsI18n.get("accounts.manage")),
+                SettingItem.value(BsI18n.get("accounts.account_recovery"), BsI18n.get("accounts.account_recovery_desc"), BsI18n.get("accounts.configured")),
+                SettingItem.link(BsI18n.get("accounts.view_account_activity"), BsI18n.get("accounts.view_account_activity_desc"), BsI18n.get("accounts.view"))
         );
     }
 }

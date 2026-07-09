@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Consumer;
@@ -32,7 +33,7 @@ public class BsPromptDialog extends BsModal {
 
     public BsPromptDialog(String title, String message, String initialText, Skin skin,
                           Consumer<String> onResult) {
-        super(title == null ? "请输入" : title, skin);
+        super(title == null ? BsI18n.get("dialog.input_title", "请输入") : title, skin);
         this.onResult = onResult;
 
         setTitleIcon(skin.newDrawable("white", BsPalette.SUCCESS.getMain()));
@@ -59,8 +60,8 @@ public class BsPromptDialog extends BsModal {
         content(content).contentWidth(400);
         separator(true);
 
-        addButton("取消", () -> reply(null), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE);
-        addButton("确定", this::confirm, BsButton.Variant.PRIMARY, BsButton.Style.SOLID);
+        addButton(BsI18n.get("btn.cancel", "取消"), () -> reply(null), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE);
+        addButton(BsI18n.get("btn.ok", "确定"), this::confirm, BsButton.Variant.PRIMARY, BsButton.Style.SOLID);
 
         closeOnBackdrop(false);
         setEnterAnimation(m -> BsAnimations.scaleIn(m, 0.24f));
@@ -71,7 +72,7 @@ public class BsPromptDialog extends BsModal {
         String text = textField.getText();
         text = text == null ? "" : text.trim();
         if (text.isEmpty()) {
-            errorLabel.setText("输入不能为空");
+            errorLabel.setText(BsI18n.get("prompt.empty_error", "输入不能为空"));
             return;
         }
         reply(text);

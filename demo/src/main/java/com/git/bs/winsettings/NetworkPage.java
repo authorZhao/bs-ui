@@ -1,6 +1,7 @@
 package com.git.bs.winsettings;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -12,48 +13,48 @@ import lombok.extern.slf4j.Slf4j;
 public class NetworkPage extends CategoryPage {
 
     public NetworkPage(Skin skin) {
-        super("网络和 Internet", skin);
+        super(BsI18n.get("nav.network"), skin);
 
         group("Wi-Fi",
-                SettingItem.toggle("Wi-Fi", "启用无线网络连接", true),
-                SettingItem.value("当前网络", "", "Home-5G (已连接, 安全)"),
-                SettingItem.value("信号强度", "", "强 (4 格)"),
-                SettingItem.toggle("随机硬件地址", "提高不同网络的隐私", false),
-                SettingItem.button("管理已知网络", "查看/管理已保存的 Wi-Fi", "管理")
+                SettingItem.toggle("Wi-Fi", BsI18n.get("network.wifi_enable_desc"), true),
+                SettingItem.value(BsI18n.get("network.current_network"), "", BsI18n.get("network.current_network_value")),
+                SettingItem.value(BsI18n.get("network.signal_strength"), "", BsI18n.get("network.signal_strength_value")),
+                SettingItem.toggle(BsI18n.get("network.random_hardware_address"), BsI18n.get("network.random_hardware_address_desc"), false),
+                SettingItem.button(BsI18n.get("network.manage_known_networks"), BsI18n.get("network.manage_known_networks_desc"), BsI18n.get("network.manage"))
         );
 
-        group("以太网",
-                SettingItem.value("状态", "", "已连接"),
-                SettingItem.value("IP 地址", "", "192.168.1.100"),
-                SettingItem.value("子网掩码", "", "255.255.255.0"),
-                SettingItem.value("DNS 服务器", "", "192.168.1.1"),
-                SettingItem.select("IP 分配", "DHCP/手动", new String[]{"自动 (DHCP)","手动"}, "自动 (DHCP)")
+        group(BsI18n.get("network.group_ethernet"),
+                SettingItem.value(BsI18n.get("network.status"), "", BsI18n.get("network.status_connected")),
+                SettingItem.value(BsI18n.get("network.ip_address"), "", "192.168.1.100"),
+                SettingItem.value(BsI18n.get("network.subnet_mask"), "", "255.255.255.0"),
+                SettingItem.value(BsI18n.get("network.dns_server"), "", "192.168.1.1"),
+                SettingItem.select(BsI18n.get("network.ip_assignment"), BsI18n.get("network.ip_assignment_desc"), new String[]{BsI18n.get("network.automatic_dhcp"), BsI18n.get("network.manual")}, BsI18n.get("network.automatic_dhcp"))
         );
 
-        group("VPN 与代理",
-                SettingItem.button("VPN", "添加或管理 VPN 连接", "添加 VPN"),
-                SettingItem.toggle("使用代理服务器", "通过代理访问 Internet", false),
-                SettingItem.value("代理地址", "", "未配置"),
-                SettingItem.toggle("自动检测设置", "自动检测代理配置", true)
+        group(BsI18n.get("network.group_vpn_proxy"),
+                SettingItem.button("VPN", BsI18n.get("network.vpn_desc"), BsI18n.get("network.add_vpn")),
+                SettingItem.toggle(BsI18n.get("network.use_proxy"), BsI18n.get("network.use_proxy_desc"), false),
+                SettingItem.value(BsI18n.get("network.proxy_address"), "", BsI18n.get("network.not_configured")),
+                SettingItem.toggle(BsI18n.get("network.auto_detect"), BsI18n.get("network.auto_detect_desc"), true)
         );
 
-        group("移动热点",
-                SettingItem.toggle("移动热点", "与其他设备共享网络", false),
-                SettingItem.value("热点名称", "", "DESKTOP-BSUI 5243"),
-                SettingItem.value("Internet 共享来源", "", "Wi-Fi"),
-                SettingItem.button("编辑", "修改热点名称/密码", "编辑")
+        group(BsI18n.get("network.group_mobile_hotspot"),
+                SettingItem.toggle(BsI18n.get("network.mobile_hotspot"), BsI18n.get("network.mobile_hotspot_desc"), false),
+                SettingItem.value(BsI18n.get("network.hotspot_name"), "", "DESKTOP-BSUI 5243"),
+                SettingItem.value(BsI18n.get("network.internet_sharing_source"), "", "Wi-Fi"),
+                SettingItem.button(BsI18n.get("network.edit"), BsI18n.get("network.edit_hotspot_desc"), BsI18n.get("network.edit"))
         );
 
-        group("飞行模式与无线",
-                SettingItem.toggle("飞行模式", "禁用所有无线通信", false),
+        group(BsI18n.get("network.group_airplane"),
+                SettingItem.toggle(BsI18n.get("network.airplane_mode"), BsI18n.get("network.airplane_mode_desc"), false),
                 SettingItem.toggle("Wi-Fi", "", true),
-                SettingItem.toggle("蓝牙", "", true)
+                SettingItem.toggle(BsI18n.get("bluetooth.bluetooth"), "", true)
         );
 
-        group("高级网络设置",
-                SettingItem.button("网络重置", "重置网络适配器和设置", "重置", () -> log.info("网络重置")),
-                SettingItem.button("网络适配器选项", "查看适配器、IP 配置", "打开"),
-                SettingItem.select("DNS over HTTPS", "加密 DNS", new String[]{"关闭","自动","手动"}, "关闭")
+        group(BsI18n.get("network.group_advanced"),
+                SettingItem.button(BsI18n.get("network.network_reset"), BsI18n.get("network.network_reset_desc"), BsI18n.get("network.reset"), () -> log.info("网络重置")),
+                SettingItem.button(BsI18n.get("network.adapter_options"), BsI18n.get("network.adapter_options_desc"), BsI18n.get("common.open")),
+                SettingItem.select("DNS over HTTPS", BsI18n.get("network.doh_desc"), new String[]{BsI18n.get("common.off"), BsI18n.get("common.on"), BsI18n.get("network.manual")}, BsI18n.get("common.off"))
         );
     }
 }

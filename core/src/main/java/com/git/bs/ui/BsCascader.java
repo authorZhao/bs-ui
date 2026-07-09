@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -155,7 +156,7 @@ public class BsCascader extends BsTextField {
         }
         if (cols.isEmpty()) {
             com.badlogic.gdx.scenes.scene2d.ui.Label empty =
-                    new com.badlogic.gdx.scenes.scene2d.ui.Label("(无选项)", skin);
+                    new com.badlogic.gdx.scenes.scene2d.ui.Label(BsI18n.get("core.cascader.empty", "(无选项)"), skin);
             empty.setColor(BsTheme.tm());
             popupRoot.add(empty).pad(20);
             popupRoot.pack();

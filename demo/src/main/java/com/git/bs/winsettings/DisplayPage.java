@@ -1,6 +1,7 @@
 package com.git.bs.winsettings;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 
 /**
  * 二级页面：显示（按 Win11「系统 › 显示」）。
@@ -10,34 +11,35 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 public class DisplayPage extends CategoryPage {
 
     public DisplayPage(Skin skin) {
-        super("显示", "主页  ›  系统  ›  显示", skin);
+        super(BsI18n.get("display.title"),
+                BsI18n.get("nav.home") + "  ›  " + BsI18n.get("nav.system") + "  ›  " + BsI18n.get("display.title"), skin);
 
-        group("显示器",
-                SettingItem.value("显示器", "", "DELL U2720Q (27 英寸, 4K)"),
-                SettingItem.select("显示分辨率", "", new String[]{"3840 × 2160 (推荐)","2560 × 1440","1920 × 1080"}, "3840 × 2160 (推荐)"),
-                SettingItem.select("缩放", "文本/图标大小", new String[]{"100%","125%","150%","175%","200%"}, "150%"),
-                SettingItem.select("显示方向", "", new String[]{"横向","纵向","横向翻转","纵向翻转"}, "横向")
+        group(BsI18n.get("display.group_monitor"),
+                SettingItem.value(BsI18n.get("display.monitor"), "", BsI18n.get("display.monitor_value")),
+                SettingItem.select(BsI18n.get("display.resolution"), "", new String[]{BsI18n.get("display.res_4k_recommended"), BsI18n.get("display.res_2k"), BsI18n.get("display.res_1080p")}, BsI18n.get("display.res_4k_recommended")),
+                SettingItem.select(BsI18n.get("display.scaling"), BsI18n.get("display.scaling_desc"), new String[]{"100%", "125%", "150%", "175%", "200%"}, "150%"),
+                SettingItem.select(BsI18n.get("display.orientation"), "", new String[]{BsI18n.get("display.orient_landscape"), BsI18n.get("display.orient_portrait"), BsI18n.get("display.orient_landscape_flip"), BsI18n.get("display.orient_portrait_flip")}, BsI18n.get("display.orient_landscape"))
         );
 
-        group("亮度和颜色",
-                SettingItem.select("亮度", "", new String[]{"100%","80%","60%","40%","20%"}, "80%"),
-                SettingItem.select("HDR", "高动态范围", new String[]{"开","关"}, "开"),
-                SettingItem.select("颜色配置文件", "", new String[]{"sRGB IEC61966-2.1","DCI-P3","自定义"}, "sRGB IEC61966-2.1"),
-                SettingItem.button("颜色校准", "校准显示器颜色", "校准")
+        group(BsI18n.get("display.group_brightness_color"),
+                SettingItem.select(BsI18n.get("display.brightness"), "", new String[]{"100%", "80%", "60%", "40%", "20%"}, "80%"),
+                SettingItem.select("HDR", BsI18n.get("display.hdr_desc"), new String[]{BsI18n.get("common.on"), BsI18n.get("common.off")}, BsI18n.get("common.on")),
+                SettingItem.select(BsI18n.get("display.color_profile"), "", new String[]{"sRGB IEC61966-2.1", "DCI-P3", BsI18n.get("display.custom")}, "sRGB IEC61966-2.1"),
+                SettingItem.button(BsI18n.get("display.color_calibration"), BsI18n.get("display.color_calibration_desc"), BsI18n.get("display.calibrate"))
         );
 
-        group("夜间模式",
-                SettingItem.toggle("夜间模式", "减弱蓝光保护眼睛", false),
-                SettingItem.select("强度", "", new String[]{"弱","中","强"}, "中"),
-                SettingItem.select("计划", "", new String[]{"日落到日出","自定义时间","关闭"}, "日落到日出"),
-                SettingItem.button("夜间模式设置", "调整色温", "设置")
+        group(BsI18n.get("display.group_night_light"),
+                SettingItem.toggle(BsI18n.get("display.night_light"), BsI18n.get("display.night_light_desc"), false),
+                SettingItem.select(BsI18n.get("display.intensity"), "", new String[]{BsI18n.get("display.weak"), BsI18n.get("display.medium"), BsI18n.get("display.strong")}, BsI18n.get("display.medium")),
+                SettingItem.select(BsI18n.get("display.schedule"), "", new String[]{BsI18n.get("display.sunset_to_sunrise"), BsI18n.get("display.custom_time"), BsI18n.get("common.off")}, BsI18n.get("display.sunset_to_sunrise")),
+                SettingItem.button(BsI18n.get("display.night_light_settings"), BsI18n.get("display.adjust_color_temp"), BsI18n.get("display.settings"))
         );
 
-        group("缩放与多显示器",
-                SettingItem.select("多显示器设置", "", new String[]{"扩展这些显示器","复制这些显示器","仅 1 号显示器","仅 2 号显示器"}, "扩展这些显示器"),
-                SettingItem.toggle("贴靠窗口", "拖动窗口自动排列", true),
-                SettingItem.toggle("在窗口边缘显示贴靠布局", "", true),
-                SettingItem.link("高级显示设置", "适配器、刷新率、颜色深度", "查看")
+        group(BsI18n.get("display.group_multi_display"),
+                SettingItem.select(BsI18n.get("display.multi_display_setup"), "", new String[]{BsI18n.get("display.extend_displays"), BsI18n.get("display.duplicate_displays"), BsI18n.get("display.display_1_only"), BsI18n.get("display.display_2_only")}, BsI18n.get("display.extend_displays")),
+                SettingItem.toggle(BsI18n.get("display.snap_windows"), BsI18n.get("display.snap_windows_desc"), true),
+                SettingItem.toggle(BsI18n.get("display.show_snap_layouts"), "", true),
+                SettingItem.link(BsI18n.get("display.advanced_display"), BsI18n.get("display.advanced_display_desc"), BsI18n.get("display.view"))
         );
     }
 }

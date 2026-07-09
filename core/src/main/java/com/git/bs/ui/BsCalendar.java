@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.DayOfWeek;
@@ -13,7 +14,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-import java.util.Locale;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -45,7 +45,6 @@ public class BsCalendar extends Table {
 
     public enum Mode { SINGLE, RANGE }
 
-    private static final DateTimeFormatter MONTH_FMT = DateTimeFormatter.ofPattern("yyyy 年 MM 月");
     private static final DayOfWeek[] WEEK = {
             DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
             DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
@@ -131,7 +130,7 @@ public class BsCalendar extends Table {
         if (showNav) {
             Table nav = new Table();
             // 中间标题保留 bs-menu-title 样式（字体较粗，整体协调）
-            TextButton title = new TextButton(currentMonth.format(MONTH_FMT), skin, "bs-menu-title");
+            TextButton title = new TextButton(currentMonth.format(DateTimeFormatter.ofPattern(datePattern())), skin, "bs-menu-title");
             title.setDisabled(true);
             // 两侧箭头改用 skin 的 bs-arrow-* drawable（程序化三角，不依赖字体字符，
             // 在 light/dark 主题下都是主色，对比稳定）
@@ -152,7 +151,7 @@ public class BsCalendar extends Table {
         // 星期表头（周一~周日）
         Table header = new Table();
         for (DayOfWeek dow : WEEK) {
-            Label h = new Label(dow.getDisplayName(TextStyle.NARROW, Locale.CHINA), skin);
+            Label h = new Label(dow.getDisplayName(TextStyle.NARROW, BsI18n.javaLocale()), skin);
             h.setColor(BsTheme.ts());
             header.add(h).width(cellW).center();
         }
@@ -240,5 +239,17 @@ public class BsCalendar extends Table {
             });
         }
         return img;
+    }
+
+    /** 根据当前 Locale 选月份标题格式串：中文用 "yyyy 年 MM 月"，英文用 "MMMM yyyy"，其他用 "yyyy-MM"。 */
+    private static String datePattern() {
+        java.util.Locale locale = BsI18n.javaLocale();
+        if (java.util.Locale.CHINA.equals(locale) || java.util.Locale.CHINESE.equals(locale)) {
+            return "yyyy 年 MM 月";
+        } else if (java.util.Locale.US.equals(locale) || java.util.Locale.ENGLISH.equals(locale)) {
+            return "MMMM yyyy";
+        } else {
+            return "yyyy-MM";
+        }
     }
 }

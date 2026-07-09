@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.git.bs.i18n.BsI18n;
 
 /**
  * Bootstrap 风格结果页（Result）—— 整页的成功/失败/警告，带图标+标题+描述+操作按钮。
@@ -141,16 +142,18 @@ public class BsResult extends Table {
 
     private static String defaultTitle(Type t) {
         switch (t) {
-            case SUCCESS: return "操作成功";
-            case WARNING: return "请注意";
-            case ERROR:   return "操作失败";
-            case INFO:    return "信息";
+            case SUCCESS: return BsI18n.get("core.result.success", "操作成功");
+            case WARNING: return BsI18n.get("core.result.warning", "请注意");
+            case ERROR:   return BsI18n.get("core.result.error", "操作失败");
+            case INFO:    return BsI18n.get("core.result.info", "信息");
         }
         return "";
     }
 
     private static boolean isDefaultTitle(String t) {
-        return "操作成功".equals(t) || "请注意".equals(t)
-                || "操作失败".equals(t) || "信息".equals(t);
+        return BsI18n.get("core.result.success", "操作成功").equals(t)
+                || BsI18n.get("core.result.warning", "请注意").equals(t)
+                || BsI18n.get("core.result.error", "操作失败").equals(t)
+                || BsI18n.get("core.result.info", "信息").equals(t);
     }
 }

@@ -1,6 +1,7 @@
 package com.git.bs.winsettings;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 import com.git.bs.ui.BsButton;
 import com.git.bs.ui.BsUI;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +15,11 @@ class PlaceholderPage extends CategoryPage {
 
     PlaceholderPage(String title, Skin skin) {
         super(title, skin);
-        group(title + "（建设中）",
-                SettingItem.value("提示", "此分类页待实现，下一轮补全全部设置项", "敬请期待"),
-                SettingItem.button("返回主页", "", "返回", null),
-                SettingItem.link("占位演示", "", "点这里打日志", null)
+        group(title + BsI18n.get("placeholder.building"),
+                SettingItem.value(BsI18n.get("placeholder.tip"),
+                        BsI18n.get("placeholder.tip_desc"), BsI18n.get("placeholder.coming_soon")),
+                SettingItem.button(BsI18n.get("placeholder.back_home"), "", BsI18n.get("placeholder.back"), null),
+                SettingItem.link(BsI18n.get("placeholder.demo"), "", BsI18n.get("placeholder.click_log"), null)
         );
     }
 }

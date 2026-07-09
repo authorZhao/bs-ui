@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Consumer;
@@ -235,7 +236,7 @@ public class BsColorPickerPopup {
         root.add(previewRow).pad(4).row();
 
         // ===== 预设色板 =====
-        root.add(new Label("预设", skin)).left().pad(4).row();
+        root.add(new Label(BsI18n.get("core.color.preset", "预设"), skin)).left().pad(4).row();
         Table swatches = new Table();
         int cols = 8;
         for (int i = 0; i < PRESET_HEX.length; i++) {
@@ -263,11 +264,11 @@ public class BsColorPickerPopup {
 
         // ===== 确认 / 取消 =====
         Table btnRow = new Table();
-        TextButton cancel = new TextButton("取消", skin, "bs-btn-secondary");
+        TextButton cancel = new TextButton(BsI18n.get("btn.cancel", "取消"), skin, "bs-btn-secondary");
         cancel.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { close(); }
         });
-        TextButton ok = new TextButton("确定", skin, "bs-btn-primary");
+        TextButton ok = new TextButton(BsI18n.get("btn.ok", "确定"), skin, "bs-btn-primary");
         ok.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { confirm(); }
         });

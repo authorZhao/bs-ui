@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.DayOfWeek;
@@ -19,7 +20,6 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
@@ -39,7 +39,6 @@ import java.util.function.Consumer;
 @Slf4j
 public class BsDatePickerPopup {
 
-    private static final DateTimeFormatter MONTH_FMT = DateTimeFormatter.ofPattern("yyyy 年 MM 月");
     private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_LOCAL_DATE;
 
     private final boolean withTime;
@@ -126,7 +125,7 @@ public class BsDatePickerPopup {
         // （程序化三角，不依赖字体字符，在 light/dark 主题下都是主色，对比稳定）
         com.badlogic.gdx.scenes.scene2d.ui.Image prev = arrowImage(false);
         com.badlogic.gdx.scenes.scene2d.ui.Image next = arrowImage(true);
-        TextButton title = new TextButton(currentMonth.format(MONTH_FMT), skin, "bs-menu-title");
+        TextButton title = new TextButton(currentMonth.format(DateTimeFormatter.ofPattern(datePattern())), skin, "bs-menu-title");
         title.setDisabled(true);
         prev.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
@@ -148,7 +147,7 @@ public class BsDatePickerPopup {
         DayOfWeek[] order = { DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
                 DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY };
         for (DayOfWeek dow : order) {
-            String name = dow.getDisplayName(TextStyle.NARROW, Locale.CHINA);
+            String name = dow.getDisplayName(TextStyle.NARROW, BsI18n.javaLocale());
             com.badlogic.gdx.scenes.scene2d.ui.Label h =
                     new com.badlogic.gdx.scenes.scene2d.ui.Label(name, skin);
             h.setColor(BsTheme.ts());
@@ -196,7 +195,7 @@ public class BsDatePickerPopup {
         root.add(grid).pad(2, 4, 2, 4).row();
 
         // 今日按钮（仅日期模式直接确认；含时间模式只设日期部分）
-        TextButton todayBtn = new TextButton("今日 (" + today.format(ISO) + ")", skin, "bs-menu-title");
+        TextButton todayBtn = new TextButton(BsI18n.get("core.datepicker.today", "今日 ({0})", today.format(ISO)), skin, "bs-menu-title");
         todayBtn.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 selectedDate = today;
@@ -212,7 +211,7 @@ public class BsDatePickerPopup {
         // 时间输入区（仅 withTime=true）
         if (withTime) {
             Table timeRow = new Table();
-            timeRow.add(new com.badlogic.gdx.scenes.scene2d.ui.Label("时间:", skin)).padRight(6);
+            timeRow.add(new com.badlogic.gdx.scenes.scene2d.ui.Label(BsI18n.get("core.datepicker.time", "时间:"), skin)).padRight(6);
             hourField = makeTimeField(selectedTime.getHour());
             minuteField = makeTimeField(selectedTime.getMinute());
             secondField = makeTimeField(selectedTime.getSecond());
@@ -224,7 +223,7 @@ public class BsDatePickerPopup {
             root.add(timeRow).pad(6, 4, 2, 4).row();
 
             // 确定按钮
-            TextButton ok = new TextButton("确定", skin, "bs-btn-primary");
+            TextButton ok = new TextButton(BsI18n.get("btn.ok", "确定"), skin, "bs-btn-primary");
             ok.addListener(new ClickListener() {
                 @Override public void clicked(InputEvent event, float x, float y) {
                     confirm();
@@ -294,6 +293,18 @@ public class BsDatePickerPopup {
     }
 
     public boolean isOpen() { return open; }
+
+    /** 根据当前 Locale 选月份标题格式串：中文用 "yyyy 年 MM 月"，英文用 "MMMM yyyy"，其他用 "yyyy-MM"。 */
+    private static String datePattern() {
+        java.util.Locale locale = BsI18n.javaLocale();
+        if (java.util.Locale.CHINA.equals(locale) || java.util.Locale.CHINESE.equals(locale)) {
+            return "yyyy 年 MM 月";
+        } else if (java.util.Locale.US.equals(locale) || java.util.Locale.ENGLISH.equals(locale)) {
+            return "MMMM yyyy";
+        } else {
+            return "yyyy-MM";
+        }
+    }
 
     /** 月份切换箭头：用 skin 的 bs-arrow-* drawable（程序化三角，主题主色，对比稳定）。 */
     private com.badlogic.gdx.scenes.scene2d.ui.Image arrowImage(boolean pointRight) {

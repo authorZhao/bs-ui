@@ -1,5 +1,7 @@
 package com.git.bs.ui.ext;
 
+import com.git.bs.i18n.BsI18n;
+
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -38,7 +40,7 @@ public final class BsRule {
 
     /// 非空（trim 后）。
     public static BsRule required() {
-        return required("必填");
+        return required(BsI18n.get("core.rule.required", "必填"));
     }
 
     /// 非空，自定义错误消息。
@@ -50,7 +52,7 @@ public final class BsRule {
     public static BsRule minLen(int n) {
         return new BsRule(ctx -> {
             int len = ctx.self() == null ? 0 : ctx.self().length();
-            return len < n ? ("至少 " + n + " 个字符") : null;
+            return len < n ? BsI18n.get("core.rule.min_length", "至少 {0} 个字符", n) : null;
         });
     }
 
@@ -58,7 +60,7 @@ public final class BsRule {
     public static BsRule maxLen(int n) {
         return new BsRule(ctx -> {
             int len = ctx.self() == null ? 0 : ctx.self().length();
-            return len > n ? ("最多 " + n + " 个字符") : null;
+            return len > n ? BsI18n.get("core.rule.max_length", "最多 {0} 个字符", n) : null;
         });
     }
 
@@ -79,16 +81,16 @@ public final class BsRule {
             if (isBlank(v)) return null;   // 空值交给 required 管
             try {
                 double d = Double.parseDouble(v);
-                return (d < min || d > max) ? ("取值范围 " + min + " ~ " + max) : null;
+                return (d < min || d > max) ? BsI18n.get("core.rule.range", "取值范围 {0} ~ {1}", min, max) : null;
             } catch (NumberFormatException e) {
-                return "必须是数字";
+                return BsI18n.get("core.rule.number", "必须是数字");
             }
         });
     }
 
     /// 邮箱格式。
     public static BsRule email() {
-        return pattern("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "邮箱格式不正确");
+        return pattern("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", BsI18n.get("core.rule.email", "邮箱格式不正确"));
     }
 
     /// 仅取自身值的自定义规则。

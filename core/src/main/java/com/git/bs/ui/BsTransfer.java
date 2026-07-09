@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class BsTransfer extends Table {
         leftScroll = new BsScrollPane(leftPanel, skin);
         leftScroll.setFadeScrollBars(false);
         leftScroll.setScrollingDisabled(true, false);
-        Table leftWrap = makeColumn("可选", leftScroll, leftCount = makeCountLabel());
+        Table leftWrap = makeColumn(BsI18n.get("core.transfer.available", "可选"), leftScroll, leftCount = makeCountLabel());
 
         // 中间按钮
         Table middle = makeMiddleButtons();
@@ -75,7 +76,7 @@ public class BsTransfer extends Table {
         rightScroll = new BsScrollPane(rightPanel, skin);
         rightScroll.setFadeScrollBars(false);
         rightScroll.setScrollingDisabled(true, false);
-        Table rightWrap = makeColumn("已选", rightScroll, rightCount = makeCountLabel());
+        Table rightWrap = makeColumn(BsI18n.get("core.transfer.selected", "已选"), rightScroll, rightCount = makeCountLabel());
 
         add(leftWrap).width(180).height(220);
         add(middle).pad(8);

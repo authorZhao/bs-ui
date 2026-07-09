@@ -4,6 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ public class BsDataTable extends Table {
         footerRow = new Table();
         footerRow.left();
         footerRow.defaults().pad(4);
-        infoLabel = new Label("(无数据)", skin);
+        infoLabel = new Label(BsI18n.get("table.no_data", "(无数据)"), skin);
         infoLabel.setColor(BsPalette.SECONDARY.getMain());
         infoLabel.setFontScale(0.9f);
         pagination = new BsPagination(skin);
@@ -145,9 +146,9 @@ public class BsDataTable extends Table {
         // 空状态
         if (allData.isEmpty()) {
             bodyWrap.setActor(new BsEmpty(BsUI.getSkin())
-                    .title("暂无数据")
-                    .description("当前列表为空"));
-            infoLabel.setText("(共 0 条)");
+                    .title(BsI18n.get("table.empty", "暂无数据"))
+                    .description(BsI18n.get("table.empty_hint", "当前列表为空")));
+            infoLabel.setText(BsI18n.get("table.zero_count", "(共 0 条)"));
             return;
         }
         if (!(bodyWrap.getActor() instanceof BsScrollPane)) {
@@ -157,8 +158,8 @@ public class BsDataTable extends Table {
         int to = Math.min(from + pageSize, allData.size());
         List<List<String>> page = new ArrayList<>(allData.subList(from, to));
         table.setData(page);
-        infoLabel.setText("共 " + allData.size() + " 条，第 " + currentPage + "/"
-                + pagination.getTotalPages() + " 页，本页 " + page.size() + " 条");
+        infoLabel.setText(BsI18n.get("table.page_info", "共 {0} 条，第 {1}/{2} 页，本页 {3} 条",
+                allData.size(), currentPage, pagination.getTotalPages(), page.size()));
     }
 
     public int getRowCount() { return allData.size(); }

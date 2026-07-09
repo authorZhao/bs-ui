@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.git.bs.i18n.BsI18n;
 import com.git.bs.ui.BsDarkTheme;
 import com.git.bs.ui.BsLightTheme;
 import com.git.bs.ui.BsUI;
@@ -24,6 +25,9 @@ public class WinSettingsApp extends Game {
     @Override
     public void create() {
         BsUI.init();
+        // 注册 winsettings 业务翻译包（core 自带的通用 key 之外，业务专属 key 在这里）
+        BsI18n.addBundle("com/git/bs/demo/i18n/");
+        BsI18n.init();                          // i18n：加载 core + demo 业务包，默认 zh_cn
         BsUI.setTheme(BsDarkTheme.INSTANCE);   // Win11 设置亮色风格
         setScreen(new WinSettingsScreen());
         // 主题切换（个性化卡「色彩模式」选亮/暗）→ 重建 screen，让所有 actor 用新 skin。
@@ -34,6 +38,12 @@ public class WinSettingsApp extends Game {
                             ? ((WinSettingsScreen) getScreen()).currentKey() : "home";
                     setScreen(new WinSettingsScreen(key));
                 }));
+        // 语言切换 → 同样重建 screen，让所有 actor 用新语言文案（仿主题切换）
+        BsI18n.addListener(() -> Gdx.app.postRunnable(() -> {
+            String key = (getScreen() instanceof WinSettingsScreen)
+                    ? ((WinSettingsScreen) getScreen()).currentKey() : "home";
+            setScreen(new WinSettingsScreen(key));
+        }));
     }
 
     @Override

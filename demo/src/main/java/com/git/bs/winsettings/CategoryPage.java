@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.git.bs.ui.BsButton;
+import com.git.bs.i18n.BsI18n;
 import com.git.bs.ui.BsLink;
 import com.git.bs.ui.BsSelectBox;
 import com.git.bs.ui.BsSwitch;
@@ -35,7 +36,7 @@ public abstract class CategoryPage extends SettingsPage {
     protected final List<SettingGroup> groups = new ArrayList<>();
 
     protected CategoryPage(String title, Skin skin) {
-        this(title, "主页  ›  " + title, skin);
+        this(title, BsI18n.get("nav.home") + "  ›  " + title, skin);
     }
 
     /** 二级页用：传入完整面包屑（如「主页 › 系统 › 显示」）。 */
@@ -118,7 +119,7 @@ public abstract class CategoryPage extends SettingsPage {
                 return box;
             }
             case BUTTON: {
-                BsButton btn = new BsButton(it.value != null ? it.value : "打开", skin,
+                BsButton btn = new BsButton(it.value != null ? it.value : BsI18n.get("common.open"), skin,
                         BsButton.Variant.PRIMARY, BsButton.Style.OUTLINE, BsButton.Size.SM);
                 btn.addListener(new ClickListener() {
                     @Override public void clicked(InputEvent event, float x, float y) {
@@ -129,7 +130,7 @@ public abstract class CategoryPage extends SettingsPage {
                 return btn;
             }
             case LINK: {
-                BsLink link = new BsLink(it.value != null ? it.value : "了解更多", skin);
+                BsLink link = new BsLink(it.value != null ? it.value : BsI18n.get("common.learn_more"), skin);
                 link.addListener(new ClickListener() {
                     @Override public void clicked(InputEvent event, float x, float y) {
                         log.info("[{}] 链接 {}", title, it.title);

@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Consumer;
@@ -50,7 +51,7 @@ public class BsSearchBar extends Table {
         filterBox.setVisible(withFilter);
         if (withFilter) {
             com.badlogic.gdx.utils.Array<String> items = new com.badlogic.gdx.utils.Array<>();
-            items.add("全部");
+            items.add(BsI18n.get("core.search.all", "全部"));
             filterBox.setItems(items);
             filterBox.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener() {
                 @Override public void changed(com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
@@ -64,7 +65,7 @@ public class BsSearchBar extends Table {
         }
 
         field = new BsTextField("", skin);
-        field.setMessageText("搜索...");
+        field.setMessageText(BsI18n.get("core.search.placeholder", "搜索..."));
         field.setTextFieldListener((f, c) -> {
             updateClearBtn();
             if (c == '\n' || c == '\r') triggerSearch();
@@ -82,7 +83,7 @@ public class BsSearchBar extends Table {
         clearBtn.setVisible(false);
         add(clearBtn).padLeft(-1);
 
-        searchBtn = new BsButton("搜索", skin, BsButton.Variant.PRIMARY, BsButton.Style.SOLID, BsButton.Size.MD);
+        searchBtn = new BsButton(BsI18n.get("core.search.button", "搜索"), skin, BsButton.Variant.PRIMARY, BsButton.Style.SOLID, BsButton.Size.MD);
         searchBtn.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 triggerSearch();

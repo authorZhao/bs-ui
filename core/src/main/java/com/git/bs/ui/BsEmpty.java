@@ -4,6 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.git.bs.i18n.BsI18n;
 
 /**
  * Bootstrap 风格空状态（Empty State）—— 列表/搜索无结果时显示。
@@ -31,12 +32,12 @@ public class BsEmpty extends Table {
         iconLabel.setFontScale(2.5f);
         add(iconLabel).padBottom(8).row();
 
-        Label title = new Label("暂无数据", skin);
+        Label title = new Label(BsI18n.get("core.empty", "暂无数据"), skin);
         title.setColor(BsTheme.tp());
         title.setFontScale(1.1f);
         add(title).row();
 
-        Label desc = new Label("没有符合条件的记录", skin);
+        Label desc = new Label(BsI18n.get("core.empty_desc", "没有符合条件的记录"), skin);
         desc.setColor(BsTheme.ts());
         desc.setFontScale(0.95f);
         add(desc).row();

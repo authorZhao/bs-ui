@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -52,7 +53,7 @@ public class BsAboutDialog extends BsModal {
     private boolean modified = false;
 
     public BsAboutDialog(Skin skin) {
-        super("关于", skin);
+        super(BsI18n.get("core.about", "关于"), skin);
         this.skin = skin;
         contentTable = new Table(skin);
         contentTable.defaults().left().padTop(2).padBottom(2);
@@ -100,7 +101,7 @@ public class BsAboutDialog extends BsModal {
     @Override
     public void showModal(Stage stage) {
         rebuildContent();
-        addButton("确定", null, BsButton.Variant.PRIMARY, BsButton.Style.SOLID);
+        addButton(BsI18n.get("btn.ok", "确定"), null, BsButton.Variant.PRIMARY, BsButton.Style.SOLID);
         super.showModal(stage);
     }
 

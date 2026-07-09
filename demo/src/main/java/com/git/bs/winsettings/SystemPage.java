@@ -1,6 +1,7 @@
 package com.git.bs.winsettings;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -13,59 +14,67 @@ import lombok.extern.slf4j.Slf4j;
 public class SystemPage extends CategoryPage {
 
     public SystemPage(Skin skin) {
-        super("系统", skin);
+        super(BsI18n.get("nav.system"), skin);
 
         // 二级页面入口（Win11 系统页顶部：每行带 › 箭头进子页）
         group("",
-                SettingItem.page("🖥", "显示", "分辨率、缩放、夜间模式、HDR", "system/display"),
-                SettingItem.page("🔊", "声音", "音量、输出/输入设备", "system/sound"),
-                SettingItem.page("🔔", "通知", "应用通知、专注助手、勿扰", "system/notifications"),
-                SettingItem.page("🔋", "电源和电池", "电源模式、屏幕睡眠、电池", "system/power"),
-                SettingItem.page("💾", "存储", "存储感知、磁盘空间、临时文件", "system/storage")
+                SettingItem.page("🖥", BsI18n.get("system.display"), BsI18n.get("system.display_desc"), "system/display"),
+                SettingItem.page("🔊", BsI18n.get("system.sound"), BsI18n.get("system.sound_desc"), "system/sound"),
+                SettingItem.page("🔔", BsI18n.get("system.notifications"), BsI18n.get("system.notifications_desc"), "system/notifications"),
+                SettingItem.page("🔋", BsI18n.get("system.power"), BsI18n.get("system.power_desc"), "system/power"),
+                SettingItem.page("💾", BsI18n.get("system.storage"), BsI18n.get("system.storage_desc"), "system/storage")
         );
 
-        group("显示",
-                SettingItem.value("分辨率", "显示器原生分辨率", "1920 × 1080 (推荐)"),
-                SettingItem.value("缩放与布局", "文本/图标大小", "100%"),
-                SettingItem.toggle("夜间模式", "减弱蓝光，夜间更护眼", false, c -> log.info("应用夜间模式: {}", c)),
-                SettingItem.select("显示方向", "横向 / 纵向", new String[]{"横向", "纵向", "横向翻转", "纵向翻转"}, "横向")
+        group(BsI18n.get("system.group_display"),
+                SettingItem.value(BsI18n.get("system.resolution"), BsI18n.get("system.resolution_desc"), BsI18n.get("system.resolution_value")),
+                SettingItem.value(BsI18n.get("system.scale"), BsI18n.get("system.scale_desc"), "100%"),
+                SettingItem.toggle(BsI18n.get("system.night_light"), BsI18n.get("system.night_light_desc"), false, c -> log.info("应用夜间模式: {}", c)),
+                SettingItem.select(BsI18n.get("system.orientation"), BsI18n.get("system.orientation_desc"),
+                        new String[]{BsI18n.get("system.orient_landscape"), BsI18n.get("system.orient_portrait"),
+                                BsI18n.get("system.orient_landscape_flip"), BsI18n.get("system.orient_portrait_flip")},
+                        BsI18n.get("system.orient_landscape"))
         );
 
-        group("声音",
-                SettingItem.select("输出设备", "扬声器 / 耳机",
-                        new String[]{"扬声器 (Realtek Audio)", "耳机", "HDMI 输出"}, "扬声器 (Realtek Audio)"),
-                SettingItem.select("输入设备", "麦克风",
-                        new String[]{"麦克风阵列 (Realtek)", "线路输入"}, "麦克风阵列 (Realtek)"),
-                SettingItem.toggle("空间音频", "Windows Sonic for Headphones", false)
+        group(BsI18n.get("system.group_sound"),
+                SettingItem.select(BsI18n.get("system.output"), BsI18n.get("system.output_desc"),
+                        new String[]{BsI18n.get("system.speakers"), BsI18n.get("system.headphones"), BsI18n.get("system.hdmi_output")},
+                        BsI18n.get("system.speakers")),
+                SettingItem.select(BsI18n.get("system.input"), BsI18n.get("system.input_desc"),
+                        new String[]{BsI18n.get("system.mic_array"), BsI18n.get("system.line_in")},
+                        BsI18n.get("system.mic_array")),
+                SettingItem.toggle(BsI18n.get("system.spatial_audio"), "Windows Sonic for Headphones", false)
         );
 
-        group("通知与专注",
-                SettingItem.toggle("通知", "允许应用显示通知", true),
-                SettingItem.toggle("专注助手", "屏蔽通知保持专注", false),
-                SettingItem.toggle("勿扰模式", "按规则自动开启勿扰", false)
+        group(BsI18n.get("system.group_focus"),
+                SettingItem.toggle(BsI18n.get("system.notifications"), BsI18n.get("system.notifications_allow"), true),
+                SettingItem.toggle(BsI18n.get("system.focus_assist"), BsI18n.get("system.focus_assist_desc"), false),
+                SettingItem.toggle(BsI18n.get("system.do_not_disturb"), BsI18n.get("system.do_not_disturb_desc"), false)
         );
 
-        group("电源与电池",
-                SettingItem.select("电源模式", "平衡 / 最佳性能 / 节能",
-                        new String[]{"平衡", "最佳性能", "最佳能效"}, "平衡"),
-                SettingItem.select("屏幕和睡眠", "无操作多久关闭屏幕",
-                        new String[]{"5 分钟", "10 分钟", "15 分钟", "30 分钟", "从不"}, "10 分钟"),
-                SettingItem.button("电源和睡眠", "高级电源设置", "打开", () -> log.info("打开电源选项"))
+        group(BsI18n.get("system.group_power"),
+                SettingItem.select(BsI18n.get("system.power_mode"), BsI18n.get("system.power_mode_desc"),
+                        new String[]{BsI18n.get("system.power_balanced"), BsI18n.get("system.power_best_perf"), BsI18n.get("system.power_best_efficiency")},
+                        BsI18n.get("system.power_balanced")),
+                SettingItem.select(BsI18n.get("system.screen_sleep"), BsI18n.get("system.screen_sleep_desc"),
+                        new String[]{BsI18n.get("common.5min"), BsI18n.get("common.10min"), BsI18n.get("common.15min"),
+                                BsI18n.get("common.30min"), BsI18n.get("common.never")},
+                        BsI18n.get("common.10min")),
+                SettingItem.button(BsI18n.get("system.power_sleep"), BsI18n.get("system.advanced_power"), BsI18n.get("common.open"), () -> log.info("打开电源选项"))
         );
 
-        group("存储",
-                SettingItem.value("C 盘 (系统)", "系统盘使用情况", "128 GB / 256 GB (50%)"),
-                SettingItem.toggle("存储感知", "自动清理临时文件释放空间", true),
-                SettingItem.button("临时文件", "清理临时文件释放空间", "清理", () -> log.info("清理临时文件"))
+        group(BsI18n.get("system.group_storage"),
+                SettingItem.value(BsI18n.get("system.disk_c"), BsI18n.get("system.disk_usage"), "128 GB / 256 GB (50%)"),
+                SettingItem.toggle(BsI18n.get("system.storage_sense"), BsI18n.get("system.storage_sense_desc"), true),
+                SettingItem.button(BsI18n.get("system.temp_files"), BsI18n.get("system.temp_files_desc"), BsI18n.get("system.cleanup"), () -> log.info("清理临时文件"))
         );
 
-        group("关于",
-                SettingItem.value("设备名称", "", "DESKTOP-BSUI"),
-                SettingItem.value("处理器", "", "Intel Core i7-12700H @ 2.30GHz"),
-                SettingItem.value("已安装的内存 (RAM)", "", "16.0 GB (可用 15.8 GB)"),
-                SettingItem.value("系统类型", "", "64 位操作系统, x64 处理器"),
-                SettingItem.value("版本", "", "Windows 11 专业版 23H2"),
-                SettingItem.link("Windows 规格", "", "查看规格", () -> log.info("查看 Windows 规格"))
+        group(BsI18n.get("system.group_about"),
+                SettingItem.value(BsI18n.get("system.device_name"), "", "DESKTOP-BSUI"),
+                SettingItem.value(BsI18n.get("system.processor"), "", "Intel Core i7-12700H @ 2.30GHz"),
+                SettingItem.value(BsI18n.get("system.memory"), "", "16.0 GB (15.8 GB usable)"),
+                SettingItem.value(BsI18n.get("system.system_type"), "", "64-bit OS, x64 processor"),
+                SettingItem.value(BsI18n.get("system.version"), "", "Windows 11 Pro 23H2"),
+                SettingItem.link(BsI18n.get("system.windows_spec"), "", BsI18n.get("system.view_spec"), () -> log.info("查看 Windows 规格"))
         );
     }
 }

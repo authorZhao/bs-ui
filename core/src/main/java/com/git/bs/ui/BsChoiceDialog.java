@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class BsChoiceDialog extends BsModal {
 
     public BsChoiceDialog(String title, String message, List<String> options, Skin skin,
                           Consumer<Integer> onResult) {
-        super(title == null ? "请选择" : title, skin);
+        super(title == null ? BsI18n.get("core.choose", "请选择") : title, skin);
         this.onResult = onResult;
 
         setTitleIcon(skin.newDrawable("white", new Color(0x66 / 255f, 0x10 / 255f, 0xF2 / 255f, 1f)));
@@ -67,7 +68,7 @@ public class BsChoiceDialog extends BsModal {
         separator(true);
 
         // 底部"取消"按钮
-        addButton("取消", () -> reply(-1), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE);
+        addButton(BsI18n.get("btn.cancel", "取消"), () -> reply(-1), BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE);
 
         closeOnBackdrop(true);
         setEnterAnimation(m -> BsAnimations.slideInDown(m, 0.28f));

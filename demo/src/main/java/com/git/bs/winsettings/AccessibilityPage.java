@@ -1,6 +1,7 @@
 package com.git.bs.winsettings;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -13,67 +14,67 @@ import lombok.extern.slf4j.Slf4j;
 public class AccessibilityPage extends CategoryPage {
 
     public AccessibilityPage(Skin skin) {
-        super("辅助功能", skin);
+        super(BsI18n.get("nav.accessibility"), skin);
 
-        group("视觉效果",
-                SettingItem.toggle("始终显示滚动条", "", true),
-                SettingItem.toggle("透明效果", "", true),
-                SettingItem.toggle("关闭动画", "减少不必要的动画", false),
-                SettingItem.select("通知显示时间", "", new String[]{"5 秒","10 秒","15 秒"}, "5 秒")
+        group(BsI18n.get("accessibility.group_visual_effects"),
+                SettingItem.toggle(BsI18n.get("accessibility.always_show_scrollbar"), "", true),
+                SettingItem.toggle(BsI18n.get("accessibility.transparency"), "", true),
+                SettingItem.toggle(BsI18n.get("accessibility.turn_off_animations"), BsI18n.get("accessibility.turn_off_animations_desc"), false),
+                SettingItem.select(BsI18n.get("accessibility.notification_duration"), "", new String[]{BsI18n.get("common.5min"), BsI18n.get("common.10min"), BsI18n.get("common.15min")}, BsI18n.get("common.5min"))
         );
 
-        group("文本大小",
-                SettingItem.select("文本大小", "放大屏幕文本", new String[]{"100%","120%","150%","200%"}, "100%"),
-                SettingItem.value("说明", "", "预览: 这是一个示例文本"),
-                SettingItem.button("应用", "应用文本大小", "应用")
+        group(BsI18n.get("accessibility.group_text_size"),
+                SettingItem.select(BsI18n.get("accessibility.text_size"), BsI18n.get("accessibility.text_size_desc"), new String[]{"100%", "120%", "150%", "200%"}, "100%"),
+                SettingItem.value(BsI18n.get("accessibility.description"), "", BsI18n.get("accessibility.preview_text")),
+                SettingItem.button(BsI18n.get("accessibility.apply"), BsI18n.get("accessibility.apply_text_size"), BsI18n.get("accessibility.apply"))
         );
 
-        group("讲述人",
-                SettingItem.toggle("讲述人", "屏幕阅读器朗读屏幕", false),
-                SettingItem.toggle("登录后自动启动讲述人", "", false),
-                SettingItem.select("讲述人语音", "", new String[]{"中文 简体 (Huihui)","English (David)","English (Zira)"}, "中文 简体 (Huihui)"),
-                SettingItem.select("详细程度", "", new String[]{"最低","普通","详细"}, "普通"),
-                SettingItem.toggle("强调加粗格式", "", false),
-                SettingItem.link("讲述人主页", "", "查看")
+        group(BsI18n.get("accessibility.group_narrator"),
+                SettingItem.toggle(BsI18n.get("accessibility.narrator"), BsI18n.get("accessibility.narrator_desc"), false),
+                SettingItem.toggle(BsI18n.get("accessibility.auto_start_narrator"), "", false),
+                SettingItem.select(BsI18n.get("accessibility.narrator_voice"), "", new String[]{BsI18n.get("accessibility.voice_huihui"), "English (David)", "English (Zira)"}, BsI18n.get("accessibility.voice_huihui")),
+                SettingItem.select(BsI18n.get("accessibility.verbosity"), "", new String[]{BsI18n.get("accessibility.verbosity_min"), BsI18n.get("accessibility.verbosity_normal"), BsI18n.get("accessibility.verbosity_detailed")}, BsI18n.get("accessibility.verbosity_normal")),
+                SettingItem.toggle(BsI18n.get("accessibility.emphasize_bold"), "", false),
+                SettingItem.link(BsI18n.get("accessibility.narrator_home"), "", BsI18n.get("accessibility.view"))
         );
 
-        group("放大镜",
-                SettingItem.toggle("放大镜", "放大屏幕部分区域", false),
-                SettingItem.select("缩放级别", "", new String[]{"100%","150%","200%","300%","400%"}, "200%"),
-                SettingItem.select("放大镜模式", "", new String[]{"全屏","镜头","停靠"}, "全屏"),
-                SettingItem.toggle("启动放大镜后自动反转颜色", "", false)
+        group(BsI18n.get("accessibility.group_magnifier"),
+                SettingItem.toggle(BsI18n.get("accessibility.magnifier"), BsI18n.get("accessibility.magnifier_desc"), false),
+                SettingItem.select(BsI18n.get("accessibility.zoom_level"), "", new String[]{"100%", "150%", "200%", "300%", "400%"}, "200%"),
+                SettingItem.select(BsI18n.get("accessibility.magnifier_mode"), "", new String[]{BsI18n.get("accessibility.mode_full_screen"), BsI18n.get("accessibility.mode_lens"), BsI18n.get("accessibility.mode_docked")}, BsI18n.get("accessibility.mode_full_screen")),
+                SettingItem.toggle(BsI18n.get("accessibility.magnifier_invert_colors"), "", false)
         );
 
-        group("颜色过滤器",
-                SettingItem.toggle("颜色过滤器", "为色弱用户调整颜色", false),
-                SettingItem.select("滤镜类型", "色盲/色弱滤镜", new String[]{"红绿色盲(绿色弱)","红绿色盲(红色弱)","蓝黄色盲","灰度","反转"}, "红绿色盲(绿色弱)"),
-                SettingItem.toggle("快捷键", "Win + Ctrl + C 切换", true)
+        group(BsI18n.get("accessibility.group_color_filters"),
+                SettingItem.toggle(BsI18n.get("accessibility.color_filters"), BsI18n.get("accessibility.color_filters_desc"), false),
+                SettingItem.select(BsI18n.get("accessibility.filter_type"), BsI18n.get("accessibility.filter_type_desc"), new String[]{BsI18n.get("accessibility.deuteranopia"), BsI18n.get("accessibility.protanopia"), BsI18n.get("accessibility.tritanopia"), BsI18n.get("accessibility.grayscale"), BsI18n.get("accessibility.invert")}, BsI18n.get("accessibility.deuteranopia")),
+                SettingItem.toggle(BsI18n.get("accessibility.shortcut_key"), "Win + Ctrl + C " + BsI18n.get("accessibility.toggle"), true)
         );
 
-        group("对比度主题",
-                SettingItem.select("对比度主题", "", new String[]{"无","水族","沙漠","黄昏","夜空","DUSK(高对比度)"}, "无"),
-                SettingItem.toggle("关闭对比度主题后通知", "", true),
-                SettingItem.link("自定义颜色", "", "编辑主题颜色")
+        group(BsI18n.get("accessibility.group_contrast_themes"),
+                SettingItem.select(BsI18n.get("accessibility.contrast_theme"), "", new String[]{BsI18n.get("accessibility.theme_none"), BsI18n.get("accessibility.theme_aquatic"), BsI18n.get("accessibility.theme_desert"), BsI18n.get("accessibility.theme_dusk"), BsI18n.get("accessibility.theme_night_sky"), "DUSK (" + BsI18n.get("accessibility.high_contrast") + ")"}, BsI18n.get("accessibility.theme_none")),
+                SettingItem.toggle(BsI18n.get("accessibility.notify_after_turning_off_contrast"), "", true),
+                SettingItem.link(BsI18n.get("accessibility.custom_colors"), "", BsI18n.get("accessibility.edit_theme_colors"))
         );
 
-        group("键盘",
-                SettingItem.toggle("粘滞键", "一次按一个键实现组合键 (Ctrl/Shift/Alt)", false),
-                SettingItem.toggle("筛选键", "忽略短暂或重复的按键", false),
-                SettingItem.toggle("切换键", "按 Caps/Num/Scroll 时发出响声", false),
-                SettingItem.toggle("屏幕键盘", "在屏幕上显示虚拟键盘", false),
-                SettingItem.value("屏幕键盘快捷键", "", "Win + Ctrl + O")
+        group(BsI18n.get("accessibility.group_keyboard"),
+                SettingItem.toggle(BsI18n.get("accessibility.sticky_keys"), BsI18n.get("accessibility.sticky_keys_desc"), false),
+                SettingItem.toggle(BsI18n.get("accessibility.filter_keys"), BsI18n.get("accessibility.filter_keys_desc"), false),
+                SettingItem.toggle(BsI18n.get("accessibility.toggle_keys"), BsI18n.get("accessibility.toggle_keys_desc"), false),
+                SettingItem.toggle(BsI18n.get("accessibility.on_screen_keyboard"), BsI18n.get("accessibility.on_screen_keyboard_desc"), false),
+                SettingItem.value(BsI18n.get("accessibility.osk_shortcut"), "", "Win + Ctrl + O")
         );
 
-        group("鼠标与光标",
-                SettingItem.select("指针大小", "", new String[]{"1(小)","2","3","4(中)","5","6(大)"}, "1(小)"),
-                SettingItem.select("指针颜色", "", new String[]{"白色","黑色","反转","主题色"}, "白色"),
-                SettingItem.toggle("光标在指针下移动", "根据指针移动方向调整文本光标", false)
+        group(BsI18n.get("accessibility.group_mouse_cursor"),
+                SettingItem.select(BsI18n.get("accessibility.pointer_size"), "", new String[]{"1 (" + BsI18n.get("accessibility.small") + ")", "2", "3", "4 (" + BsI18n.get("accessibility.medium") + ")", "5", "6 (" + BsI18n.get("accessibility.large") + ")"}, "1 (" + BsI18n.get("accessibility.small") + ")"),
+                SettingItem.select(BsI18n.get("accessibility.pointer_color"), "", new String[]{BsI18n.get("accessibility.color_white"), BsI18n.get("accessibility.color_black"), BsI18n.get("accessibility.color_invert"), BsI18n.get("accessibility.accent_color_label")}, BsI18n.get("accessibility.color_white")),
+                SettingItem.toggle(BsI18n.get("accessibility.cursor_move"), BsI18n.get("accessibility.cursor_move_desc"), false)
         );
 
-        group("眼睛控制",
-                SettingItem.toggle("眼睛控制", "用眼动仪控制 PC", false),
-                SettingItem.value("眼动仪", "", "未检测到"),
-                SettingItem.link("眼动仪设置", "", "配置")
+        group(BsI18n.get("accessibility.group_eye_control"),
+                SettingItem.toggle(BsI18n.get("accessibility.eye_control"), BsI18n.get("accessibility.eye_control_desc"), false),
+                SettingItem.value(BsI18n.get("accessibility.eye_tracker"), "", BsI18n.get("accessibility.not_detected")),
+                SettingItem.link(BsI18n.get("accessibility.eye_tracker_settings"), "", BsI18n.get("accessibility.configure"))
         );
     }
 }

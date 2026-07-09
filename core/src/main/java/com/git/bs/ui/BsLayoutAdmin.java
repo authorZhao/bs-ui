@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.git.bs.i18n.BsI18n;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -266,7 +267,7 @@ public class BsLayoutAdmin extends Table {
         final Skin skin = BsUI.getSkin();
         final com.badlogic.gdx.scenes.scene2d.ui.TextField search =
                 new com.badlogic.gdx.scenes.scene2d.ui.TextField("", skin);
-        search.setMessageText("🔍 搜索菜单");
+        search.setMessageText(BsI18n.get("core.layout.search", "🔍 搜索菜单"));
         // 限制只占固定宽度，不挤掉面包屑
         topMenuRow.add(search).width(200).height(28).padLeft(12);
         search.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener() {
