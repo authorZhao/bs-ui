@@ -929,15 +929,56 @@ public final class BsSkinFactory {
     }
 
     /**
-     * 用指定颜色构造一个纯色 Drawable（Pixmap 2×2 染色，包成 TextureRegionDrawable）。
-     * <p>比 {@code skin.newDrawable("white", color)} 更可靠——不依赖 skin 里 "white" drawable 的存在与类型，
-     * 用于 setBackground 等需要纯色背景的场景。</p>
-     * <p>调用方不持有 Texture 引用，Texture 随 Drawable 生命周期泄漏（适用一次性场景）；
-     * 需要自行释放 Texture 的调用方用 {@link #solidTexture(Color)}。</p>
+     * 全局纯色 Drawable 缓存：颜色 rgba int → 共享 Drawable。
+     *
+     * <p>所有 2×2 纯色块（hover 背景、分隔线、区间填充、斑马纹等）走这里。
+     * 相同颜色返回同一个 Drawable 实例，纹理只创建一次，永不释放（全进程共享，
+     * 颜色总数有限，内存占用可忽略：每个 2×2 RGBA = 16 字节像素）。</p>
+     *
+     * <p>调用方约定：只用于 setBackground 等只读场景，不得 dispose 返回的 Drawable
+     * （它是全局共享的）。需要独立生命周期的调用方用 {@link #drawableOfUncached(Color)}。</p>
+     */
+    private static final ObjectMap<Integer, com.badlogic.gdx.scenes.scene2d.utils.Drawable> SOLID_CACHE = new ObjectMap<>();
+
+    /**
+     * 取一个纯色 Drawable（Pixmap 2×2 染色）。<b>默认走全局缓存</b>：相同颜色返回同一实例，
+     * 不会重复创建 Texture。用于 setBackground 等只读场景；返回的 Drawable <b>不得 dispose</b>。
+     *
+     * <p>比 {@code skin.newDrawable("white", color)} 更可靠——不依赖 skin 里 "white" drawable 的类型，
+     * 也不会踩 NinePatch 切边坑。比每次 new Pixmap+Texture 节省 GPU 内存与 GC。</p>
+     *
+     * <p>需要自行管理生命周期（如浮层 close 时释放）的调用方用 {@link #drawableOfUncached(Color)}。</p>
      */
     public static com.badlogic.gdx.scenes.scene2d.utils.Drawable drawableOf(Color color) {
+        int key = colorKey(color);
+        com.badlogic.gdx.scenes.scene2d.utils.Drawable cached = SOLID_CACHE.get(key);
+        if (cached != null) return cached;
+        com.badlogic.gdx.scenes.scene2d.utils.Drawable d = new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(
+                new TextureRegion(solidTexture(color)));
+        SOLID_CACHE.put(key, d);
+        return d;
+    }
+
+    /**
+     * 取一个纯色 Drawable，<b>不走缓存</b>：每次新建独立的 Texture + Drawable，调用方自行 dispose。
+     *
+     * <p>用于需要独立生命周期管理的场景（如临时浮层、动态色板，关闭时统一释放 Texture）。
+     * 调用方可通过 {@code ((TextureRegionDrawable)d).getRegion().getTexture().dispose()} 释放底层纹理。</p>
+     *
+     * <p>常规场景（setBackground 等只读）应优先用 {@link #drawableOf(Color)} 走缓存。</p>
+     */
+    public static com.badlogic.gdx.scenes.scene2d.utils.Drawable drawableOfUncached(Color color) {
         return new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(
                 new TextureRegion(solidTexture(color)));
+    }
+
+    /** Color → rgba packed int（用作缓存 key，避免按对象引用比较导致 new Color 同色不命中）。 */
+    private static int colorKey(Color c) {
+        int r = Math.round(c.r * 255) & 0xFF;
+        int g = Math.round(c.g * 255) & 0xFF;
+        int b = Math.round(c.b * 255) & 0xFF;
+        int a = Math.round(c.a * 255) & 0xFF;
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     /**
