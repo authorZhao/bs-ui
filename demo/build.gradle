@@ -1,7 +1,6 @@
 plugins { id 'java-library' }
 
 group = 'com.git.bs'
-version = '0.1.0'
 
 eclipse.project.name = appName + '-demo'
 

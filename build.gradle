@@ -37,7 +37,7 @@ configure(subprojects) {
 }
 
 subprojects {
-  version = '$projectVersion'
+  version = projectVersion
   ext.appName = 'bs-ui'
   repositories {
     mavenCentral()
