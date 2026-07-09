@@ -246,6 +246,15 @@ public final class BsSkinFactory {
                 outline.disabledFontColor = td;
                 putStyle(skin, outlineKey, outline);
             }
+            // GHOST（Win11 风格）：与 OUTLINE 完全一致，仅 up 去掉边框（透明）。这里预注册是为了
+            // 让 BsSkinExporter 能导出（否则 ensureGhostStyle 是延迟派生，导出时 skin 里没有）。
+            // 运行时 BsButton.ensureGhostStyle 的 skin.has 会命中，不再重复派生。
+            String ghostKey = "bs-btn-ghost-" + name;
+            if (!skin.has(ghostKey, TextButtonStyle.class)) {
+                TextButtonStyle ghost = new TextButtonStyle(skin.get(outlineKey, TextButtonStyle.class));
+                ghost.up = null;   // up 无边框透明；over/down/fontColor 等均与 OUTLINE 一致
+                putStyle(skin, ghostKey, ghost);
+            }
         }
 
         // default / toggle TextButtonStyle

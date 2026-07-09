@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
+import com.git.bs.ui.BsSkinFactory;
 import com.git.bs.ui.BsText;
 import com.git.bs.ui.BsTheme;
 
@@ -62,9 +63,10 @@ public class WinRow extends Table {
             add(trailing).right().padLeft(16).top();
         }
 
-        // hover：setBackground 微亮。exit 时区分「进入行内 SelectBox 的下拉 popup」——
-        // 那种情况保持 hover（不 invalidate），避免 popup 关闭；其他离开才取消 hover。
-        final Drawable hover = skin.newDrawable("white", BsTheme.bh());
+        // hover：setBackground。注意必须用 BsSkinFactory.drawableOf 生成纯色 Drawable，
+        // 不能用 skin.newDrawable("white", color) —— 后者基于 2×2 的 NinePatchDrawable(切边1px)，
+        // 画到大尺寸时四个角区只占 1px、中间无拉伸区，结果几乎画不出任何东西。
+        final Drawable hover = BsSkinFactory.drawableOf(BsTheme.bh());
         addListener(new InputListener() {
             @Override public void enter(InputEvent e, float x, float y, int pointer, Actor from) {
                 if (pointer == -1) setBackground(hover);

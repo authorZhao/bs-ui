@@ -18,8 +18,8 @@ public class WinSettingsLauncher {
         config.setWindowedMode(1100, 720);
         config.useVsync(true);
         config.setSamples(4);
-        config.setIdleFPS(60);
-        config.setForegroundFPS(60);
+        config.setIdleFPS(30);
+        config.setForegroundFPS(30);
         PlatformStatic.registerImpl(DeskPlatform.class);
         new Lwjgl3Application(new WinSettingsApp(), config);
     }
