@@ -4,6 +4,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 
+import java.lang.reflect.Field;
+
 public class BsTextField extends TextField {
     public BsTextField(String text, Skin skin) {
         super(text, skin);
@@ -26,5 +28,47 @@ public class BsTextField extends TextField {
         } finally {
             setTextFieldFilter(old);
         }
+    }
+
+    // =================== 光标闪烁频率控制 ===================
+
+    /**
+     * libgdx TextField 内部光标闪烁计时字段（反射获取，不同版本字段名/逻辑可能不同；
+     * 取不到则本机制失效，退回 libgdx 默认闪烁频率）。
+     */
+    private static final Field CURSOR_BLINK;
+    static {
+        Field f = null;
+        try {
+            f = TextField.class.getDeclaredField("cursorBlink");
+            f.setAccessible(true);
+        } catch (Throwable ignored) {}
+        CURSOR_BLINK = f;
+    }
+
+    /** 自定义光标闪烁周期（秒）。默认 1.06f（≈Win11 0.53s 切换一次），比 libgdx 默认慢、更柔和。 */
+    private float blinkPeriod = 1.06f;
+    private float blinkAccum;
+
+    /** 设置光标闪烁周期（秒）。值越大闪烁越慢；过小会 clamp 到 0.2f。 */
+    public BsTextField setBlinkPeriod(float seconds) {
+        this.blinkPeriod = Math.max(0.2f, seconds);
+        return this;
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        if (CURSOR_BLINK == null) return;   // 反射取不到字段，退回默认
+        // libgdx super.act 会把 cursorBlink 减 delta；这里按自定义周期覆盖 cursorBlink 值，
+        // 让 draw 的光标可见判断按慢节奏切换（前半周期可见、后半隐藏）。
+        blinkAccum += delta;
+        if (blinkAccum >= blinkPeriod) blinkAccum -= blinkPeriod;
+        try {
+            float phase = blinkAccum / blinkPeriod;  // 0~1
+            // libgdx draw 通常：cursorBlink 较小（< 0.5）画光标，较大不画。
+            // 前半周期设 0.2（画）、后半设 0.8（不画）→ 慢闪烁。
+            CURSOR_BLINK.set(this, phase < 0.5f ? 0.2f : 0.8f);
+        } catch (Throwable ignored) {}
     }
 }
