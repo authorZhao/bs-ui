@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 默认会把字体缓存，避免多次加载
+ * 对于独立的fnt或者ttf字体默认会进行缓存，对于skin图片里面的不缓存
  *
  * @author authorZhao
  * @since 2026-07-02
@@ -27,7 +29,7 @@ import java.util.Map;
 @Slf4j
 public class BsSkin extends Skin {
 
-    private static final Map<String,BitmapFont> CACHE_FONT = new HashMap<>();
+    private static final Map<String, BitmapFont> CACHE_FONT = new HashMap<>();
 
     private boolean useCacheFont = false;
     private boolean canLoad = false;
@@ -71,120 +73,8 @@ public class BsSkin extends Skin {
     protected Json getJsonLoader(FileHandle skinFile) {
         Json json = super.getJsonLoader(skinFile);
         var skin = this;
-        json.setSerializer(BitmapFont.class, new Json.ReadOnlySerializer<BitmapFont>() {
-            @Override
-            public BitmapFont read (Json json, JsonValue jsonData, Class type) {
-                String fontKey = jsonData.name;
-//                if(CACHE_FONT.containsKey(fontKey) && !useCacheFont){
-//                    return CACHE_FONT.get(fontKey);
-//                }
-
-                String path = json.readValue("file", String.class, jsonData);
-                float scaledSize = json.readValue("scaledSize", float.class, -1f, jsonData);
-                Boolean flip = json.readValue("flip", Boolean.class, false, jsonData);
-                Boolean markupEnabled = json.readValue("markupEnabled", Boolean.class, false, jsonData);
-                Boolean useIntegerPositions = json.readValue("useIntegerPositions", Boolean.class, true, jsonData);
-
-                FileHandle fontFile = skinFile.parent().child(path);
-                if (!fontFile.exists()) fontFile = Gdx.files.internal(path);
-                if (!fontFile.exists()) throw new SerializationException("Font file not found: " + fontFile);
-
-                // Use a region with the same name as the font, else use a PNG file in the same directory as the FNT file.
-                String regionName = fontFile.nameWithoutExtension();
-                try {
-                    BitmapFont font;
-                    Array<TextureRegion> regions = skin.getRegions(regionName);
-                    if (regions != null)
-                        font = new BitmapFont(new BitmapFont.BitmapFontData(fontFile, flip), regions, true);
-                    else {
-                        TextureRegion region = skin.optional(regionName, TextureRegion.class);
-                        if (region != null){
-                            font = new BitmapFont(fontFile, region, flip);
-                            // TODO 此时不走缓存
-                        }
-                        else {
-                            FileHandle imageFile = fontFile.parent().child(regionName + ".png");
-                            if (imageFile.exists())
-                                font = new BitmapFont(fontFile, imageFile, flip);
-                            else
-                                font = new BitmapFont(fontFile, flip);
-                        }
-                    }
-                    font.getData().markupEnabled = markupEnabled;
-                    font.setUseIntegerPositions(useIntegerPositions);
-                    // Scaled size is the desired cap height to scale the font to.
-                    if (scaledSize != -1) font.getData().setScale(scaledSize / font.getCapHeight());
-                    CACHE_FONT.put(fontKey, font);
-                    return font;
-                } catch (RuntimeException ex) {
-                    throw new SerializationException("Error loading bitmap font: " + fontFile, ex);
-                }
-            }
-        });
-
-
-        json.setSerializer(FreeTypeFontGenerator.class, new Json.ReadOnlySerializer<FreeTypeFontGenerator>() {
-            @Override
-            public FreeTypeFontGenerator read(Json json, JsonValue jsonData, Class type) {
-                String path = json.readValue("font", String.class, jsonData);
-                jsonData.remove("font");
-
-                FreeTypeFontGenerator.Hinting hinting = FreeTypeFontGenerator.Hinting.valueOf(json.readValue("hinting",
-                        String.class, "AutoMedium", jsonData));
-                jsonData.remove("hinting");
-
-                Texture.TextureFilter minFilter = Texture.TextureFilter.valueOf(
-                        json.readValue("minFilter", String.class, "Nearest", jsonData));
-                jsonData.remove("minFilter");
-
-                Texture.TextureFilter magFilter = Texture.TextureFilter.valueOf(
-                        json.readValue("magFilter", String.class, "Nearest", jsonData));
-                jsonData.remove("magFilter");
-
-
-                var characters = json.readValue("characters", String.class, jsonData);
-                FreeTypeFontGenerator.FreeTypeFontParameter parameter = json.readValue(FreeTypeFontGenerator.FreeTypeFontParameter.class, jsonData);
-                parameter.hinting = hinting;
-                parameter.minFilter = minFilter;
-                parameter.magFilter = magFilter;
-
-                if (characters != null && characters.endsWith(".txt")) {
-                    // 相对 skin 目录解析（与 font ttf 路径一致），支持子目录下的字符集文件
-                    FileHandle charsFile = skinFile.parent().child(parameter.characters);
-                    parameter.characters = charsFile.readString(StandardCharsets.UTF_8.name());
-                }
-
-                // 使用字体缓存避免重复生成
-                String fontKey = jsonData.name;
-                BitmapFont cachedFont = CACHE_FONT.get(fontKey);
-                FreeTypeFontGenerator generator = null;
-
-                if (cachedFont == null) {
-                    long startTime = System.currentTimeMillis();
-                    generator = new FreeTypeFontGenerator(skinFile.parent().child(path));
-                    BitmapFont font = generator.generateFont(parameter);
-                    CACHE_FONT.put(fontKey, font);
-                    cachedFont = font;
-                    skin.add(jsonData.name, cachedFont);
-                    long generationTime = System.currentTimeMillis() - startTime;
-                    log.info("生成字体 {} 耗时: {}ms", jsonData.name, generationTime);
-                } else {
-                    skin.add(jsonData.name, cachedFont);
-                    log.info("使用缓存的字体: {}", jsonData.name);
-                }
-
-                if (!parameter.incremental) {
-                    if (generator != null) {
-                        generator.dispose();
-                    }
-                    return null;
-                } else {
-                    return  null;
-                }
-            }
-        });
-
-
+        json.setSerializer(BitmapFont.class, new BitmapFontReadOnlySerializer(skinFile, skin));
+        json.setSerializer(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorReadOnlySerializer(skinFile, skin));
         return json;
     }
 
@@ -206,29 +96,161 @@ public class BsSkin extends Skin {
      */
     @Override
     public void dispose() {
-        if(!useCacheFont) {
+        if (!useCacheFont) {
             super.dispose();
             return;
         }
 
-        Map<String, BitmapFont> fontCache = SkinUtil.getFontCache(this);
-        boolean has = fontCache.values().stream().anyMatch(BitmapFont::ownsTexture);
-
-
-
-
         for (String key : CACHE_FONT.keySet()) {
-            try { remove(key, BitmapFont.class); } catch (Throwable ignored) {}
+            try {
+                remove(key, BitmapFont.class);
+            } catch (Throwable ignored) {
+            }
         }
         super.dispose();
     }
 
-    /** 释放所有跨 skin 共享的缓存字体。<b>由开发者显式调用</b>（skin / dispose 不会自动调），
-     *  时机自行决定（通常 app 退出，或确定所有 skin 都不再使用字体时）。 */
+    /**
+     * 释放所有跨 skin 共享的缓存字体。<b>由开发者显式调用</b>（skin / dispose 不会自动调），
+     * 时机自行决定（通常 app 退出，或确定所有 skin 都不再使用字体时）。
+     */
     public static void disposeFontCache() {
         for (BitmapFont f : CACHE_FONT.values()) {
-            try { f.dispose(); } catch (Throwable ignored) {}
+            try {
+                f.dispose();
+            } catch (Throwable ignored) {
+            }
         }
         CACHE_FONT.clear();
+    }
+
+    private static class BitmapFontReadOnlySerializer extends Json.ReadOnlySerializer<BitmapFont> {
+        private final FileHandle skinFile;
+        private final BsSkin skin;
+
+        public BitmapFontReadOnlySerializer(FileHandle skinFile, BsSkin skin) {
+            this.skinFile = skinFile;
+            this.skin = skin;
+        }
+
+        @Override
+        public BitmapFont read(Json json, JsonValue jsonData, Class type) {
+            String fontKey = jsonData.name;
+//                if(CACHE_FONT.containsKey(fontKey) && !useCacheFont){
+//                    return CACHE_FONT.get(fontKey);
+//                }
+            var cached = skin.useCacheFont;
+            String path = json.readValue("file", String.class, jsonData);
+            float scaledSize = json.readValue("scaledSize", float.class, -1f, jsonData);
+            Boolean flip = json.readValue("flip", Boolean.class, false, jsonData);
+            Boolean markupEnabled = json.readValue("markupEnabled", Boolean.class, false, jsonData);
+            Boolean useIntegerPositions = json.readValue("useIntegerPositions", Boolean.class, true, jsonData);
+
+            FileHandle fontFile = skinFile.parent().child(path);
+            if (!fontFile.exists()) fontFile = Gdx.files.internal(path);
+            if (!fontFile.exists()) throw new SerializationException("Font file not found: " + fontFile);
+
+            // Use a region with the same name as the font, else use a PNG file in the same directory as the FNT file.
+            String regionName = fontFile.nameWithoutExtension();
+            try {
+                BitmapFont font;
+                Array<TextureRegion> regions = skin.getRegions(regionName);
+                if (regions != null)
+                    font = new BitmapFont(new BitmapFont.BitmapFontData(fontFile, flip), regions, true);
+                else {
+                    TextureRegion region = skin.optional(regionName, TextureRegion.class);
+                    if (region != null) {
+                        font = new BitmapFont(fontFile, region, flip);
+                    } else {
+                        if (cached && CACHE_FONT.containsKey(fontKey)) {
+                            return CACHE_FONT.get(fontKey);
+                        }
+
+                        FileHandle imageFile = fontFile.parent().child(regionName + ".png");
+                        if (imageFile.exists())
+                            font = new BitmapFont(fontFile, imageFile, flip);
+                        else
+                            font = new BitmapFont(fontFile, flip);
+                    }
+                }
+                font.getData().markupEnabled = markupEnabled;
+                font.setUseIntegerPositions(useIntegerPositions);
+                // Scaled size is the desired cap height to scale the font to.
+                if (scaledSize != -1) font.getData().setScale(scaledSize / font.getCapHeight());
+                CACHE_FONT.put(fontKey, font);
+                return font;
+            } catch (RuntimeException ex) {
+                throw new SerializationException("Error loading bitmap font: " + fontFile, ex);
+            }
+        }
+    }
+
+    private static class FreeTypeFontGeneratorReadOnlySerializer extends Json.ReadOnlySerializer<FreeTypeFontGenerator> {
+        private final FileHandle skinFile;
+        private final BsSkin skin;
+
+        public FreeTypeFontGeneratorReadOnlySerializer(FileHandle skinFile, BsSkin skin) {
+            this.skinFile = skinFile;
+            this.skin = skin;
+        }
+
+        @Override
+        public FreeTypeFontGenerator read(Json json, JsonValue jsonData, Class type) {
+            String path = json.readValue("font", String.class, jsonData);
+            jsonData.remove("font");
+
+            FreeTypeFontGenerator.Hinting hinting = FreeTypeFontGenerator.Hinting.valueOf(json.readValue("hinting",
+                    String.class, "AutoMedium", jsonData));
+            jsonData.remove("hinting");
+
+            Texture.TextureFilter minFilter = Texture.TextureFilter.valueOf(
+                    json.readValue("minFilter", String.class, "Nearest", jsonData));
+            jsonData.remove("minFilter");
+
+            Texture.TextureFilter magFilter = Texture.TextureFilter.valueOf(
+                    json.readValue("magFilter", String.class, "Nearest", jsonData));
+            jsonData.remove("magFilter");
+
+
+            var characters = json.readValue("characters", String.class, jsonData);
+            FreeTypeFontGenerator.FreeTypeFontParameter parameter = json.readValue(FreeTypeFontGenerator.FreeTypeFontParameter.class, jsonData);
+            parameter.hinting = hinting;
+            parameter.minFilter = minFilter;
+            parameter.magFilter = magFilter;
+
+            if (characters != null && characters.endsWith(".txt")) {
+                // 相对 skin 目录解析（与 font ttf 路径一致），支持子目录下的字符集文件
+                FileHandle charsFile = skinFile.parent().child(parameter.characters);
+                parameter.characters = charsFile.readString(StandardCharsets.UTF_8.name());
+            }
+
+            // 使用字体缓存避免重复生成
+            String fontKey = jsonData.name;
+            BitmapFont cachedFont = CACHE_FONT.get(fontKey);
+            FreeTypeFontGenerator generator = null;
+
+            if (cachedFont == null) {
+                long startTime = System.currentTimeMillis();
+                generator = new FreeTypeFontGenerator(skinFile.parent().child(path));
+                BitmapFont font = generator.generateFont(parameter);
+                CACHE_FONT.put(fontKey, font);
+                cachedFont = font;
+                skin.add(jsonData.name, cachedFont);
+                long generationTime = System.currentTimeMillis() - startTime;
+                log.info("生成字体 {} 耗时: {}ms", jsonData.name, generationTime);
+            } else {
+                skin.add(jsonData.name, cachedFont);
+                log.info("使用缓存的字体: {}", jsonData.name);
+            }
+
+            if (!parameter.incremental) {
+                if (generator != null) {
+                    generator.dispose();
+                }
+                return null;
+            } else {
+                return null;
+            }
+        }
     }
 }
