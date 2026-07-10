@@ -182,6 +182,10 @@ public class BsImage extends Table {
     // =================== 生命周期 ===================
 
     /// 释放本组件托管的 Texture（path/file 加载的）。多次调用安全。
+    ///
+    /// <b>ownedTexture 生命周期由调用方显式管理</b>：组件不再使用时调本方法释放。
+    /// 不在 remove() 自动触发 —— remove 在 Scene2d 里可能只是 reparent/动画移除，不等于销毁，
+    /// 自动 dispose 会导致 reparent 后 Texture 失效崩溃。
     public void dispose() {
         disposeOwned();
     }
