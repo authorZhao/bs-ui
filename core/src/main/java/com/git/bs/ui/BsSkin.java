@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.SerializationException;
+import com.git.bs.common.SkinUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
@@ -28,17 +29,42 @@ public class BsSkin extends Skin {
 
     private static final Map<String,BitmapFont> CACHE_FONT = new HashMap<>();
 
+    private boolean useCacheFont = false;
+    private boolean canLoad = false;
 
     public BsSkin(FileHandle skinFile) {
-        super(skinFile);
+        this(skinFile, true);
     }
 
-    public BsSkin(FileHandle skinFile, TextureAtlas atlas) {
+    public BsSkin(FileHandle skinFile, boolean useCacheFont) {
+        super(skinFile);
+        this.useCacheFont = useCacheFont;
+        canLoad = true;
+        load(skinFile);
+    }
+
+    public BsSkin(FileHandle skinFile, TextureAtlas atlas, boolean useCacheFont) {
         super(skinFile, atlas);
+        this.useCacheFont = useCacheFont;
+        canLoad = true;
+        load(skinFile);
     }
 
     public BsSkin(TextureAtlas atlas) {
         super(atlas);
+        canLoad = true;
+    }
+
+    @Override
+    public void load(FileHandle skinFile) {
+        if (!canLoad) {
+            return;
+        }
+        try {
+            getJsonLoader(skinFile).fromJson(Skin.class, skinFile);
+        } catch (SerializationException ex) {
+            throw new SerializationException("Error reading file: " + skinFile, ex);
+        }
     }
 
     @Override
@@ -49,9 +75,9 @@ public class BsSkin extends Skin {
             @Override
             public BitmapFont read (Json json, JsonValue jsonData, Class type) {
                 String fontKey = jsonData.name;
-                if(CACHE_FONT.containsKey(fontKey)){
-                    return CACHE_FONT.get(fontKey);
-                }
+//                if(CACHE_FONT.containsKey(fontKey) && !useCacheFont){
+//                    return CACHE_FONT.get(fontKey);
+//                }
 
                 String path = json.readValue("file", String.class, jsonData);
                 float scaledSize = json.readValue("scaledSize", float.class, -1f, jsonData);
@@ -72,8 +98,10 @@ public class BsSkin extends Skin {
                         font = new BitmapFont(new BitmapFont.BitmapFontData(fontFile, flip), regions, true);
                     else {
                         TextureRegion region = skin.optional(regionName, TextureRegion.class);
-                        if (region != null)
+                        if (region != null){
                             font = new BitmapFont(fontFile, region, flip);
+                            // TODO 此时不走缓存
+                        }
                         else {
                             FileHandle imageFile = fontFile.parent().child(regionName + ".png");
                             if (imageFile.exists())
@@ -158,5 +186,49 @@ public class BsSkin extends Skin {
 
 
         return json;
+    }
+
+    /**
+     * dispose 行为由 {@link #useCacheFont} 决定：
+     * <ul>
+     *   <li>{@code false}（不用全局缓存）：字体属于本 skin，{@code super.dispose()} 正常释放。</li>
+     *   <li>{@code true}（用全局缓存）：先把 {@link #CACHE_FONT} 里跨 skin 共享字体从本 skin 摘除引用，
+     *       避免 {@code super.dispose()}（Skin.dispose 会 dispose 所有 Disposable）连带 dispose
+     *       这些被其他 skin 仍在使用的共享字体。</li>
+     * </ul>
+     *
+     * <p><b>disposeFontCache 不由 skin / dispose 自动调用</b>：skin 对象不随便销毁，全局字体缓存的
+     * 释放时机由<b>开发者自行决定</b>（通常 app 退出，或确定所有 skin 都不再使用字体时）。</p>
+     *
+     * <p><b>注意</b>：若字体 Texture 来自本 skin 的 TextureAtlas（region 配置命中 atlas），
+     * 摘除引用也救不了 —— super.dispose 仍会 dispose atlas 破坏字体 Texture。
+     * 多 skin 共享的字体应使用独立 Texture（FreeType 生成或独立 .png），不要放 atlas。</p>
+     */
+    @Override
+    public void dispose() {
+        if(!useCacheFont) {
+            super.dispose();
+            return;
+        }
+
+        Map<String, BitmapFont> fontCache = SkinUtil.getFontCache(this);
+        boolean has = fontCache.values().stream().anyMatch(BitmapFont::ownsTexture);
+
+
+
+
+        for (String key : CACHE_FONT.keySet()) {
+            try { remove(key, BitmapFont.class); } catch (Throwable ignored) {}
+        }
+        super.dispose();
+    }
+
+    /** 释放所有跨 skin 共享的缓存字体。<b>由开发者显式调用</b>（skin / dispose 不会自动调），
+     *  时机自行决定（通常 app 退出，或确定所有 skin 都不再使用字体时）。 */
+    public static void disposeFontCache() {
+        for (BitmapFont f : CACHE_FONT.values()) {
+            try { f.dispose(); } catch (Throwable ignored) {}
+        }
+        CACHE_FONT.clear();
     }
 }
