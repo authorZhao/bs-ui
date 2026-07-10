@@ -1,5 +1,6 @@
 package com.git.bs.ui;
 
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.git.bs.common.SkinUtil;
@@ -74,8 +75,34 @@ public final class BsUI {
         BsSkinLoader.loadAllThemes();
     }
 
+    // =================== 全局 ShapeRenderer ===================
+    /**
+     * 全局共享 ShapeRenderer（render 线程单线程，组件 draw 时短暂独占 begin/end，安全）。
+     * 替代各组件自己的 static SR（BsChart/BsRingProgress/BsRating/BsSteps/BsStatusBar），
+     * 把 N 个 native OpenGL 资源收敛成 1 个。
+     */
+    private static ShapeRenderer shapeRenderer;
+
+    /** 全局共享 ShapeRenderer（懒加载，首次调用时 new）。 */
+    public static synchronized ShapeRenderer shapeRenderer() {
+        if (shapeRenderer == null) shapeRenderer = new ShapeRenderer();
+        return shapeRenderer;
+    }
+
+    /** 自定义全局 ShapeRenderer（如需特殊配置）。传 null 重置为懒加载默认。 */
+    public static void setShapeRenderer(ShapeRenderer sr) {
+        if (shapeRenderer != null && shapeRenderer != sr) {
+            try { shapeRenderer.dispose(); } catch (Throwable ignored) {}
+        }
+        shapeRenderer = sr;
+    }
+
     /** dispose：清空状态。 */
     public static void dispose() {
+        if (shapeRenderer != null) {
+            try { shapeRenderer.dispose(); } catch (Throwable ignored) {}
+            shapeRenderer = null;
+        }   // 释放 BsSkin 跨 skin 共享的缓存字体（多主题公用字体）
         if (instance != null) {
             instance.listeners.clear();
         }
