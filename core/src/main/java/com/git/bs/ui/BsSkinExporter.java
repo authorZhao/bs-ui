@@ -1,8 +1,5 @@
 package com.git.bs.ui;
 
-// FIXME: fastjson2 依赖未引入 core 模块，json 导出功能暂时禁用
-// import com.alibaba.fastjson2.JSON;
-// import com.alibaba.fastjson2.JSONWriter;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -26,13 +23,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.*;
-import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.git.bs.common.Platform;
 import com.git.bs.common.PlatformStatic;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.badlogic.gdx.net.HttpRequestBuilder.json;
 import static com.git.bs.ui.BsTheme.lighten;
 import static com.git.bs.ui.BsTheme.darken;
 
