@@ -148,18 +148,33 @@ public abstract class BsChart extends Actor {
     /** 点击隔离是否启用（折线/柱状）：true 时单击只显示该系列，Shift 多选对比。 */
     protected boolean clickToIsolate = false;
 
-    /** ShapeRenderer 单例。 */
-    private static ShapeRenderer shapeRenderer;
-    protected static synchronized ShapeRenderer sr() {
-        if (shapeRenderer == null) shapeRenderer = new ShapeRenderer();
-        return shapeRenderer;
+    /** 本实例 ShapeRenderer（构造时取 {@link BsUI#shapeRenderer()} 全局，draw 用字段避免每帧方法调用；可用 {@link #setShapeRenderer} 自定义）。 */
+    protected ShapeRenderer renderer;
+
+    /** 全局 ShapeRenderer 访问（兼容旧调用，返回 {@link BsUI#shapeRenderer()}）。 */
+    protected static ShapeRenderer sr() {
+        return BsUI.shapeRenderer();
+    }
+
+    /** 自定义 ShapeRenderer（覆盖默认全局实例）。 */
+    public BsChart setShapeRenderer(ShapeRenderer custom) {
+        this.renderer = custom;
+        return this;
+    }
+
+    /** 自定义字体（覆盖构造时从 skin 取的 default）。 */
+    public BsChart setFont(BitmapFont f) {
+        if (f != null) this.font = f;
+        return this;
     }
 
     // ========================= 构造 =========================
 
     protected BsChart() {
-        // 默认字体兜底（无 skin 时用默认；setTextFont 可换）
-        this.font = new BitmapFont();
+        // 默认从全局 skin 取 default 字体（切主题是整体重建，构造时 skin 必已就绪），
+        // 不 new BitmapFont 避免每个图表实例泄漏 native 字体内存；后续 setSkinFont 可换。
+        try { this.font = BsUI.getSkin().getFont("default"); } catch (Throwable ignored) {}
+        this.renderer = BsUI.shapeRenderer();   // 全局共享 SR（不每组件 static 单例）
         // hover 监听
         addListener(new InputListener() {
             @Override
@@ -306,7 +321,7 @@ public abstract class BsChart extends Actor {
         // 2. shape 阶段：画图形（轴、网格、柱、线、饼）
         batch.end();
         try {
-            ShapeRenderer sr = sr();
+            ShapeRenderer sr = this.renderer;   // 用字段，不每帧调 sr()
             sr.setProjectionMatrix(batch.getProjectionMatrix());
             sr.setTransformMatrix(batch.getTransformMatrix());
             sr.setColor(1, 1, 1, parentAlpha);
