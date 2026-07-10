@@ -105,12 +105,11 @@ public class BsSwitch extends Table {
         private float knobX;
         private float targetKnobX;
         private boolean disabledLocal = false;
-        private final ShapeRenderer sr;
+        private static final ShapeRenderer SR = new ShapeRenderer();   // 共享单例，避免每实例 new 泄漏 native OpenGL 资源
 
         Track() {
             float[] wh = trackSize();
             setSize(wh[0], wh[1]);
-            sr = new ShapeRenderer();
             knobX = knobRestX(false);
             targetKnobX = knobX;
         }
@@ -164,27 +163,27 @@ public class BsSwitch extends Table {
         public void draw(Batch batch, float parentAlpha) {
             batch.end();
             try {
-                sr.setProjectionMatrix(batch.getProjectionMatrix());
-                sr.setTransformMatrix(batch.getTransformMatrix());
-                sr.setColor(1, 1, 1, parentAlpha);
-                sr.begin(ShapeRenderer.ShapeType.Filled);
+                SR.setProjectionMatrix(batch.getProjectionMatrix());
+                SR.setTransformMatrix(batch.getTransformMatrix());
+                SR.setColor(1, 1, 1, parentAlpha);
+                SR.begin(ShapeRenderer.ShapeType.Filled);
                 try {
-                    sr.translate(getX(), getY(), 0);
+                    SR.translate(getX(), getY(), 0);
                     // 轨道（圆角矩形 = 圆角胶囊）
                     Color trackColor = disabledLocal
                             ? BsTheme.td()
                             : checked
                                     ? BsPalette.PRIMARY.getMain()
                                     : BsTheme.tm();
-                    sr.setColor(trackColor);
+                    SR.setColor(trackColor);
                     float r = getHeight() / 2f;
-                    roundRect(sr, 0, 0, getWidth(), getHeight(), r);
+                    roundRect(SR, 0, 0, getWidth(), getHeight(), r);
                     // 滑块（白色实心圆）
-                    sr.setColor(Color.WHITE);
-                    sr.circle(knobX, getHeight() / 2f, knobRadius());
+                    SR.setColor(Color.WHITE);
+                    SR.circle(knobX, getHeight() / 2f, knobRadius());
                 } finally {
-                    sr.identity();
-                    sr.end();
+                    SR.identity();
+                    SR.end();
                 }
             } finally {
                 batch.begin();
@@ -193,13 +192,13 @@ public class BsSwitch extends Table {
 
         /** 圆角矩形（Filled 模式，用矩形 + 两端 fillCircle 近似胶囊）。 */
         private void roundRect(ShapeRenderer sr, float x, float y, float w, float h, float r) {
-            sr.rect(x + r, y, w - 2 * r, h);
-            sr.rect(x, y + r, r, h - 2 * r);
-            sr.rect(x + w - r, y + r, r, h - 2 * r);
-            sr.circle(x + r, y + r, r);
-            sr.circle(x + w - r, y + r, r);
-            sr.circle(x + r, y + h - r, r);
-            sr.circle(x + w - r, y + h - r, r);
+            SR.rect(x + r, y, w - 2 * r, h);
+            SR.rect(x, y + r, r, h - 2 * r);
+            SR.rect(x + w - r, y + r, r, h - 2 * r);
+            SR.circle(x + r, y + r, r);
+            SR.circle(x + w - r, y + r, r);
+            SR.circle(x + r, y + h - r, r);
+            SR.circle(x + w - r, y + h - r, r);
         }
     }
 }
