@@ -1,16 +1,27 @@
 package com.git.bs.winsettings;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.git.bs.i18n.BsI18n;
+import com.git.bs.ui.BsLoadingOverlay;
+import com.git.bs.ui.BsToast;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Windows 更新页（按 Win11 真实结构）。
  *
  * <p>设置组：检查更新 / 更多选项 / 高级选项 / 预览体验 / 故障排除。</p>
+ *
+ * <p><b>演示</b>：点击「检查更新」按钮 → 弹全屏旋转加载遮罩（{@link BsLoadingOverlay}），
+ * 模拟进度递增（0→100%），完成后弹 Toast 显示结果（最新 / 发现更新）。展示异步操作的
+ * loading + 进度条 + 完成反馈的典型交互。</p>
  */
 @Slf4j
 public class WindowsUpdatePage extends CategoryPage {
+
+    /** 检查更新状态（演示用，避免连点重复弹遮罩）。 */
+    private boolean checking = false;
 
     public WindowsUpdatePage(Skin skin) {
         super(BsI18n.get("nav.update"), skin);
@@ -19,7 +30,7 @@ public class WindowsUpdatePage extends CategoryPage {
                 SettingItem.value(BsI18n.get("update.update_status"), "", BsI18n.get("update.up_to_date")),
                 SettingItem.value(BsI18n.get("update.last_check"), "", BsI18n.get("update.last_check_value")),
                 SettingItem.button(BsI18n.get("update.check_for_updates"), BsI18n.get("update.check_for_updates_desc"), BsI18n.get("update.check_for_updates"),
-                        () -> log.info("[Windows 更新] 检查更新")),
+                        this::simulateCheckForUpdates),
                 SettingItem.value(BsI18n.get("update.available_updates"), "", BsI18n.get("update.no_updates"))
         );
 
@@ -44,7 +55,7 @@ public class WindowsUpdatePage extends CategoryPage {
         group(BsI18n.get("update.group_insider"),
                 SettingItem.value(BsI18n.get("update.insider_status"), "", BsI18n.get("update.not_joined")),
                 SettingItem.link(BsI18n.get("update.join_insider"), BsI18n.get("update.join_insider_desc"), BsI18n.get("update.join")),
-                SettingItem.value(BsI18n.get("update.channel"), "", "\u2014")
+                SettingItem.value(BsI18n.get("update.channel"), "", "—")
         );
 
         group(BsI18n.get("update.group_troubleshoot"),
@@ -52,5 +63,81 @@ public class WindowsUpdatePage extends CategoryPage {
                 SettingItem.value(BsI18n.get("update.last_troubleshoot"), "", BsI18n.get("update.never_run")),
                 SettingItem.button(BsI18n.get("update.reset_components"), BsI18n.get("update.reset_components_desc"), BsI18n.get("update.reset"))
         );
+    }
+
+    /**
+     * 演示：点击「检查更新」→ 旋转加载遮罩（带进度条递增）→ 完成后弹 Toast。
+     *
+     * <p>实现：用 libgdx {@link com.badlogic.gdx.utils.Timer} 每 100ms 触发，postRunnable
+     * 切回 render 线程更新进度（scene2d 非线程安全）。约 8 秒走完 0→100%，
+     * 完成后关闭遮罩、弹 Toast 显示结果。遮罩 modal 拦截所有点击，避免检查期间用户重复操作。</p>
+     */
+    private void simulateCheckForUpdates() {
+        if (checking) {
+            log.info("[Windows 更新] 正在检查中，忽略重复点击");
+            return;
+        }
+        Stage stage = currentStage();
+        if (stage == null) {
+            log.info("[Windows 更新] 检查更新（无 stage，跳过遮罩演示）");
+            return;
+        }
+        checking = true;
+        log.info("[Windows 更新] 开始检查更新…");
+
+        // 显示遮罩：spinner + 「正在检查更新…」 + 进度条从 0 开始
+        final BsLoadingOverlay overlay = BsLoadingOverlay.show(stage, skin,
+                BsI18n.get("demo.update_checking"), 0f);
+
+        // 每 100ms 推进进度（每秒 +12%，约 8s 走完，进度条走得自然不突兀）
+        final float[] progress = {0f};
+        final float step = 1.2f;   // 每次Tick +1.2%（10次/秒 × 1.2 = 12/s → ~8秒满）
+        final com.badlogic.gdx.utils.Timer.Task task = new com.badlogic.gdx.utils.Timer.Task() {
+            @Override public void run() {
+                // Timer 在独立线程，scene2d 操作必须切回 render 线程
+                Gdx.app.postRunnable(() -> tick(stage, overlay, progress, step, this));
+            }
+        };
+        com.badlogic.gdx.utils.Timer.schedule(task, 0f, 0.1f);
+    }
+
+    /** 单次进度推进（render 线程内执行）。到 100% 关闭遮罩、弹 Toast、停止定时器。 */
+    private void tick(Stage stage, BsLoadingOverlay overlay, float[] progress, float step,
+                      com.badlogic.gdx.utils.Timer.Task task) {
+        if (overlay.getStage() == null) {
+            // 遮罩已被关闭（主题/语言切换重建 screen 等）→ 停止定时器
+            task.cancel();
+            checking = false;
+            return;
+        }
+        progress[0] = Math.min(100f, progress[0] + step);
+        overlay.setProgress(progress[0]);
+        overlay.setText(BsI18n.get("demo.update_progress", (int) progress[0]));
+        if (progress[0] >= 100f) {
+            task.cancel();
+            overlay.close();
+            checking = false;
+            // 模拟结果：80% 概率「最新」，20% 发现 3 个更新
+            boolean upToDate = Math.random() < 0.8;
+            if (upToDate) {
+                BsToast.show(stage, skin,
+                        BsI18n.get("demo.update_uptodate"),
+                        BsToast.Variant.SUCCESS, 4f);
+            } else {
+                BsToast.show(stage, skin,
+                        BsI18n.get("demo.update_found", 3),
+                        BsToast.Variant.INFO, 4f);
+            }
+            log.info("[Windows 更新] 检查完成: {}", upToDate ? "已是最新" : "发现 3 个更新");
+        }
+    }
+
+    /** 拿当前 stage：WinSettingsScreen.show() 里 {@code Gdx.input.setInputProcessor(stage)}，所以 InputProcessor 即 stage。 */
+    private static Stage currentStage() {
+        try {
+            Object ip = Gdx.input.getInputProcessor();
+            if (ip instanceof Stage) return (Stage) ip;
+        } catch (Throwable ignored) {}
+        return null;
     }
 }

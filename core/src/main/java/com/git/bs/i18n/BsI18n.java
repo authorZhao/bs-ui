@@ -1,8 +1,6 @@
 package com.git.bs.i18n;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.ObjectMap;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,15 +31,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * }</pre>
  *
  * <h3>语言文件</h3>
- * <p>classpath {@code com/git/bs/i18n/{locale}.json}，扁平 key-value：
+ * <p>classpath {@code com/git/bs/i18n/{locale}.properties}，扁平 key-value：
  * <pre>{@code
- * {
- *   "btn.ok": "确定",
- *   "table.page_info": "共 {0} 条，第 {1}/{2} 页"
- * }
+ * btn.ok=确定
+ * table.page_info=共 {0} 条，第 {1}/{2} 页
  * }</pre>
- * 用 libgdx {@link Json} 解析（不加依赖，core 已可用）。不依赖 Platform.toJson/fromJson
- * （DeskPlatform 用 fastjson2 + UnquoteFieldName 输出非标准 JSON，不适合手写语言文件）。</p>
+ * 自写 UTF-8 properties 解析（不用 {@code java.util.Properties.load()}，它用 ISO-8859-1 不支持中文）。
+ * IntelliJ IDEA 原生支持 {@code .properties} 的 key 自动补全和 Ctrl+Click 跳转。</p>
  *
  * <h3>占位符约定</h3>
  * <p>用 {@code {0}{1}} 风格，内部转成 {@code %s}/{@code %d} 走 {@link String#format}。
@@ -79,7 +75,7 @@ public final class BsI18n {
 
     /**
      * 初始化并加载指定语言。
-     * @param locale 语言代码，如 {@code "zh_cn"} / {@code "en_us"}（对应 {@code {locale}.json}）
+     * @param locale 语言代码，如 {@code "zh_cn"} / {@code "en_us"}（对应 {@code {locale}.properties}）
      */
     public static synchronized void init(String locale) {
         currentLocale = locale == null ? DEFAULT_LOCALE : locale;
@@ -99,7 +95,7 @@ public final class BsI18n {
      * 如果已 init，调用后会立即重载当前 locale 生效。</p>
      *
      * @param classpathDir classpath 目录路径，如 {@code "com/git/bs/demo/i18n/"}，
-     *                     目录下放 {@code zh_cn.json} / {@code en_us.json} 等
+     *                     目录下放 {@code zh_cn.properties} / {@code en_us.properties} 等
      */
     public static synchronized void addBundle(String classpathDir) {
         if (classpathDir == null || classpathDir.isEmpty()) return;
@@ -155,9 +151,9 @@ public final class BsI18n {
      * 取文案，带默认值（core 库组件用）。
      *
      * <p><b>用途</b>：bs-ui core 组件（BsDialog/BsEmpty/BsSearchBar 等）内置默认中文文案，
-     * 即使外部应用没配 json 也能正常显示。调用方传默认值（通常就是原硬编码中文），
-     * json 里有对应 key 就覆盖默认值，没有就用默认值 —— 这样 core 库可独立工作，
-     * 业务可选地在自己的 json 里覆盖 core 文案。</p>
+     * 即使外部应用没配 properties 也能正常显示。调用方传默认值（通常就是原硬编码中文），
+     * properties 里有对应 key 就覆盖默认值，没有就用默认值 —— 这样 core 库可独立工作，
+     * 业务可选地在自己的 properties 里覆盖 core 文案。</p>
      *
      * <p>例：{@code BsI18n.get("core.empty", "暂无数据")} —— zh_cn/en_us 没配则显示"暂无数据"，
      * 配了则用配置值。不打印 missing key 日志（因为有默认值不算 missing）。</p>
@@ -246,7 +242,7 @@ public final class BsI18n {
     }
 
     /**
-     * 从 classpath 加载各 bundle 的 {locale}.json 合并到 messages map。
+     * 从 classpath 加载各 bundle 的 {locale}.properties 合并到 messages map。
      * 顺序：core 默认包 → 业务包（addBundle 注册顺序，后者覆盖前者）。
      * 任何文件不存在/解析失败 → 跳过该文件（不崩，get 走 fallback 返回 key）。
      */
@@ -260,24 +256,82 @@ public final class BsI18n {
         }
     }
 
-    /** 加载单个 bundle 的 {locale}.json 到 messages。文件不存在/解析失败 → 静默跳过。 */
-    @SuppressWarnings("unchecked")
+    /** 加载单个 bundle 的 {locale}.properties 到 messages。文件不存在/解析失败 → 静默跳过。 */
     private static void loadBundleFile(String dir, String locale) {
         try {
-            String path = dir + locale + ".json";
+            String path = dir + locale + ".properties";
             var fh = Gdx.files.internal(path);
             if (!fh.exists()) return;
             String text = fh.readString("UTF-8");
-            Json json = new Json();
-            ObjectMap<String, String> map = json.fromJson(ObjectMap.class, text);
+            Map<String, String> map = parseProperties(text);
             if (map != null) {
-                for (ObjectMap.Entry<String, String> e : map.entries()) {
-                    messages.put(e.key, e.value);
-                }
+                messages.putAll(map);
             }
         } catch (Throwable ignored) {
             // 单个 bundle 加载失败不影响其他 bundle
         }
+    }
+
+    /**
+     * 自写 UTF-8 properties 解析（不用 {@code java.util.Properties.load()}，它用 ISO-8859-1 不支持中文）。
+     *
+     * <p>规则：
+     * <ul>
+     *   <li>空行 / {@code #} 或 {@code !} 开头的注释行 → 跳过</li>
+     *   <li>第一个 {@code =} 或 {@code :} 作为 key/value 分隔符（左到右扫描，谁先出现用谁）</li>
+     *   <li>key 和 value 都做 trim</li>
+     *   <li>行尾 {@code \} 表示续行（当前数据集不会触发，但支持）</li>
+     *   <li>不处理 backslash-u-XXXX 转义（文件本身就是 UTF-8）</li>
+     * </ul></p>
+     */
+    private static Map<String, String> parseProperties(String text) {
+        Map<String, String> result = new LinkedHashMap<>();
+        StringBuilder logical = new StringBuilder();
+        boolean continued = false;
+        for (String rawLine : text.split("\r?\n", -1)) {
+            if (continued) {
+                logical.append(rawLine);
+            } else {
+                logical.setLength(0);
+                logical.append(rawLine);
+            }
+            // 续行判断：奇数个行尾反斜杠
+            int bs = 0;
+            for (int i = logical.length() - 1; i >= 0 && logical.charAt(i) == '\\'; i--) bs++;
+            if (bs % 2 == 1) {
+                // 去掉末尾反斜杠，等待下一行
+                logical.deleteCharAt(logical.length() - 1);
+                continued = true;
+                continue;
+            }
+            continued = false;
+            String line = logical.toString();
+            // 去首尾空白用于注释/空行判断
+            String trimmed = line.trim();
+            if (trimmed.isEmpty() || trimmed.charAt(0) == '#' || trimmed.charAt(0) == '!') {
+                continue;
+            }
+            // 找第一个 = 或 :
+            int sep = -1;
+            for (int i = 0; i < line.length(); i++) {
+                char c = line.charAt(i);
+                if (c == '=' || c == ':') {
+                    sep = i;
+                    break;
+                }
+            }
+            if (sep < 0) {
+                // 只有 key，value 为空
+                result.put(trimmed, "");
+            } else {
+                String key = line.substring(0, sep).trim();
+                String value = line.substring(sep + 1).trim();
+                if (!key.isEmpty()) {
+                    result.put(key, value);
+                }
+            }
+        }
+        return result;
     }
 
     /**

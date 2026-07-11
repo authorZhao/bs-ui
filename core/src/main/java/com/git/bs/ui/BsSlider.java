@@ -2,6 +2,10 @@ package com.git.bs.ui;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -15,15 +19,74 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
  * 真正"到底/到顶"。track 视觉宽度 = knob 的 40%（比 knob 细，看起来像 Bootstrap 滑槽）。</p>
  *
  * <p>垂直方向同理：knob 顶部对齐 track 顶端，底部对齐 track 底端。</p>
+ *
+ * <p><b>滚动容器内拖动防抖</b>：Slider 放在 ScrollPane 里时，ScrollPane 的 flickScroll
+ * 手势检测（ActorGestureListener）会在拖动时触发页面平移，导致滑块拖动不流畅 + 页面跟着浮动。
+ * 解法：touchDown 时临时禁用最近 ScrollPane 祖先的滚动（{@link ScrollPane#setScrollingDisabled}），
+ * touchUp 时恢复。同时 touchDown 返回 true 消费事件阻止冒泡（双重保险）。</p>
  */
 public class BsSlider extends Slider {
 
+    /** touchDown 时找到的 ScrollPane 祖先（null = 不在滚动容器内，无需处理）。 */
+    private ScrollPane parentScroll;
+    /** 记录原滚动禁用状态，touchUp 时恢复。 */
+    private boolean savedScrollX, savedScrollY;
+
     public BsSlider(float min, float max, float step, boolean vertical, Skin skin) {
         super(min, max, step, vertical, skin);
+        installScrollGuard();
     }
 
     public BsSlider(float min, float max, float step, boolean vertical, Skin skin, String styleName) {
         super(min, max, step, vertical, skin, styleName);
+        installScrollGuard();
+    }
+
+    /**
+     * 安装滚动防抖监听。两道防线：
+     * <ol>
+     *   <li>touchDown 时禁用父 ScrollPane 滚动（对付 flickScroll 手势检测）</li>
+     *   <li>touchDown 返回 true 消费事件（阻止 touchDragged 冒泡）</li>
+     * </ol>
+     * touchUp 时恢复 ScrollPane 状态。
+     */
+    private void installScrollGuard() {
+        addListener(new InputListener() {
+            @Override public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                // 禁用父 ScrollPane 滚动（flickScroll 的手势检测靠这个）
+                parentScroll = findScrollPaneAncestor();
+                if (parentScroll != null) {
+                    savedScrollX = parentScroll.isScrollingDisabledX();
+                    savedScrollY = parentScroll.isScrollingDisabledY();
+                    parentScroll.setScrollingDisabled(true, true);
+                }
+                // 消费事件，阻止 touchDragged 冒泡到外层容器
+                return true;
+            }
+
+            @Override public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                restoreScroll();
+            }
+        });
+    }
+
+    /** 沿 parent 链向上找最近的 {@link ScrollPane}。 */
+    private ScrollPane findScrollPaneAncestor() {
+        Actor p = getParent();
+        while (p != null) {
+            if (p instanceof ScrollPane) return (ScrollPane) p;
+            p = p.getParent();
+        }
+        return null;
+    }
+
+    /** 恢复 touchDown 时禁用的滚动状态（幂等）。 */
+    private void restoreScroll() {
+        if (parentScroll != null) {
+            try { parentScroll.setScrollingDisabled(savedScrollX, savedScrollY); }
+            catch (Throwable ignored) {}
+            parentScroll = null;
+        }
     }
 
     @Override

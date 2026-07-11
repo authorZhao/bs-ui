@@ -1,8 +1,17 @@
 package com.git.bs.winsettings;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.git.bs.i18n.BsI18n;
+import com.git.bs.ui.BsDatePicker;
+import com.git.bs.ui.BsToast;
+import com.git.bs.ui.BsTimePicker;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 时间和语言页（按 Win11 真实结构）。
@@ -11,6 +20,10 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p><b>Windows 显示语言</b>：真正驱动 i18n 切换。选中后调 {@link BsI18n#setLocale}，
  * App 监听器会重建 screen，所有文案变新语言。</p>
+ *
+ * <p><b>演示</b>：日期时间组里的「设置日期 / 设置时间」用真正的 {@link BsDatePicker}（含时间）
+ * 和 {@link BsTimePicker}，点击弹出选择面板，选完回显。点击「立即同步」按钮 → 自动取系统当前
+ * {@link LocalDateTime#now()}，刷新两个选择器的显示 + 弹 Toast 反馈。</p>
  */
 @Slf4j
 public class TimeLanguagePage extends CategoryPage {
@@ -22,16 +35,38 @@ public class TimeLanguagePage extends CategoryPage {
             {"日本語 (日本)",           "ja_jp"},
     };
 
+    private static final DateTimeFormatter SYNC_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /** 日期+时间选择器（点击弹日历面板，选完回显 yyyy-MM-dd HH:mm:ss）。 */
+    private final BsDatePicker dateTimePicker;
+    /** 仅时间选择器（点击弹时:分:秒步进面板）。 */
+    private final BsTimePicker timePicker;
+
     public TimeLanguagePage(Skin skin) {
         super(BsI18n.get("nav.timelanguage"), skin);
+
+        // 创建选择器：初始值用当前系统时间，让回显真实可信
+        LocalDateTime now = LocalDateTime.now();
+        dateTimePicker = new BsDatePicker(skin, true);
+        dateTimePicker.setValue(now);
+        dateTimePicker.setOnChange(dt -> log.info("[时间语言] 用户调整日期时间: {}", dt));
+
+        timePicker = new BsTimePicker(skin);
+        timePicker.setValue(now.toLocalTime());
+        timePicker.setOnChange(t -> log.info("[时间语言] 用户调整时间: {}", t));
 
         group(BsI18n.get("timelang.group_date_time"),
                 SettingItem.toggle(BsI18n.get("timelang.set_time_automatically"), "", true),
                 SettingItem.toggle(BsI18n.get("timelang.set_timezone_automatically"), "", true),
                 SettingItem.select(BsI18n.get("timelang.timezone"), "", new String[]{BsI18n.get("timelang.tz_beijing"), BsI18n.get("timelang.tz_tokyo"), BsI18n.get("timelang.tz_london"), BsI18n.get("timelang.tz_pacific")}, BsI18n.get("timelang.tz_beijing")),
+                // 真正的日期+时间选择器（CUSTOM 控件，Container 固定宽度避免文本截断）
+                SettingItem.custom(BsI18n.get("timelang.set_date"), BsI18n.get("timelang.current_time"),
+                        () -> fixedWidth(dateTimePicker, 230f)),
+                SettingItem.custom(BsI18n.get("timelang.set_time"), "",
+                        () -> fixedWidth(timePicker, 110f)),
+                // 点击「立即同步」→ 取系统当前时间，刷新两个选择器 + 弹 Toast 回显
                 SettingItem.button(BsI18n.get("timelang.sync_now"), BsI18n.get("timelang.sync_now_desc"), BsI18n.get("timelang.sync"),
-                        () -> log.info("同步时间")),
-                SettingItem.value(BsI18n.get("timelang.current_time"), "", "2026-07-09 14:30:00"),
+                        () -> syncNow()),
                 SettingItem.toggle(BsI18n.get("timelang.dst_auto_adjust"), "", false)
         );
 
@@ -71,6 +106,43 @@ public class TimeLanguagePage extends CategoryPage {
                 SettingItem.toggle(BsI18n.get("timelang.simplified_traditional_toggle"), "Ctrl + Shift + F", true),
                 SettingItem.button(BsI18n.get("timelang.ime_options"), BsI18n.get("timelang.ime_options_desc"), BsI18n.get("timelang.options"))
         );
+    }
+
+    /**
+     * 点击「立即同步」：取系统当前 {@link LocalDateTime#now()}，刷新日期/时间两个选择器，
+     * 弹 Toast 回显同步后的时间。
+     */
+    private void syncNow() {
+        LocalDateTime now = LocalDateTime.now();
+        // 刷新两个 picker 的显示（picker 内部 value + 文本回填）
+        dateTimePicker.setValue(now);
+        timePicker.setValue(now.toLocalTime());
+        String formatted = now.format(SYNC_FMT);
+        log.info("[时间语言] 立即同步 → {}", formatted);
+
+        Stage stage = currentStage();
+        if (stage != null) {
+            BsToast.show(stage, skin,
+                    BsI18n.get("demo.sync_success", formatted),
+                    BsToast.Variant.SUCCESS, 3.5f);
+        }
+    }
+
+    /** 拿当前 stage：WinSettingsScreen.show() 里 {@code Gdx.input.setInputProcessor(stage)}。 */
+    private static Stage currentStage() {
+        try {
+            Object ip = Gdx.input.getInputProcessor();
+            if (ip instanceof Stage) return (Stage) ip;
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    /** 把 actor 包到固定宽度的 Container 里（解决 TextField 默认 prefWidth 偏窄文本截断的问题）。 */
+    private static Container<com.badlogic.gdx.scenes.scene2d.Actor> fixedWidth(
+            com.badlogic.gdx.scenes.scene2d.Actor a, float w) {
+        Container<com.badlogic.gdx.scenes.scene2d.Actor> c = new Container<>(a);
+        c.width(w);
+        return c;
     }
 
     // =================== 显示语言工具 ===================

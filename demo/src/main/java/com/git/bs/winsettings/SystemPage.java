@@ -1,7 +1,15 @@
 package com.git.bs.winsettings;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.git.bs.i18n.BsI18n;
+import com.git.bs.ui.BsProgress;
+import com.git.bs.ui.BsSlider;
+import com.git.bs.ui.BsTheme;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -9,6 +17,9 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>涵盖 Win11 系统分类的主要设置组：显示 / 声音 / 通知与专注 / 电源与电池 / 存储 / 关于。
  * 所有操作只打日志（{@link CategoryPage} 统一处理），少数项演示带业务回调。</p>
+ *
+ * <p><b>演示</b>：「电池电量」用 {@link BsProgress} 进度条（SUCCESS 色，带百分比标签回显）；
+ * 「屏幕亮度」用 {@link BsSlider} 滑块（0-100，旁边百分比文字实时回显）。</p>
  */
 @Slf4j
 public class SystemPage extends CategoryPage {
@@ -28,6 +39,9 @@ public class SystemPage extends CategoryPage {
         group(BsI18n.get("system.group_display"),
                 SettingItem.value(BsI18n.get("system.resolution"), BsI18n.get("system.resolution_desc"), BsI18n.get("system.resolution_value")),
                 SettingItem.value(BsI18n.get("system.scale"), BsI18n.get("system.scale_desc"), "100%"),
+                // 屏幕亮度：滑块 + 百分比回显
+                SettingItem.custom(BsI18n.get("system.screen_brightness"), BsI18n.get("system.screen_brightness_desc"),
+                        () -> brightnessSlider(skin, 80)),
                 SettingItem.toggle(BsI18n.get("system.night_light"), BsI18n.get("system.night_light_desc"), false, c -> log.info("应用夜间模式: {}", c)),
                 SettingItem.select(BsI18n.get("system.orientation"), BsI18n.get("system.orientation_desc"),
                         new String[]{BsI18n.get("system.orient_landscape"), BsI18n.get("system.orient_portrait"),
@@ -52,6 +66,9 @@ public class SystemPage extends CategoryPage {
         );
 
         group(BsI18n.get("system.group_power"),
+                // 电池电量：进度条 + 百分比回显（SUCCESS 绿色，带条纹动画）
+                SettingItem.custom(BsI18n.get("system.battery_level"), BsI18n.get("system.battery_level_desc"),
+                        () -> batteryProgress(skin, 0.75f)),
                 SettingItem.select(BsI18n.get("system.power_mode"), BsI18n.get("system.power_mode_desc"),
                         new String[]{BsI18n.get("system.power_balanced"), BsI18n.get("system.power_best_perf"), BsI18n.get("system.power_best_efficiency")},
                         BsI18n.get("system.power_balanced")),
@@ -76,5 +93,49 @@ public class SystemPage extends CategoryPage {
                 SettingItem.value(BsI18n.get("system.version"), "", "Windows 11 Pro 23H2"),
                 SettingItem.link(BsI18n.get("system.windows_spec"), "", BsI18n.get("system.view_spec"), () -> log.info("查看 Windows 规格"))
         );
+    }
+
+    /**
+     * 电池电量进度条：{@link BsProgress}（SUCCESS 绿色，带百分比标签 + 条纹动画）。
+     * 固定宽度 200px，百分比文字叠在进度条上居中显示。
+     * @param percent 0~1
+     */
+    private Actor batteryProgress(Skin skin, float percent) {
+        BsProgress bar = new BsProgress(skin);
+        bar.setVariant(BsProgress.Variant.SUCCESS);
+        bar.setShowLabel(true);     // 显示 "NN%" 叠在 fill 上
+        bar.setStriped(true);       // 条纹背景（Win11 电池条风格）
+        bar.setProgress(percent);
+        // 固定宽度 + 高度（进度条默认 18px 高，宽度给 200）
+        Container<Actor> wrap = new Container<>(bar);
+        wrap.width(200f).height(18f);
+        return wrap;
+    }
+
+    /**
+     * 屏幕亮度滑块：{@link BsSlider}（0-100 步进 1）+ 右侧百分比文字回显。
+     * 拖动时百分比文字同步更新。整体固定宽度 220px。
+     */
+    private Actor brightnessSlider(Skin skin, int initial) {
+        BsSlider slider = new BsSlider(0, 100, 1, false, skin);
+        slider.setValue(initial);
+        Label label = new Label(initial + "%", skin);
+        label.setColor(BsTheme.ts());
+        label.setAlignment(com.badlogic.gdx.utils.Align.right);
+
+        slider.addListener(new ChangeListener() {
+            @Override public void changed(ChangeEvent event, Actor actor) {
+                int v = (int) slider.getValue();
+                label.setText(v + "%");
+                log.info("[系统] 屏幕亮度调到 {}%", v);
+            }
+        });
+
+        Table row = new Table();
+        row.add(slider).growX().padRight(8);
+        row.add(label).width(42).right();
+        Container<Actor> wrap = new Container<>(row);
+        wrap.width(220f);
+        return wrap;
     }
 }

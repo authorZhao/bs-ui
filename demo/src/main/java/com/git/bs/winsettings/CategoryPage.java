@@ -142,6 +142,18 @@ public abstract class CategoryPage extends SettingsPage {
             case VALUE:
             default:
                 return new BsText(it.value != null ? it.value : "--", BsText.Size.DEFAULT, BsText.Variant.SECONDARY);
+            case CUSTOM: {
+                // 自定义控件：直接把工厂返回的 Actor 放 trailing（日期/时间选择器等）
+                if (it.customControl != null) {
+                    try {
+                        Actor a = it.customControl.get();
+                        if (a != null) return a;
+                    } catch (Throwable t) {
+                        log.warn("CUSTOM 控件工厂异常: {}", it.title, t);
+                    }
+                }
+                return new BsText("--", BsText.Size.DEFAULT, BsText.Variant.SECONDARY);
+            }
         }
     }
 }
