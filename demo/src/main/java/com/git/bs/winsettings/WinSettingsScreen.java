@@ -52,18 +52,18 @@ public class WinSettingsScreen implements Screen, Router {
 
     /** {key, 图标符号, 导航文案的 i18n key} —— 渲染时调 BsI18n.get 取文案，与 HomePage 卡片 key 对齐。 */
     private static final String[][] NAV = {
-            {"home",           "⌂", "nav.home"},
+            {"home",           "🏠", "nav.home"},
             {"system",         "🖥", "nav.system"},
-            {"bluetooth",      "ⓑ", "nav.bluetooth"},
+            {"bluetooth",      "📡", "nav.bluetooth"},
             {"network",        "📶", "nav.network"},
             {"personalization","🎨", "nav.personalization"},
-            {"apps",           "⊞", "nav.apps"},
+            {"apps",           "📱", "nav.apps"},
             {"accounts",       "👤", "nav.accounts"},
             {"timelanguage",   "🕐", "nav.timelanguage"},
             {"gaming",         "🎮", "nav.gaming"},
             {"accessibility",  "♿", "nav.accessibility"},
             {"privacy",        "🔒", "nav.privacy"},
-            {"update",         "⟳", "nav.update"},
+            {"update",         "🔄", "nav.update"},
     };
 
     public WinSettingsScreen() {
@@ -136,13 +136,19 @@ public class WinSettingsScreen implements Screen, Router {
         nav.setBackground(skin.getDrawable("bs-window-bg"));
         nav.defaults().growX().left();
 
-        // 圆形头像 + 名字（导航栏最顶）
-        Drawable avD = skin.has("bs-circle", Drawable.class)
-                ? skin.getDrawable("bs-circle")
-                : skin.newDrawable("white", BsTheme.colorOf("primary"));
-        Image avatar = new Image(avD);
-        avatar.setScaling(Scaling.stretch);
-        avatar.setColor(BsTheme.colorOf("primary"));
+        // 头像 + 名字（导航栏最顶）：优先用 emoji 头像图集，否则回退到纯色圆形
+        Drawable avD = com.git.bs.ui.BsEmoji.randomHead();
+        Image avatar;
+        if (avD != null) {
+            avatar = new Image(avD);
+        } else {
+            Drawable fallback = skin.has("bs-circle", Drawable.class)
+                    ? skin.getDrawable("bs-circle")
+                    : com.git.bs.ui.BsSkinFactory.drawableOf(BsTheme.colorOf("primary"));
+            avatar = new Image(fallback);
+            avatar.setColor(BsTheme.colorOf("primary"));
+        }
+        avatar.setScaling(Scaling.fit);
         Table profile = new Table();
         profile.left();
         profile.defaults().left().pad(10, 14, 4, 14);
@@ -209,10 +215,19 @@ public class WinSettingsScreen implements Screen, Router {
         private final Skin itemSkin;
 
         NavItem(Skin skin, String key, String iconSym, String text, Runnable onClick) {
-            super(iconSym + "  " + text, skin, BsButton.Variant.SECONDARY, BsButton.Style.GHOST, BsButton.Size.MD);
+            super(text, skin, BsButton.Variant.SECONDARY, BsButton.Style.GHOST, BsButton.Size.MD);
             this.key = key;
             this.itemSkin = skin;
             left();
+            // 优先用 emoji 图集里的彩色图标；没有则用文字符号（iconSym 首字符）。
+            com.badlogic.gdx.scenes.scene2d.utils.Drawable emojiD =
+                    com.git.bs.ui.BsEmoji.isLoaded() ? com.git.bs.ui.BsEmoji.get(iconSym) : null;
+            if (emojiD != null) {
+                setIcon(emojiD);
+            } else {
+                // 文字 emoji 回退：拼到文字前面（原行为）
+                setText(iconSym + "  " + text);
+            }
             addListener(new ClickListener() {
                 @Override public void clicked(InputEvent event, float x, float y) { onClick.run(); }
             });

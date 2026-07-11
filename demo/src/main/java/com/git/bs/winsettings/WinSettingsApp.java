@@ -28,6 +28,8 @@ public class WinSettingsApp extends Game {
         // 注册 winsettings 业务翻译包（core 自带的通用 key 之外，业务专属 key 在这里）
         BsI18n.addBundle("com/git/bs/demo/i18n/");
         BsI18n.init();                          // i18n：加载 core + demo 业务包，默认 zh_cn
+        com.git.bs.ui.BsEmoji.load();          // 加载 emoji atlas（WinRow/NavItem 用彩色 emoji 替代文字 emoji）
+        com.git.bs.ui.BsEmoji.loadHeads();     // 加载头像 atlas（左导航栏默认头像）
         BsUI.setTheme(BsDarkTheme.INSTANCE);   // Win11 设置亮色风格
         setScreen(new WinSettingsScreen());
         // 主题切换（个性化卡「色彩模式」选亮/暗）→ 重建 screen，让所有 actor 用新 skin。
@@ -62,6 +64,7 @@ public class WinSettingsApp extends Game {
         for (BitmapFont f : fontSet) {
             try { f.dispose(); } catch (Throwable ignored) {}
         }
+        com.git.bs.ui.BsEmoji.dispose();
         BsUI.dispose();
     }
 }

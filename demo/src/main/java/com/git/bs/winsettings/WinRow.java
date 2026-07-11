@@ -9,8 +9,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
+import com.git.bs.ui.BsEmoji;
 import com.git.bs.ui.BsSkinFactory;
 import com.git.bs.ui.BsText;
 import com.git.bs.ui.BsTheme;
@@ -47,7 +49,8 @@ public class WinRow extends Table {
         setTouchable(Touchable.enabled);
 
         if (icon != null && !icon.isEmpty()) {
-            add(new BsText(icon, BsText.Size.LG)).padRight(12).top();
+            Actor iconActor = emojiOrText(icon);
+            if (iconActor != null) add(iconActor).padRight(12).top();
         }
         Table text = new Table();
         text.left();
@@ -134,5 +137,25 @@ public class WinRow extends Table {
     /** 导航行：trailing 为 › 箭头，整行点击触发回调（主页推荐设置用）。 */
     public static WinRow nav(Skin skin, String icon, String title, String desc, Runnable onClick) {
         return new WinRow(skin, icon, title, desc, new BsText("›", BsText.Size.LG, BsText.Variant.MUTED), onClick);
+    }
+
+    /**
+     * 把 icon 字符串转成 Actor：
+     * <ul>
+     *   <li>如果 BsEmoji 已加载且该字符串对应 emoji region → 返回 {@link Image}（彩色 emoji 图标）</li>
+     *   <li>否则 → 返回 {@link BsText}（文字符号，如 ⌂ ⓑ ⊞ ⟳ ⚡）</li>
+     * </ul>
+     */
+    private static Actor emojiOrText(String icon) {
+        if (BsEmoji.isLoaded()) {
+            Drawable emojiD = BsEmoji.get(icon);
+            if (emojiD != null) {
+                Image img = new Image(emojiD);
+                // emoji 32×32 源图，缩放到接近 LG 文字的视觉大小（约 24px）
+                img.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+                return img;
+            }
+        }
+        return new BsText(icon, BsText.Size.LG);
     }
 }

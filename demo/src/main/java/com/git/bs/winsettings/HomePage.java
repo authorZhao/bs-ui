@@ -75,6 +75,38 @@ public class HomePage extends SettingsPage {
         return "zh_cn".equals(BsI18n.currentLocale()) ? "中文" : "English";
     }
 
+    /** 弹出重命名对话框：输入新设备名，确认后回显到设备名标签。 */
+    private void showRenameDialog() {
+        com.badlogic.gdx.scenes.scene2d.Stage stage =
+                (com.badlogic.gdx.scenes.scene2d.Stage) com.badlogic.gdx.Gdx.input.getInputProcessor();
+        if (stage == null) {
+            log.warn("[主页] 无法获取 stage，重命名对话框取消");
+            return;
+        }
+        final com.git.bs.ui.BsTextField nameField = new com.git.bs.ui.BsTextField(deviceName, skin);
+        com.badlogic.gdx.scenes.scene2d.ui.Table form = new com.badlogic.gdx.scenes.scene2d.ui.Table(skin);
+        form.pad(10);
+        form.defaults().pad(6).left().growX();
+        form.add(new BsText(BsI18n.get("home.rename_prompt"), BsText.Size.SM, BsText.Variant.MUTED)).row();
+        form.add(nameField).growX().row();
+
+        final com.git.bs.ui.BsModal modal = new com.git.bs.ui.BsModal(BsI18n.get("home.rename"), skin);
+        modal.content(form).contentWidth(360).separator(true);
+        modal.addButton(BsI18n.get("home.cancel"), modal::close,
+                BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE);
+        modal.addButton(BsI18n.get("home.confirm"), () -> {
+                    String newName = nameField.getText().trim();
+                    if (!newName.isEmpty()) {
+                        deviceName = newName;
+                        deviceNameText.setText(newName);
+                        log.info("[主页] 设备重命名为 {}", newName);
+                    }
+                    modal.close();
+                },
+                BsButton.Variant.PRIMARY, BsButton.Style.SOLID);
+        modal.showModal(stage);
+    }
+
     private BsButton outlineBtn(String text, Runnable r) {
         BsButton b = new BsButton(text, skin, BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE, BsButton.Size.SM);
         b.addListener(click(r));
@@ -83,11 +115,16 @@ public class HomePage extends SettingsPage {
 
     // ---------- 各卡片 ----------
 
+    /** 当前设备名（点击重命名弹框改写）。 */
+    private String deviceName = BsI18n.get("home.device_name");
+    /** 设备名显示控件引用（重命名后 setText 刷新）。 */
+    private BsText deviceNameText;
+
     /** 顶部用户/设备卡：锁屏图 + 设备名 + 重命名 + 以太网 / Windows 更新状态。 */
     private Actor buildUserCard() {
         Table card = card();
         Table lock = new Table();
-        lock.setBackground(skin.newDrawable("white", BsTheme.tm()));
+        lock.setBackground(com.git.bs.ui.BsSkinFactory.drawableOf(BsTheme.tm()));
         lock.defaults().center();
         lock.add(new BsText(BsI18n.get("home.lock_screen"), BsText.Size.SM, BsText.Variant.MUTED));
         card.add(lock).width(160).height(90).padRight(16).top();
@@ -98,8 +135,9 @@ public class HomePage extends SettingsPage {
         Table nameRow = new Table();
         nameRow.left();
         nameRow.defaults().left();
-        nameRow.add(new BsText(BsI18n.get("home.device_name"), BsText.Size.LG).bold()).padRight(10);
-        nameRow.add(outlineBtn(BsI18n.get("home.rename"), () -> log.info("[主页] 重命名设备")));
+        deviceNameText = new BsText(deviceName, BsText.Size.LG).bold();
+        nameRow.add(deviceNameText).padRight(10);
+        nameRow.add(outlineBtn(BsI18n.get("home.rename"), this::showRenameDialog));
         right.add(nameRow).row();
 
         Table status = new Table();
@@ -148,9 +186,9 @@ public class HomePage extends SettingsPage {
                 {"🔒", "home.lockscreen_title", "home.lockscreen_desc", "personalization"},
                 {"🖥", "home.display_title",    "home.display_desc",    "system"},
                 {"🎨", "home.personalization_title", "home.personalization_desc", "personalization"},
-                {"ⓑ", "home.bluetooth_title",  "home.bluetooth_desc",  "bluetooth"},
-                {"⊞", "home.apps_title",       "home.apps_desc",       "apps"},
-                {"⟳", "home.update_title",     "home.update_desc",     "update"},
+                {"📡", "home.bluetooth_title",  "home.bluetooth_desc",  "bluetooth"},
+                {"📱", "home.apps_title",       "home.apps_desc",       "apps"},
+                {"🔄", "home.update_title",     "home.update_desc",     "update"},
         };
         for (String[] it : items) {
             final String navKey = it[3];
@@ -199,7 +237,7 @@ public class HomePage extends SettingsPage {
         for (int i = 0; i < cs.length; i++) {
             final int idx = i;
             Table thumb = new Table();
-            thumb.setBackground(skin.newDrawable("white", cs[i]));
+            thumb.setBackground(com.git.bs.ui.BsSkinFactory.drawableOf(cs[i]));
             thumb.setTouchable(Touchable.enabled);
             thumb.addListener(click(() -> log.info("[个性化] 选择背景 {}", idx + 1)));
             thumbs.add(thumb).size(84, 52);
