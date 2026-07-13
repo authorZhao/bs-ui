@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Emoji 图标加载：从预烘焙的 TextureAtlas 按 emoji 字符取 Drawable。
@@ -134,7 +135,7 @@ public final class BsEmoji {
      */
     public static Drawable randomHead() {
         if (headNames.isEmpty()) return null;
-        String name = headNames.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(headNames.size()));
+        String name = headNames.get(new Random().nextInt(headNames.size()));
         TextureRegion region = cache.get(name);
         return region == null ? null : new TextureRegionDrawable(region);
     }

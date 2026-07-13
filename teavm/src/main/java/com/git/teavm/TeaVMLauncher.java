@@ -4,6 +4,7 @@ package com.git.teavm;
 import com.git.bs.common.PlatformStatic;
 import com.git.bs.game.BsControlsTestApp;
 import com.git.bs.game.BsSkinApp;
+import com.git.bs.winsettings.WinSettingsApp;
 import com.git.teavm.platform.TeaVmPlatform;
 import com.github.xpenatan.gdx.teavm.backends.web.WebApplication;
 import com.github.xpenatan.gdx.teavm.backends.web.WebApplicationConfiguration;
@@ -24,7 +25,7 @@ public class TeaVMLauncher {
         config.preloadListener = assetLoader -> {
             assetLoader.loadScript("freetype.js");
         };
-        new WebApplication(new BsSkinApp(), config);
+        new WebApplication(new WinSettingsApp(), config);
     }
     private static void registerPlatform() {
         // 直接 new 实例注入，绕开反射 —— TeaVM wasm-gc 下

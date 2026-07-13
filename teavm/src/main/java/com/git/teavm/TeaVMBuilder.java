@@ -3,9 +3,7 @@ package com.git.teavm;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.badlogic.gdx.files.FileHandle;
 import com.git.bs.demo.BsControlsTestScreen;
 import com.github.xpenatan.gdx.teavm.backends.shared.config.AssetFileHandle;
 import com.github.xpenatan.gdx.teavm.backends.shared.config.compiler.TeaCompiler;
@@ -65,74 +63,86 @@ public class TeaVMBuilder {
 
 
     private static List<AssetFileHandle> getAssetFileHandles() {
+        // 外部 assets 目录（运行时通过 Gdx.files.internal("...") 加载的路径）
+        var list = new java.util.ArrayList<AssetFileHandle>();
+        list.add(new AssetFileHandle("../assets"));
+        list.add(new AssetFileHandle("bs/test/img", com.badlogic.gdx.Files.FileType.Classpath));
 
-        var pre = "com/git/bs/ui/skin/";
-        var files = List.of("bs-admin.atlas",
-                "bs-admin.json",
-                "bs-admin.png",
-                "bs-dark.atlas",
-                "bs-dark.json",
-                "bs-dark.png",
-                "bs-light.atlas",
-                "bs-light.json",
-                "bs-light.png",
-                "default-font.fnt",
-                "default-font_0.png",
-                "default-font_1.png",
-                "default-font_2.png",
-                "font-lg.fnt",
-                "font-lg_0.png",
-                "font-lg_1.png",
-                "font-lg_2.png",
-                "font-lg_3.png",
-                "font-lg_4.png",
-                "font-md.fnt",
-                "font-md_0.png",
-                "font-md_1.png",
-                "font-md_2.png",
-                "font-sm.fnt",
-                "font-sm_0.png",
-                "font-sm_1.png",
-                "font-xl.fnt",
-                "font-xl_0.png",
-                "font-xl_1.png",
-                "font-xl_2.png",
-                "font-xl_3.png",
-                "font-xl_4.png",
-                "font-xl_5.png",
-                "font-xl_6.png",
-                "font-xl_7.png",
-                "font-xl_8.png");
+        // ---- core 资源（classpath）----
+        // skin：烘焙好的 3 套皮肤（atlas+png+json）+ 烘焙字体（fnt+png）
+        var skinPre = "com/git/bs/ui/skin/";
+        list.add(cp(skinPre + "bs-admin.atlas"));
+        list.add(cp(skinPre + "bs-admin.json"));
+        list.add(cp(skinPre + "bs-admin.png"));
+        list.add(cp(skinPre + "bs-dark.atlas"));
+        list.add(cp(skinPre + "bs-dark.json"));
+        list.add(cp(skinPre + "bs-dark.png"));
+        list.add(cp(skinPre + "bs-light.atlas"));
+        list.add(cp(skinPre + "bs-light.json"));
+        list.add(cp(skinPre + "bs-light.png"));
+        list.add(cp(skinPre + "default-font.fnt"));
+        list.add(cp(skinPre + "default-font_0.png"));
+        list.add(cp(skinPre + "default-font_1.png"));
+        list.add(cp(skinPre + "default-font_2.png"));
+        list.add(cp(skinPre + "font-lg.fnt"));
+        list.add(cp(skinPre + "font-lg_0.png"));
+        list.add(cp(skinPre + "font-lg_1.png"));
+        list.add(cp(skinPre + "font-lg_2.png"));
+        list.add(cp(skinPre + "font-lg_3.png"));
+        list.add(cp(skinPre + "font-lg_4.png"));
+        list.add(cp(skinPre + "font-md.fnt"));
+        list.add(cp(skinPre + "font-md_0.png"));
+        list.add(cp(skinPre + "font-md_1.png"));
+        list.add(cp(skinPre + "font-md_2.png"));
+        list.add(cp(skinPre + "font-sm.fnt"));
+        list.add(cp(skinPre + "font-sm_0.png"));
+        list.add(cp(skinPre + "font-sm_1.png"));
+        list.add(cp(skinPre + "font-xl.fnt"));
+        list.add(cp(skinPre + "font-xl_0.png"));
+        list.add(cp(skinPre + "font-xl_1.png"));
+        list.add(cp(skinPre + "font-xl_2.png"));
+        list.add(cp(skinPre + "font-xl_3.png"));
+        list.add(cp(skinPre + "font-xl_4.png"));
+        list.add(cp(skinPre + "font-xl_5.png"));
+        list.add(cp(skinPre + "font-xl_6.png"));
+        list.add(cp(skinPre + "font-xl_7.png"));
+        list.add(cp(skinPre + "font-xl_8.png"));
 
+        // icons：bootstrap-icons 图标集（atlas + 3 张 png）
+        var iconPre = "com/git/bs/ui/icons/";
+        list.add(cp(iconPre + "bootstrap-icons.atlas"));
+        list.add(cp(iconPre + "bootstrap-icons.png"));
+        list.add(cp(iconPre + "bootstrap-icons2.png"));
+        list.add(cp(iconPre + "bootstrap-icons3.png"));
 
-        var list1 = files.stream().map(TeaVMBuilder::classPathHandle).collect(Collectors.toList());
+        // emoji：彩色 emoji + 头像图集（BsEmoji 加载）
+        var emojiPre = "com/git/bs/ui/emoji/";
+        list.add(cp(emojiPre + "emoji.atlas"));
+        list.add(cp(emojiPre + "emoji.png"));
+        list.add(cp(emojiPre + "pack2.png"));
+        list.add(cp(emojiPre + "pack3.png"));
+        list.add(cp(emojiPre + "pack4.png"));
+        list.add(cp(emojiPre + "pack5.png"));
+        list.add(cp(emojiPre + "head_emoji.atlas"));
+        list.add(cp(emojiPre + "head_emoji.png"));
 
+        // i18n：core 通用翻译包（properties，3 个 locale）
+        var i18nPre = "com/git/bs/i18n/";
+        list.add(cp(i18nPre + "zh_cn.properties"));
+        list.add(cp(i18nPre + "en_us.properties"));
+        list.add(cp(i18nPre + "ja_jp.properties"));
 
-        var list2 = List.of((new AssetFileHandle("../assets"))
-                , (new AssetFileHandle("com/git/bs/ui/icons/bootstrap-icons.atlas", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/icons/bootstrap-icons.png", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/icons/bootstrap-icons2.png", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/icons/bootstrap-icon3.png", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/chinese.txt", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/LXGWWenKaiMonoLite-Light.ttf", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/LXGWWenKaiScreen.ttf", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("bs/test/img", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/light.json", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/light.atlas", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/light.png", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/dark.json", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/dark.atlas", com.badlogic.gdx.Files.FileType.Classpath))
-                , (new AssetFileHandle("com/git/bs/ui/skin/dark.png", com.badlogic.gdx.Files.FileType.Classpath))
+        // ---- demo 资源（classpath）----
+        // winsettings 业务翻译包（properties，2 个 locale）
+        var demoI18nPre = "com/git/bs/demo/i18n/";
+        list.add(cp(demoI18nPre + "zh_cn.properties"));
+        list.add(cp(demoI18nPre + "en_us.properties"));
 
-        );
-        list1.addAll(list2);
-        return list1;
+        return list;
     }
 
-    private static AssetFileHandle classPathHandle(String path) {
+    /** classpath 资源快捷构造。 */
+    private static AssetFileHandle cp(String path) {
         return new AssetFileHandle(path, com.badlogic.gdx.Files.FileType.Classpath);
     }
-
-    ;
 }
