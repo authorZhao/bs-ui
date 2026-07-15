@@ -48,6 +48,10 @@ btn.setIcon(BsIcon.get("gear"));     // 文字前加图标
 
 ## 三、输入
 
+![select](img/ui-show-select.png)
+
+> 上图：控件测试台中的下拉选择（BsSelectBox）等输入控件。
+
 | 组件 | 继承 | 职责 | 增强点 |
 |---|---|---|---|
 | **BsTextField** | `TextField` | 文本输入 | `setTextProgrammatic()` 绕过 TextFieldFilter 设值（修复 1.14.x setText 走 paste 被过滤） |
@@ -157,6 +161,10 @@ btn.setIcon(BsIcon.get("gear"));     // 文字前加图标
 ## 八、图表（零第三方依赖）
 
 全部 `extends BsChart extends Actor`，基于 `ShapeRenderer` 自绘，**不依赖任何图表库**，TeaVM/WebGL 兼容，随主题变色。
+
+![chart-hover](img/ui-show-chart-hover.png)
+
+> 上图：控件测试台中的折线图，鼠标 hover 时显示数据点 tooltip。
 
 | 组件 | 职责 | 增强点 |
 |---|---|---|

@@ -22,6 +22,16 @@ GitHub: <https://github.com/authorZhao/bs-ui>
 
 核心组件（90+）、双主题（Light / Dark）、FreeType 中文字体、Skin 加载/导出、跨平台启动器均已落地，可以拿来构建真实界面。仍有打磨空间（性能、字符集瘦身、Web 端适配、文档），欢迎试用与反馈。
 
+### 效果展示
+
+数据看板（图表 / 统计卡 / 表格）：
+
+![dashboard](docs/img/dashboard.png)
+
+复刻 Win11 设置界面（导航 / 卡片 / 表单控件）：
+
+![win-settings](docs/img/win—setting-home.png)
+
 ### 特性
 
 - **90+ Bootstrap 风格组件**：Button / Form / InputGroup / SelectBox / Table / DataTable / Pagination / Navbar / MenuBar / Breadcrumb / Card / Modal / Window / Toast / Alert / Dialog / Tooltip / Popover / Tabs / Accordion / Collapse / Offcanvas / Drawer / Carousel / Slider / Progress / Spinner / Badge / Tag / Avatar / Tree / Steps / Timeline / Transfer / ColorPicker / DatePicker / FileItem …
@@ -45,27 +55,49 @@ GitHub: <https://github.com/authorZhao/bs-ui>
 
 ### 快速上手
 
-```java
-// 应用启动
-BsUI.init();
-BitmapFont defaultFont = ...; // FreeType 生成
-BsUI.registerDefaultSkin(defaultFont);
-BsUI.registerTheme("dark", BsDarkTheme.INSTANCE, buildSkin(BsDarkTheme.INSTANCE));
+最简启动（`BsUI.init()` 自动注册内置三主题 + 字体）：
 
-// 任意位置取用
+```java
+public class MyApp extends Game {
+    @Override
+    public void create() {
+        BsUI.init();              // 注册 dark/admin/light 三主题 + 自带字体
+        BsI18n.init();            // 国际化（默认中文）
+        setScreen(new MainScreen());
+    }
+
+    @Override
+    public void dispose() {
+        BsUI.disposeAllSkins();   // 释放全局共享字体 + skin
+        BsUI.dispose();
+    }
+}
+
+// 任意位置取用（组件不持有 Skin，全局访问）
 Skin skin = BsUI.getSkin();
 BsButton btn = new BsButton("确定", skin,
         BsButton.Variant.PRIMARY, BsButton.Style.SOLID, BsButton.Size.MD);
-
-// 切主题（监听器回调里重建 UI）
-BsUI.setTheme("dark");
+BsUI.setTheme("dark");            // 切主题，监听器回调里重建 UI
 ```
+
+注入自定义字体（推荐三步法）：
+
+```java
+FileHandle json = Gdx.files.internal("skins/bs-light.json");
+Skin skin = new BsSkin(json);                       // ① 加载（字体进全局缓存）
+BsSkinFactory.augmentWithBsStyles(skin, BsLightTheme.INSTANCE);  // ② 叠加 bs 样式
+BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);        // ③ 注册到全局
+```
+
+> **字体全局共享**：多主题共用同一组字体实例，单个 skin 的 dispose 不会释放字体，退出时统一调 `BsUI.disposeAllSkins()`。详见 [docs/getting-started.md](./docs/getting-started.md)。
 
 运行 demo：
 
 ```bash
 ./gradlew :lwjgl3:run     # Desktop
 ```
+
+> 完整入门（Skin 初始化、字体全局共享、生命周期范式、常见错误）见 [docs/getting-started.md](./docs/getting-started.md)。
 
 ### 致谢
 
@@ -138,6 +170,16 @@ Game engines excel at rendering, animation, and batch drawing, yet their built-i
 
 Core components (90+), Light/Dark themes, FreeType CJK fonts, Skin load/export, and cross-platform launchers are all in place and can be used to build real interfaces. There is still room for polish (performance, charset trimming, web adaptation, docs). Feedback is welcome.
 
+### Screenshots
+
+Data dashboard (charts / stat cards / table):
+
+![dashboard](docs/img/dashboard.png)
+
+Win11 Settings clone (navigation / cards / form controls):
+
+![win-settings](docs/img/win-setting-home-en.png)
+
 ### Features
 
 - **90+ Bootstrap-style components**: Button / Form / InputGroup / SelectBox / Table / DataTable / Pagination / Navbar / MenuBar / Breadcrumb / Card / Modal / Window / Toast / Alert / Dialog / Tooltip / Popover / Tabs / Accordion / Collapse / Offcanvas / Drawer / Carousel / Slider / Progress / Spinner / Badge / Tag / Avatar / Tree / Steps / Timeline / Transfer / ColorPicker / DatePicker / FileItem …
@@ -161,27 +203,49 @@ Core components (90+), Light/Dark themes, FreeType CJK fonts, Skin load/export, 
 
 ### Quick start
 
-```java
-// App bootstrap
-BsUI.init();
-BitmapFont defaultFont = ...; // generated via FreeType
-BsUI.registerDefaultSkin(defaultFont);
-BsUI.registerTheme("dark", BsDarkTheme.INSTANCE, buildSkin(BsDarkTheme.INSTANCE));
+Minimal bootstrap (`BsUI.init()` auto-registers the built-in themes + fonts):
 
-// Anywhere in your code
+```java
+public class MyApp extends Game {
+    @Override
+    public void create() {
+        BsUI.init();              // registers dark/admin/light themes + bundled fonts
+        BsI18n.init();            // i18n (defaults to zh_cn)
+        setScreen(new MainScreen());
+    }
+
+    @Override
+    public void dispose() {
+        BsUI.disposeAllSkins();   // release globally-shared fonts + skins
+        BsUI.dispose();
+    }
+}
+
+// Anywhere (components hold no Skin; global access)
 Skin skin = BsUI.getSkin();
 BsButton btn = new BsButton("OK", skin,
         BsButton.Variant.PRIMARY, BsButton.Style.SOLID, BsButton.Size.MD);
-
-// Switch theme (rebuild UI inside the listener)
-BsUI.setTheme("dark");
+BsUI.setTheme("dark");            // switch theme; rebuild UI in the listener
 ```
+
+Inject a custom font (recommended 3-step flow):
+
+```java
+FileHandle json = Gdx.files.internal("skins/bs-light.json");
+Skin skin = new BsSkin(json);                                  // 1. load (font enters global cache)
+BsSkinFactory.augmentWithBsStyles(skin, BsLightTheme.INSTANCE); // 2. overlay bs styles
+BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);      // 3. register globally
+```
+
+> **Globally shared fonts**: multiple themes share the same font instances; disposing a single skin does NOT release the fonts — call `BsUI.disposeAllSkins()` on exit. See [docs/getting-started-en.md](./docs/getting-started-en.md).
 
 Run the demo:
 
 ```bash
 ./gradlew :lwjgl3:run     # Desktop
 ```
+
+> Full guide (Skin init, global font sharing, lifecycle patterns, common pitfalls) in [docs/getting-started-en.md](./docs/getting-started-en.md).
 
 ### Acknowledgements
 

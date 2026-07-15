@@ -23,7 +23,57 @@ bs-ui/
 | `lwjgl3` | Desktop 启动器 + `BsIconPackager`（SVG→atlas，依赖 Apache Batik） | 桌面运行 |
 | `teavm` | Web 启动器，复用 core 的所有组件 | Web 运行 |
 
-> **关键**：业务逻辑（`demo` 的 Game/Screen）是平台无关的，desktop 和 web **两端复用同一套代码**，只是启动器不同。
+### 跨平台架构：core + common 是平台无关核心
+
+`core` 和 `common` 是**平台无关的核心库**，支持桌面（LWJGL3）、Web（TeaVM/WebGL）、移动端（Android/iOS）等 libGDX 所覆盖的所有后端。组件、主题、图表、Skin 加载等全部在 core 实现，不依赖任何平台特定代码。
+
+**平台差异由各平台项目自行实现**，通过 `common` 的 `Platform` 接口注入。`Platform` 接口定义了平台能力的抽象（窗口图标、文件选择、定时任务、JSON 序列化、系统暗色模式等）：
+
+```java
+public interface Platform {
+    String getPlatformName();
+    void exit();
+    boolean setWindowIcons(String windowTitle, String iconPath);
+    String chooseJarFile();
+    void schedule(Runnable r, long delay, long period, TimeUnit unit);
+
+    default boolean isSystemDarkMode() { return false; }
+
+    // JSON 序列化的平台差异点 ↓
+    default String toJson(Object object) {
+        return new Json().toJson(object);          // 默认走 libGDX 的 Json（全平台可用）
+    }
+    default <T> T fromJson(String json, Class<T> type) {
+        return new Json().fromJson(type, json);
+    }
+}
+```
+
+各平台项目提供自己的 `Platform` 实现并注册（如桌面端 `DeskPlatform`、Web 端 `TeaVmPlatform`），按需覆写差异方法。例如：
+
+```java
+// 桌面端（lwjgl3 模块）：用 fastjson2 代替 libGDX 的 Json（功能更全、生态更好）
+public class DeskPlatform implements Platform {
+    @Override public String toJson(Object object) {
+        return JSON.toJSONString(object);          // fastjson2
+    }
+    @Override public <T> T fromJson(String json, Class<T> type) {
+        return JSON.parseObject(json, type);
+    }
+    // ... 其余平台能力
+}
+```
+
+> 设计意图：**核心库不绑定具体平台的 JSON 库 / 文件选择器 / 调度器**。core 用 libGDX 自带的 `Json` 作为全平台兜底默认实现；如果某平台有更好的选择（如桌面端用 fastjson2），由该平台项目覆写 `Platform` 的对应方法即可，core 无需改动。Web 端同理——`teavm` 模块自带最小 `org.slf4j` 替换实现，避免官方 slf4j 在 TeaVM 下的类冲突。
+
+> **关键**：业务逻辑（`demo` 的 Game/Screen）和 UI 组件是平台无关的，桌面、Web、移动端**多端复用同一套代码**，各端只需提供启动器和 `Platform` 实现。
+
+### 新增平台（如 Android/iOS）怎么做
+
+1. 新建平台模块（如 `android/`），配置 libGDX 对应后端（`gdx-backend-android`）。
+2. 实现 `Platform` 接口（`AndroidPlatform`），覆写该平台的差异能力。
+3. 写启动器（`AndroidApplication` 子类），`PlatformStatic.registerImpl(AndroidPlatform.class)` 注入。
+4. core 的所有组件直接可用，无需改动。
 
 ---
 
