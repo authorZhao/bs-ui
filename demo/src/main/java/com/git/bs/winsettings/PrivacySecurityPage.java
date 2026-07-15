@@ -22,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
  * <p><b>演示</b>：开启「开发者模式 / 设备门户 / 关闭内存完整性」等危险配置时，
  * 弹出红色警告对话框（{@link BsModal}）要求二次确认，点「取消」自动回滚开关，
  * 点「继续」弹 Toast 反馈。展示危险操作的 confirm 模式 + 开关回滚。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class PrivacySecurityPage extends CategoryPage {

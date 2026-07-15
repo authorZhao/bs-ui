@@ -21,6 +21,7 @@ import com.git.bs.demo.modules.BsFormModules;
 import com.git.bs.demo.modules.BsWaveModules;
 import com.git.bs.demo.modules.ModuleSupport;
 import com.git.bs.game.BsSkinApp;
+import com.git.bs.ui.BsAboutDialog;
 import com.git.bs.ui.BsAdminTheme;
 import com.git.bs.ui.BsButton;
 import com.git.bs.ui.BsCheckBox;
@@ -51,6 +52,8 @@ import java.util.function.Consumer;
  *
  * <p>本类只保留：布局骨架 + 模块路由 + 屏幕生命周期 + 皮肤导出对话框 + 内容工厂 API。
  * 49 个 {@code fillXxx} 内容方法已按分类拆分到 {@link com.git.bs.demo.modules} 下。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class BsControlsSkinScreen extends ScreenAdapter {
@@ -195,6 +198,16 @@ public class BsControlsSkinScreen extends ScreenAdapter {
             }
         });
         header.add(exportBtn).pad(8).right();
+
+        // 关于按钮（醒目：主色实心）
+        BsButton aboutBtn = new BsButton("ⓘ 关于", skin,
+                BsButton.Variant.PRIMARY, BsButton.Style.SOLID, BsButton.Size.SM);
+        aboutBtn.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent event, float x, float y) {
+                BsAboutDialog.show(stage, skin, "Bs UI 皮肤演示台", false);
+            }
+        });
+        header.add(aboutBtn).pad(8, 8, 8, 4).right();
         root.add(header).growX().row();
 
         // 主区：左导航 + 右内容（可滚动）

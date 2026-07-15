@@ -29,6 +29,8 @@ import java.util.List;
  * 路径："用户管理/用户"（一级"用户管理"下另有 角色/权限 占位项，由 BsAdminShell 注册）。
  *
  * 内容：搜索框 + 新增按钮 + BsDataTable（6 个用户），行操作 编辑/删除。
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class UserListModule implements AdminModule {

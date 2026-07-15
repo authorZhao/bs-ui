@@ -2,6 +2,8 @@
 
 > Bootstrap-style UI components for libGDX — bridging the gap between a game engine and a traditional GUI framework.
 
+GitHub: <https://github.com/authorZhao/bs-ui>
+
 ---
 
 ## 中文
@@ -73,12 +75,18 @@ BsUI.setTheme("dark");
 - **[VISUI](https://github.com/kotcrab/vis-ui)** —— Scene2D UI 库的标杆，bs-ui 的全局 API 设计直接受其启发
 - **[Bootstrap](https://getbootstrap.com/)** —— 设计语言与组件形态的来源
 - **[Bootstrap Icons](https://icons.getbootstrap.com/)** —— 图标体系
+- **[noto-emoji](https://github.com/googlefonts/noto-emoji.git)** emoji
 - **[霞鹜文楷 / LXGW WenKai](https://github.com/lxgw/LxgwWenKai)** —— 内置中文字体，清新易读
 - **[gdx-liftoff](https://github.com/libgdx/gdx-liftoff)** —— 项目脚手架生成
 - **[gdx-teavm](https://github.com/xpenatan/gdx-teavm)** —— libGDX 的 TeaVM/Web 后端
 - **[gdx-nativefilechooser](https://github.com/spdqdd/gdx-nativefilechooser)** —— 跨平台原生文件选择
 - **[Apache Batik](https://xmlgraphics.apache.org/batik/)** —— iconpkg 工具用于 SVG → PNG/atlas 转换
 - **[Lombok](https://projectlombok.org/) / [SLF4J](http://www.slf4j.org/) / [Fastjson2](https://github.com/alibaba/fastjson2)** —— 开发基础设施
+
+**拷贝进源码的第三方代码（Vendored）**：为保证 TeaVM/Web 端可编译与零外部依赖，本项目直接拷贝了少量第三方源码（均在其原始协议下分发）：
+
+- `core/.../bmfont/BitmapFontWriter.java` —— 来自 **libGDX gdx-tools**（Apache License 2.0），已保留来源声明，未改动其实现。
+- SLF4J 的 **java.util.logging 绑定（jul）** 最小实现 —— 源自 **SLF4J**（MIT 兼容），供桌面端日志桥接使用。
 
 > 若您认为某个致谢遗漏或标注不当，欢迎指出。
 
@@ -184,11 +192,17 @@ This project stands on the shoulders of these excellent open-source projects; wi
 - **[Bootstrap](https://getbootstrap.com/)** — the source of the design language and component patterns
 - **[Bootstrap Icons](https://icons.getbootstrap.com/)** — the icon system
 - **[LXGW WenKai / 霞鹜文楷](https://github.com/lxgw/LxgwWenKai)** — the built-in CJK font, clean and readable
+- **[noto-emoji/](https://github.com/googlefonts/noto-emoji.git)** emoji
 - **[gdx-liftoff](https://github.com/libgdx/gdx-liftoff)** — project scaffolding generator
 - **[gdx-teavm](https://github.com/xpenatan/gdx-teavm)** — TeaVM/Web backend for libGDX
 - **[gdx-nativefilechooser](https://github.com/spdqdd/gdx-nativefilechooser)** — cross-platform native file chooser
 - **[Apache Batik](https://xmlgraphics.apache.org/batik/)** — used by the iconpkg tool for SVG → PNG/atlas conversion
-- **[Lombok](https://projectlombok.org/) / [SLF4J](http://www.slf4j.org/) / [Fastjson2](https://github.com/alibaba/fastjson2)** — development infrastructure
+- **[Lombok](https://projectlombok.org/) / [SLF4J](http://www.slf4j.org/) / [Fastjson2](https://github.com/alibaba/fastjson2) / (...other)** — development infrastructure
+
+**Vendored third-party source**: To keep the TeaVM/Web build self-contained and dependency-light, a small amount of third-party source is copied directly into this repository (distributed under its original license):
+
+- `core/.../bmfont/BitmapFontWriter.java` — from **libGDX gdx-tools** (Apache License 2.0); source attribution retained, implementation unchanged.
+- A minimal **SLF4J java.util.logging (jul) binding** — from **SLF4J** (MIT-compatible); used for desktop log bridging.
 
 > If any credit is missing or mis-attributed, please let us know.
 

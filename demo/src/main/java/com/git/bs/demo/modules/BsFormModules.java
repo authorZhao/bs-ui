@@ -35,6 +35,8 @@ import static com.git.bs.demo.modules.ModuleSupport.*;
 
 /**
  * 表单与浮层模块组：Pickers / Form / DateTime / Overlay / Modal / Dialogs / CollapseAccordion / InputNumberGroup。
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class BsFormModules {
 

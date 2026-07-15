@@ -20,6 +20,7 @@ import com.git.bs.demo.modules.BsFeedbackModules;
 import com.git.bs.demo.modules.BsFormModules;
 import com.git.bs.demo.modules.BsWaveModules;
 import com.git.bs.game.BsControlsTestApp;
+import com.git.bs.ui.BsAboutDialog;
 import com.git.bs.ui.BsAdminTheme;
 import com.git.bs.ui.BsButton;
 import com.git.bs.ui.BsCheckBox;
@@ -41,6 +42,8 @@ import lombok.extern.slf4j.Slf4j;
  * ({@link #switchModule})、屏幕生命周期 (show/render/resize/dispose)，以及与布局耦合较深
  * 的皮肤导出对话框。48+ 个 {@code fillXxx} 内容方法已按分类拆分到
  * {@link com.git.bs.demo.modules} 下的 6 个 module 类。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class BsControlsTestScreen extends ScreenAdapter {
@@ -143,6 +146,16 @@ public class BsControlsTestScreen extends ScreenAdapter {
             }
         });
         header.add(exportBtn).pad(8).right();
+
+        // 关于按钮（醒目：主色实心）
+        BsButton aboutBtn = new BsButton("ⓘ 关于", skin,
+                BsButton.Variant.PRIMARY, BsButton.Style.SOLID, BsButton.Size.SM);
+        aboutBtn.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent event, float x, float y) {
+                BsAboutDialog.show(stage, skin, "Bs UI 控件测试台", false);
+            }
+        });
+        header.add(aboutBtn).pad(8, 8, 8, 4).right();
         root.add(header).growX().row();
 
         // 主区：左导航 + 右内容（可滚动）

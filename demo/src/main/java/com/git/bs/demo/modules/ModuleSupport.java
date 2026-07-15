@@ -21,6 +21,8 @@ import java.util.function.Consumer;
  * 模块共享静态辅助工具：抽取被多个 module 类共用的 helper（避免每个模块重复定义）。
  *
  * <p>不持有任何可变状态；所有方法都是无副作用的工厂方法。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public final class ModuleSupport {

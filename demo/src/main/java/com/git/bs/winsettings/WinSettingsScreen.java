@@ -38,6 +38,8 @@ import java.util.Map;
  *
  * <p>实现 {@link Router}，主页卡片点击 / 导航项点击都走 {@link #navigate(String)}。
  * 支持「初始页」构造参数：主题切换重建 screen 时传入 {@link #currentKey()} 保持当前页。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class WinSettingsScreen implements Screen, Router {

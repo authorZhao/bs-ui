@@ -3,7 +3,11 @@ package com.git.bs.winsettings;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
-/** 所有设置页基类（主页 / 各分类页）。buildView 由调用方（WinSettingsScreen）塞进内容区。 */
+/**
+ * 所有设置页基类（主页 / 各分类页）。buildView 由调用方（WinSettingsScreen）塞进内容区。
+ * @author authorZhao
+ * @since 2026-07-16
+ */
 public abstract class SettingsPage {
 
     protected final Skin skin;

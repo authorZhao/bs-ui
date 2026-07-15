@@ -33,6 +33,8 @@ import static com.git.bs.demo.modules.ModuleSupport.*;
  * 数据展示模块组：Tree / Table / Badge / Breadcrumb / Cards / Profile / Layout / NavbarOffcanvas。
  *
  * <p>{@code demoLayout} 持有 Layout 模块状态（用于切换 sidebar 内容）。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class BsDataModules {
 

@@ -17,6 +17,8 @@ import java.util.function.Supplier;
  *   <li>{@link Type#PAGE} 二级页面入口：trailing 显示 › 箭头，整行点击跳转到 {@link #pageKey} 子页</li>
  *   <li>{@link Type#CUSTOM} 自定义控件：通过 {@link #customControl} 工厂提供任意 Actor（如 BsDatePicker）</li>
  * </ul>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class SettingItem {
 

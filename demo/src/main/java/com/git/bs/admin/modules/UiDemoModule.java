@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>stage 注入：admin shell 构造后调 {@link #bindStage(Stage)}，
  * 让 Pickers/DateTime/Overlay/Modal/Dialogs 等依赖真实 stage 的弹窗正常工作。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class UiDemoModule {

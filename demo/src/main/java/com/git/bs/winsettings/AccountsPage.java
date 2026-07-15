@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
  * 账户页（按 Win11 真实结构）。
  *
  * <p>设置组：你的信息 / 登录选项 / 家庭和其他用户 / 备份与凭据 / 设备密码恢复。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class AccountsPage extends CategoryPage {

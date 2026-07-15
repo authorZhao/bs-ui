@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
  * 应用页（按 Win11 真实结构）。
  *
  * <p>设置组：应用管理 / 默认应用 / 可选功能 / 高级应用设置 / 应用执行别名。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class AppsPage extends CategoryPage {

@@ -10,6 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
  * </ol>
  * 模块会自动出现在侧边栏菜单树、点击后内容区渲染 {@link #buildView(BsAdminShell)} 的返回值，
  * 面包屑自动按 path 拆段更新。
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public interface AdminModule {
 

@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
  * 蓝牙和其他设备页（按 Win11 真实结构）。
  *
  * <p>设置组：蓝牙 / 鼠标 / 键盘 / 触控 / 笔和 Windows Ink / 自动播放与 USB / 打印机和扫描仪。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class BluetoothPage extends CategoryPage {

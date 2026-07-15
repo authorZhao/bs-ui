@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>设置组：视觉效果 / 文本大小 / 讲述人 / 放大镜 / 颜色过滤器 / 对比度主题 /
  * 键盘 / 鼠标与光标 / 眼睛控制。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class AccessibilityPage extends CategoryPage {

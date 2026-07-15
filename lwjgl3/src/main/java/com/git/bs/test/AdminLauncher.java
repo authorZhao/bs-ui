@@ -11,6 +11,8 @@ import com.git.bs.game.AdminApp;
  * bs-ui 管理后台模板启动器。
  * <p>用法（IDEA）：右键 Run；或命令行
  * {@code ./gradlew :lwjgl3:run -PmainClass=com.git.bs.test.AdminLauncher}。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class AdminLauncher {
 

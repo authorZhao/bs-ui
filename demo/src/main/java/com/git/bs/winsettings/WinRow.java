@@ -40,6 +40,8 @@ import com.git.bs.ui.BsTheme;
  * // 设置行（带 toggle 控件）
  * new WinRow(skin, null, "夜间模式", "减弱蓝光", new BsSwitch(skin), null)
  * }</pre>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class WinRow extends Table {
 

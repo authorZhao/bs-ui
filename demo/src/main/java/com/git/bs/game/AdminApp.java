@@ -31,6 +31,8 @@ import java.util.Map;
  * Admin 模板入口 App，骨架完全镜像 {@link BsSkinApp}：
  * 字体池 / BsSkinLoader 加载 / 主题切换 / applyTheme 重建 screen，
  * 唯一差别是进入 {@link AdminLoginScreen} 而非 BsControlsSkinScreen。
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class AdminApp extends Game {

@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>结构：面包屑 + 标题 + 搜索框 + 排序筛选条 + 应用列表卡片（每行：图标 + 名称 + 发布方/大小/日期 + 卸载按钮）。
  * 非声明式（应用列表是动态行），所以直接 extends {@link SettingsPage} 而非 CategoryPage。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class InstalledAppsPage extends SettingsPage {

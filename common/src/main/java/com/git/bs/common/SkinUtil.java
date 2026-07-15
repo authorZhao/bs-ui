@@ -1,3 +1,24 @@
+/*
+ * bs-ui — Bootstrap 风格的 libGDX Scene2D UI 组件库。
+ * Copyright (c) 2026 bs-ui contributors
+ *
+ * 基于 Apache License 2.0 开源，允许商用、修改和再分发。
+ * 使用本库的产品须在“关于”界面标注本项目，详见 LICENSE。
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Project home: https://github.com/authorZhao/bs-ui
+ */
 package com.git.bs.common;
 
 import com.badlogic.gdx.Gdx;
@@ -17,13 +38,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 建议多用BsSkin
+ *
  * @author authorZhao
  * @since 2025-06-26
  */
 @Slf4j
 public class SkinUtil {
 
-    private static final Map<String, BitmapFont> fontCache = new HashMap<>();
 
     public static Map<String, BitmapFont> getFontCache(Skin skin) {
         ObjectMap<String, BitmapFont> all = skin.getAll(BitmapFont.class);
@@ -38,17 +60,12 @@ public class SkinUtil {
     public static synchronized Skin load(String jsonPath) {
         var jsonFile = Gdx.files.internal(jsonPath);
         FileHandle atlasFile = jsonFile.sibling(jsonFile.nameWithoutExtension() + ".atlas");
-        return load(jsonFile, atlasFile, new HashMap<>());
-    }
+        return load(jsonFile, atlasFile);
 
-    public static synchronized Skin load(String jsonPath, Map<String, BitmapFont> fontCache) {
-        var jsonFile = Gdx.files.internal(jsonPath);
-        FileHandle atlasFile = jsonFile.sibling(jsonFile.nameWithoutExtension() + ".atlas");
-        return load(jsonFile, atlasFile, fontCache);
     }
 
 
-    public static synchronized Skin load(FileHandle jsonPath, FileHandle atlasPath, Map<String, BitmapFont> fontCache) {
+    public static synchronized Skin load(FileHandle jsonPath, FileHandle atlasPath) {
         log.info("====================skin初始化开始==================");
         return new Skin(jsonPath, new TextureAtlas(atlasPath)) {
             @Override
@@ -88,23 +105,15 @@ public class SkinUtil {
                         }
 
                         // 使用字体缓存避免重复生成
-                        String fontKey = jsonData.name;
-                        BitmapFont cachedFont = fontCache.get(fontKey);
-                        FreeTypeFontGenerator generator = null;
 
-                        if (cachedFont == null) {
-                            long startTime = System.currentTimeMillis();
-                            generator = new FreeTypeFontGenerator(skinFile.parent().child(path));
-                            BitmapFont font = generator.generateFont(parameter);
-                            fontCache.put(fontKey, font);
-                            cachedFont = font;
-                            skin.add(jsonData.name, cachedFont);
-                            long generationTime = System.currentTimeMillis() - startTime;
-                            log.info("生成字体 {} 耗时: {}ms", jsonData.name, generationTime);
-                        } else {
-                            skin.add(jsonData.name, cachedFont);
-                            log.info("使用缓存的字体: {}", jsonData.name);
-                        }
+                        long startTime = System.currentTimeMillis();
+                        var generator = new FreeTypeFontGenerator(skinFile.parent().child(path));
+                        BitmapFont font = generator.generateFont(parameter);
+
+                        skin.add(jsonData.name, font);
+                        long generationTime = System.currentTimeMillis() - startTime;
+                        log.info("生成字体 {} 耗时: {}ms", jsonData.name, generationTime);
+
 
                         if (parameter.incremental) {
                             if (generator != null) {
@@ -112,7 +121,7 @@ public class SkinUtil {
                             }
                             return null;
                         } else {
-                            return  null;
+                            return null;
                         }
                     }
                 });

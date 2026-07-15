@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
  * 居中 BsCard 内放标题 + 用户名/密码输入框 + 登录/重置按钮（全部居中），
  * 校验 admin/123456 成功后进入 {@link BsAdminShell}，失败弹 {@link BsAlertDialog}。
  * 登录态仅内存（{@link AdminContext}），不持久化。
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class AdminLoginScreen extends ScreenAdapter {

@@ -38,6 +38,8 @@ import static com.git.bs.demo.modules.ModuleSupport.*;
  * 基础控件模块组：Labels / Buttons / ImageButton / Inputs / Selects / RadioCheck / Slider / Misc / MenuBar / ContextMenu。
  *
  * <p>持有 skin / stage / setStatus，不持有可变跨模块状态。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class BsBasicModules {
 

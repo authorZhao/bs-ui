@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p><b>演示</b>：「主音量」「输入音量」用 {@link BsSlider} 滑块（0-100，步进 1），
  * 旁边带百分比文字实时回显。拖动滑块时文字同步更新。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class SoundPage extends CategoryPage {

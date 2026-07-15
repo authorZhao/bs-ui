@@ -9,6 +9,8 @@ import com.git.bs.winsettings.WinSettingsApp;
 /**
  * Windows 设置启动器。
  * <p>IDEA 右键 Run；或 {@code ./gradlew :lwjgl3:run -PmainClass=com.git.bs.test.WinSettingsLauncher}。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class WinSettingsLauncher {
 

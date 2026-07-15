@@ -1,10 +1,33 @@
+/*
+ * bs-ui — Bootstrap 风格的 libGDX Scene2D UI 组件库。
+ * Copyright (c) 2026 bs-ui contributors
+ *
+ * 基于 Apache License 2.0 开源，允许商用、修改和再分发。
+ * 使用本库的产品须在“关于”界面标注本项目，详见 LICENSE。
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Project home: https://github.com/authorZhao/bs-ui
+ */
 package com.git.bs.ui;
 
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.git.bs.i18n.BsI18n;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +55,8 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>本组件只负责把 <b>bs-ui 自身的声明</b> 渲染出来，方便使用方履行 License 义务。
  * 使用方追加的额外内容（自家产品信息、其他依赖）通过 {@link #appendLine} / {@link #appendSection} 添加。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class BsAboutDialog extends BsModal {
@@ -40,8 +65,10 @@ public class BsAboutDialog extends BsModal {
     public static final String BS_UI_COPYRIGHT = "Copyright (c) 2026 bs-ui contributors";
     /** bs-ui 库名（License 附加条件要求展示的最低限度信息之一）。 */
     public static final String BS_UI_NAME = "bs-ui";
-    /** bs-ui 上游项目链接占位（如有正式 home URL，替换此常量即可全局生效）。 */
-    public static final String BS_UI_HOME_URL = "https://github.com/bs-ui/bs-ui";
+    /** bs-ui 作者。 */
+    public static final String BS_UI_AUTHOR = "authorZhao";
+    /** bs-ui 上游项目链接（真实仓库地址，替换此常量即可全局生效）。 */
+    public static final String BS_UI_HOME_URL = "https://github.com/authorZhao/bs-ui";
 
     /** 默认宽度。 */
     private static final float DEFAULT_WIDTH = 420;
@@ -119,44 +146,46 @@ public class BsAboutDialog extends BsModal {
     private void rebuildContent() {
         contentTable.clearChildren();
 
-        // 1. 产品名 + 版本（可选）
+        // 1. 产品名 + 版本（可选）——直接用最大号烘焙字体（XXL），不缩放，避免发虚
         if (productName != null && !productName.isEmpty()) {
             String title = productVersion != null && !productVersion.isEmpty()
                     ? productName + "  v" + productVersion
                     : productName;
-            Label p = new Label(title, skin);
-            p.setColor(BsTheme.tp());
-            p.setFontScale(1.3f);
+            BsText p = new BsText(title, BsText.Size.XXL).bold();
             contentTable.add(p).growX().padBottom(8).row();
         }
 
-        // 2. bs-ui 合规声明（License 强制要求，不可省）
-        Label libLine = new Label("This product uses " + BS_UI_NAME
-                + (modified ? " (modified)" : " (unmodified)"), skin);
-        libLine.setColor(BsTheme.ts());
+        // 2. bs-ui 合规声明（License 强制要求，不可省）——用 BsText 取清晰烘焙字体，不缩放
+        BsText libLine = new BsText(BsI18n.get("about.uses_lib", BS_UI_NAME)
+                + " " + BsI18n.get(modified ? "about.modified" : "about.unmodified"),
+                BsText.Size.MD, BsText.Variant.DEFAULT);
         libLine.setWrap(true);
         contentTable.add(libLine).growX().padTop(6).row();
 
-        Label copyLine = new Label(BS_UI_COPYRIGHT, skin);
-        copyLine.setColor(BsTheme.ts());
+        BsText copyLine = new BsText(BS_UI_COPYRIGHT, BsText.Size.SM, BsText.Variant.SECONDARY);
         contentTable.add(copyLine).growX().row();
 
-        Label urlLine = new Label(BS_UI_HOME_URL, skin);
-        Color linkColor;
-        try {
-            linkColor = skin.has("bs-link", Color.class)
-                    ? skin.get("bs-link", Color.class)
-                    : BsPalette.PRIMARY.getMain();
-        } catch (Throwable t) {
-            linkColor = BsPalette.PRIMARY.getMain();
-        }
-        urlLine.setColor(linkColor);
-        contentTable.add(urlLine).growX().padBottom(4).row();
+        BsText authorLine = new BsText(BsI18n.get("about.author") + ": " + BS_UI_AUTHOR,
+                BsText.Size.SM, BsText.Variant.SECONDARY);
+        contentTable.add(authorLine).growX().row();
+
+        // GitHub 链接：点击用系统浏览器打开（桌面端与 TeaVM/Web 端均可用）
+        BsLink urlLink = new BsLink(BS_UI_HOME_URL, skin);
+        urlLink.left();
+        urlLink.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                try {
+                    Gdx.net.openURI(BS_UI_HOME_URL);
+                } catch (Throwable t) {
+                    log.warn("Failed to open URI: {}", BS_UI_HOME_URL, t);
+                }
+            }
+        });
+        contentTable.add(urlLink).growX().padBottom(4).row();
 
         // 3. License 提示（让最终用户知道协议类型）
-        Label licLine = new Label("Licensed under the Apache License 2.0 "
-                + "(with additional attribution condition)", skin);
-        licLine.setColor(BsTheme.tm());
+        BsText licLine = new BsText(BsI18n.get("about.license_note"), BsText.Size.SM, BsText.Variant.MUTED);
         licLine.setWrap(true);
         contentTable.add(licLine).growX().row();
 

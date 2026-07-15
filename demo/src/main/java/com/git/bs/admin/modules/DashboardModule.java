@@ -13,6 +13,8 @@ import com.git.bs.ui.BsUI;
 /**
  * 主页面板：4 个统计卡 + 最近活动列表。
  * 路径："首页"（点击 logo / 面包屑首页都进这里）。
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class DashboardModule implements AdminModule {
 

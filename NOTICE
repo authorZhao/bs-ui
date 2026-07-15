@@ -1,0 +1,107 @@
+bs-ui
+Copyright (c) 2026 bs-ui contributors
+
+本项目（bs-ui）基于 Apache License 2.0 开源，详见 LICENSE。
+本 NOTICE 文件列出随本项目分发的第三方素材、拷贝进源码的第三方代码（vendored）
+以及引用的开源依赖，供下游使用者合规参考。本文件内容仅供参考，不修改 LICENSE。
+
+================================================================================
+一、随本项目分发的第三方资源（字体 / 图集）
+================================================================================
+
+这些第三方资源由各自原作者保留版权，遵循其原始开源协议，**不在本项目 Apache
+License 2.0 之范围内**。如再分发，请遵守对应协议（多数为 SIL Open Font License，
+要求保留许可全文且不可单独售卖字体本身）。
+
+1. 霞鹜文楷 LXGW WenKai（含 LXGW WenKai Screen / Mono Lite 变体）
+   - 用途：内置中文字体
+   - 来源：https://github.com/lxgw/LxgwWenKai
+   - 协议：SIL Open Font License 1.1 (OFL)
+   - 文件：assets/com/git/bs/ui/skin/LXGWWenKai*.ttf
+   - 声明：Copyright (c) 霞鹜文楷作者（lxgw）。字体受 OFL 约束，"LXGW WenKai"
+     为保留名称。
+
+2. Noto Color Emoji
+   - 用途：彩色 emoji 字体
+   - 来源：https://github.com/googlefonts/noto-emoji
+   - 协议：SIL Open Font License 1.1 (OFL)
+   - 文件：assets/com/git/bs/ui/skin/NotoColorEmoji.ttf
+
+3. Noto Emoji 图集（PNG atlas）
+   - 用途：emoji 纹理图集
+   - 来源：https://github.com/googlefonts/noto-emoji
+   - 加工方式：从上游仓库下载 SVG 源文件，本项目自行转换为 PNG，再打包成 TextureAtlas
+   - 协议：Apache License 2.0（部分图形资产亦提供 OFL）
+   - 文件：core/src/main/resources/com/git/bs/ui/emoji/*.png, *.atlas
+
+4. Bootstrap Icons 图集（PNG atlas）
+   - 用途：图标纹理图集
+   - 来源：https://github.com/twbs/icons
+   - 加工方式：从上游仓库下载 SVG 源文件，本项目自行用 Apache Batik 转换为 PNG，
+     再打包成 TextureAtlas（加工产物随项目分发）
+   - 协议：MIT License（图标本身为 Apache 2.0 / MIT 双协议）
+   - 文件：core/src/main/resources/com/git/bs/ui/icons/*.png, *.atlas
+
+================================================================================
+二、通用免责声明（第三方示例素材）
+================================================================================
+
+本仓库中可能包含的其他第三方示例素材（包括但不限于 J2ME 模拟器游戏截图、
+演示用图片、第三方 Logo / 商标等）：
+
+  - 这些素材的版权归原作者所有，**不在本项目 Apache License 2.0 协议范围内**；
+  - 它们仅用于功能演示，不构成对本项目的贡献；
+  - 本项目不对这些素材的版权归属做任何主张；
+  - 若您是某素材的版权方且认为本仓库的使用超出了合理范围，请与作者联系，
+    核实后本人将及时删除。
+
+联系方式：authorZhao <2519946973@qq.com>
+项目地址：https://github.com/authorZhao/bs-ui
+
+================================================================================
+三、拷贝进源码的第三方代码（Vendored）
+================================================================================
+
+为保证 TeaVM/Web 端可编译与零外部依赖，本项目直接拷贝了少量第三方源码。
+这些文件保留原作者署名与原始协议头，在本段说明的各自协议下分发。
+
+1. BitmapFontWriter
+   - 来源：libGDX gdx-tools（com.badlogic.gdx.tools.bmfont.BitmapFontWriter）
+   - 协议：Apache License 2.0
+   - 文件：core/src/main/java/com/git/bs/ui/bmfont/BitmapFontWriter.java
+   - 说明：仅依赖 libGDX 核心（无 AWT / LWJGL），可安全编入 TeaVM；实现未改动。
+
+2. SLF4J java.util.logging (jul) 绑定的最小实现
+   - 来源：SLF4J（org.slf4j）
+   - 协议：MIT 相容（SLF4J 为 MIT）
+   - 文件：lwjgl3 模块 com/git/log/jul/* 等
+   - 说明：用于桌面端将 java.util.logging 桥接到 SLF4J。
+
+3. libGDX LWJGL3 后端片段
+   - 来源：libGDX（com.badlogic.gdx.backends.lwjgl3）
+   - 协议：Apache License 2.0
+   - 文件：lwjgl3 模块内 vendored 的 libGDX 后端类（已保留 Apache 2.0 头）
+
+================================================================================
+四、引用的开源依赖（构建期依赖，未拷入源码）
+================================================================================
+
+  - libGDX 1.14.1                      https://libgdx.com/                                  Apache 2.0
+    （gdx / gdx-freetype / gdx-backend-lwjgl3 / gdx-tools / gdx-box2d-gwt）
+  - gdx-teavm 1.5.6                    https://github.com/xpenatan/gdx-teavm               Apache 2.0
+    （backend-web / gdx-freetype-teavm）
+  - gdx-nativefilechooser 2.4.0        https://github.com/spdqdd/gdx-nativefilechooser     Apache 2.0
+  - Apache Batik 1.19                  https://xmlgraphics.apache.org/batik/               Apache 2.0
+    （batik-all，iconpkg 工具用于 SVG→PNG/atlas）
+  - Lombok 1.18.42                     https://projectlombok.org/                          MIT
+  - SLF4J 2.0.16                       http://www.slf4j.org/                               MIT
+  - Fastjson2 2.0.58                   https://github.com/alibaba/fastjson2                Apache 2.0
+
+设计参考（非运行时依赖）：
+  - VISUI  https://github.com/kotcrab/vis-ui  —— 仅 API 设计灵感（全局 Skin 门面风格），未引入为依赖
+  - Bootstrap  https://getbootstrap.com/  —— 组件形态与设计语言来源（CC BY 3.0），本项目借鉴其视觉风格，未引入代码
+  - Bootstrap Icons 见第一节第 4 条（SVG 已直接使用并加工为 atlas）
+
+================================================================================
+若本 NOTICE 有任何遗漏或标注不当，欢迎指正。
+联系方式：authorZhao <2519946973@qq.com>

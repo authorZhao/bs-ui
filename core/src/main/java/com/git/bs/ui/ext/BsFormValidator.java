@@ -1,3 +1,24 @@
+/*
+ * bs-ui — Bootstrap 风格的 libGDX Scene2D UI 组件库。
+ * Copyright (c) 2026 bs-ui contributors
+ *
+ * 基于 Apache License 2.0 开源，允许商用、修改和再分发。
+ * 使用本库的产品须在“关于”界面标注本项目，详见 LICENSE。
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Project home: https://github.com/authorZhao/bs-ui
+ */
 package com.git.bs.ui.ext;
 
 import com.git.bs.ui.BsTextField;
@@ -37,6 +58,8 @@ import java.util.function.Supplier;
 ///
 /// 说明：异步 checker 自行决定线程，**回调 consumer 必须在 GL 线程**（用 `Gdx.app.postRunnable`）。
 /// `validateAsync` 先跑同步规则，同步不通过的字段不触发其异步；全部异步完成后回调。
+/// @author authorZhao
+/// @since 2026-07-16
 @Slf4j
 public final class BsFormValidator {
 

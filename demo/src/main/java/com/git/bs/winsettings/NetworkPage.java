@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
  * 网络和 Internet 页（按 Win11 真实结构）。
  *
  * <p>设置组：Wi-Fi / 以太网 / VPN 与代理 / 移动热点 / 高级网络设置。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class NetworkPage extends CategoryPage {

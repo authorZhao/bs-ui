@@ -24,6 +24,8 @@ import java.util.Set;
  * <p>大数字字体：KPI 的百分比/计数要大（64px），CJK 烘焙最大 xl=32 不够。但数字只需 0-9 + ASCII，
  * 字符集仅 95 个 —— 运行时 FreeType 生成一份 64px 纯 ASCII 字体（&lt;10ms、KB 级），注册成
  * {@code font-big-num} 供所有 skin 公用。这正是"动态字体甜区=小字符集"的合理用法。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class DashboardApp extends Game {

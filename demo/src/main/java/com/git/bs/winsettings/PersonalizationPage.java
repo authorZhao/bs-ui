@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
  * 个性化页（按 Win11 真实结构）。色彩模式 select 接真实换肤（BsUI.setTheme）。
  *
  * <p>设置组：背景 / 颜色 / 主题 / 锁屏界面 / 任务栏与开始 / 触摸键盘 / 字体。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class PersonalizationPage extends CategoryPage {

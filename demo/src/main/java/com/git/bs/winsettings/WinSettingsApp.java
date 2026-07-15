@@ -18,6 +18,8 @@ import java.util.Set;
  * Windows 设置（bs-ui 复刻）入口：加载烘焙 skin + Light 主题。
  *
  * <p>不走运行时字体生成 —— 设置界面用正常字号，烘焙 skin 的 sm/md/lg/xl 完全够用。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class WinSettingsApp extends Game {

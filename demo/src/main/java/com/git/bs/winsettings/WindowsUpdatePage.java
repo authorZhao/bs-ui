@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
  * <p><b>演示</b>：点击「检查更新」按钮 → 弹全屏旋转加载遮罩（{@link BsLoadingOverlay}），
  * 模拟进度递增（0→100%），完成后弹 Toast 显示结果（最新 / 发现更新）。展示异步操作的
  * loading + 进度条 + 完成反馈的典型交互。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class WindowsUpdatePage extends CategoryPage {

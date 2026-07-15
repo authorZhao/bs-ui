@@ -58,6 +58,8 @@ import java.util.List;
  * </table>
  *
  * <p>KPI 数值用运行时生成的 font-big-num（64px ASCII）；所有图表均开启 hover tooltip。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class DashboardScreen implements Screen {
 

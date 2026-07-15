@@ -23,6 +23,8 @@ import java.util.Random;
  *   <li>告警：CPU>85 / 节点离线 / 5xx 触发</li>
  *   <li>机房环境：温度 / 湿度（缓慢漂移）</li>
  * </ul>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class MockMonitorDataSource {
 

@@ -7,6 +7,8 @@ import com.git.bs.i18n.BsI18n;
  * 二级页面：显示（按 Win11「系统 › 显示」）。
  *
  * <p>设置组：显示器 / 亮度和颜色 / 夜间模式 / 缩放与多显示器。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class DisplayPage extends CategoryPage {
 

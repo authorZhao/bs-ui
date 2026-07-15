@@ -1,12 +1,15 @@
 package com.git.bs.winsettings;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.git.bs.i18n.BsI18n;
+import com.git.bs.ui.BsAboutDialog;
 import com.git.bs.ui.BsProgress;
 import com.git.bs.ui.BsSlider;
 import com.git.bs.ui.BsTheme;
@@ -20,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p><b>演示</b>：「电池电量」用 {@link BsProgress} 进度条（SUCCESS 色，带百分比标签回显）；
  * 「屏幕亮度」用 {@link BsSlider} 滑块（0-100，旁边百分比文字实时回显）。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class SystemPage extends CategoryPage {
@@ -91,7 +96,12 @@ public class SystemPage extends CategoryPage {
                 SettingItem.value(BsI18n.get("system.memory"), "", "16.0 GB (15.8 GB usable)"),
                 SettingItem.value(BsI18n.get("system.system_type"), "", "64-bit OS, x64 processor"),
                 SettingItem.value(BsI18n.get("system.version"), "", "Windows 11 Pro 23H2"),
-                SettingItem.link(BsI18n.get("system.windows_spec"), "", BsI18n.get("system.view_spec"), () -> log.info("查看 Windows 规格"))
+                SettingItem.link(BsI18n.get("system.windows_spec"), "", BsI18n.get("system.view_spec"), () -> log.info("查看 Windows 规格")),
+                // 关于本程序（bs-ui 合规声明入口）：系统 → 关于 的自然位置
+                SettingItem.button(BsI18n.get("system.about_app"), "", BsI18n.get("core.about"), () -> {
+                    Stage stage = (Stage) Gdx.input.getInputProcessor();
+                    BsAboutDialog.show(stage, skin, "Win11 设置（复刻）", false);
+                })
         );
     }
 

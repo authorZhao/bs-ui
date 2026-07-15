@@ -21,6 +21,8 @@ import static com.git.bs.demo.modules.ModuleSupport.*;
 
 /**
  * 图表模块组：ChartsLine / ChartsBar / ChartsPie / ChartsLegend / ChartsHover / ChartsExtended。
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class BsChartModules {
 

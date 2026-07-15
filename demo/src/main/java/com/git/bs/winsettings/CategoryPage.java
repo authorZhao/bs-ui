@@ -27,6 +27,8 @@ import java.util.List;
  *
  * <p>面包屑：一级页默认「主页 › 标题」；二级页用 {@link #CategoryPage(String, String, Skin)}
  * 传入完整面包屑（如「主页 › 系统 › 显示」）。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public abstract class CategoryPage extends SettingsPage {

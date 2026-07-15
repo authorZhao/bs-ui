@@ -1,3 +1,24 @@
+/*
+ * bs-ui — Bootstrap 风格的 libGDX Scene2D UI 组件库。
+ * Copyright (c) 2026 bs-ui contributors
+ *
+ * 基于 Apache License 2.0 开源，允许商用、修改和再分发。
+ * 使用本库的产品须在“关于”界面标注本项目，详见 LICENSE。
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Project home: https://github.com/authorZhao/bs-ui
+ */
 package com.git.bs.ui;
 
 import com.badlogic.gdx.math.Interpolation;
@@ -28,6 +49,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
  * }</pre>
  *
  * <p>注意：调用前需要 actor 已 addActor 到 stage 且 pack() 完成，否则坐标计算不准。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public final class BsAnimations {
 

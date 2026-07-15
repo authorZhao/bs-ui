@@ -1,3 +1,24 @@
+/*
+ * bs-ui — Bootstrap 风格的 libGDX Scene2D UI 组件库。
+ * Copyright (c) 2026 bs-ui contributors
+ *
+ * 基于 Apache License 2.0 开源，允许商用、修改和再分发。
+ * 使用本库的产品须在“关于”界面标注本项目，详见 LICENSE。
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Project home: https://github.com/authorZhao/bs-ui
+ */
 package com.git.bs.ui;
 
 import com.badlogic.gdx.Gdx;
@@ -12,7 +33,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.git.bs.common.SkinUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
@@ -48,6 +68,8 @@ import java.util.Map;
  * // 直接在加载好的 skin 上叠加 Bs 主题资源
  * BsSkinFactory.augmentWithBsStyles(skin, BsLightTheme.INSTANCE);
  * }</pre>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public final class BsSkinLoader {
@@ -57,12 +79,6 @@ public final class BsSkinLoader {
     private static final String CHARS = SKIN_CP + "/chinese.txt";
     private static final String CHARS_COMMON = SKIN_CP + "/common.txt";
 
-    public static Skin loadDefault() {
-        BsLightTheme lightTheme = BsLightTheme.INSTANCE;
-        var lightSkin = BsSkinLoader.loadAndRegisterTheme(SKIN_CP, lightTheme, new HashMap<>());
-        BsUI.registerTheme(lightTheme.name(), lightTheme, lightSkin);
-        return lightSkin;
-    }
 
 
     public static void loadAllThemes() {
@@ -93,29 +109,6 @@ public final class BsSkinLoader {
         }
         TextureAtlas atlas = new TextureAtlas(atlasFile);
         return new Skin(jsonFile, atlas);
-    }
-
-    /**
-     * 带 FreeType 字体扩展的加载（BsSkinExporter 约定）。
-     *
-     * <p>流程：</p>
-     * <ol>
-     *   <li>读 atlas 创建 Skin</li>
-     *   <li>读 json 但**跳过** FreeTypeFontGenerator 桶（libgdx 标准 Skin 不识别这个）</li>
-     *   <li>手动解析 FreeType 配置，按约定读取 TTF + chinese.txt 生成 BitmapFont</li>
-     *   <li>把 BitmapFont 注册到 skin</li>
-     *   <li>其他标准桶（Color/Style）正常加载</li>
-     * </ol>
-     */
-    public static Skin loadWithFreeType(FileHandle jsonFile, Map<String,BitmapFont> fontCache) {
-        log.info("BsSkinLoader: loadWithFreeType {}", jsonFile.path());
-        FileHandle baseDir = jsonFile.parent();
-        FileHandle atlasFile = baseDir.child(jsonFile.nameWithoutExtension() + ".atlas");
-        return SkinUtil.load(jsonFile, atlasFile, fontCache);
-    }
-
-    public static Skin loadWithFreeType(FileHandle jsonFile) {
-        return loadWithFreeType(jsonFile, new HashMap<>());
     }
 
     /** 把 "default-font" → "default"，"font-sm" → "font-sm"（保持不变）。 */
@@ -174,22 +167,7 @@ public final class BsSkinLoader {
     }
 
 
-    public static Skin loadAndAugmentWithCache(FileHandle jsonFile, BsTheme theme, Map<String, BitmapFont> fontCache) {
-        Skin skin;
-        // 检测是否含 FreeType（简单启发：json 含 "freetype" 字符串）
-        String text = jsonFile.readString(StandardCharsets.UTF_8.name());
-        if (text.contains("FreeTypeFontGenerator")) {
-            skin = loadWithFreeType(jsonFile, fontCache);
-        } else {
-            skin = load(jsonFile);
-        }
-        BsSkinFactory.augmentWithBsStyles(skin, theme);
-        return skin;
-    }
 
-    public static Skin loadAndAugmentWithCache(FileHandle jsonFile, BsTheme theme) {
-        return loadAndAugmentWithCache(jsonFile, theme, new HashMap<>());
-    }
 
     /** 把一个字体绑定到 skin 的 font-{suffix} + label-{suffix} 桶（用主题色作为字色）。 */
     public static void bindFontStyles(Skin skin, String suffix, BitmapFont font) {
@@ -201,12 +179,6 @@ public final class BsSkinLoader {
         skin.add(labelKey, new Label.LabelStyle(font, BsTheme.tp()), Label.LabelStyle.class);
     }
 
-    public static Skin loadAndRegisterTheme(String skinCp, BsTheme bsTheme, Map<String, BitmapFont> fontCache) {
-        var fileHandle = Gdx.files.internal(skinCp + "/" + bsTheme.name() + ".json");
-        var skin = BsSkinLoader.loadAndAugmentWithCache(fileHandle, bsTheme, fontCache);
-        BsUI.registerTheme(bsTheme.name(), bsTheme, skin);
-        return skin;
-    }
 
     public static Skin loadAndRegisterBsTheme(String skinCp, BsTheme bsTheme, Map<String, BitmapFont> fontCache) {
         var fileHandle = Gdx.files.internal(skinCp + "/" + bsTheme.name() + ".json");

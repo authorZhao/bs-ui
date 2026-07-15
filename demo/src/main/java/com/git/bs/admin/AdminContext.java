@@ -8,6 +8,8 @@ import lombok.Setter;
  *
  * <p><b>内存态</b>：不写 Preferences，进程退出即失效。
  * 演示账号 admin / 123456。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class AdminContext {
 

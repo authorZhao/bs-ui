@@ -24,6 +24,8 @@ import java.time.format.DateTimeFormatter;
  * <p><b>演示</b>：日期时间组里的「设置日期 / 设置时间」用真正的 {@link BsDatePicker}（含时间）
  * 和 {@link BsTimePicker}，点击弹出选择面板，选完回显。点击「立即同步」按钮 → 自动取系统当前
  * {@link LocalDateTime#now()}，刷新两个选择器的显示 + 弹 Toast 反馈。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class TimeLanguagePage extends CategoryPage {

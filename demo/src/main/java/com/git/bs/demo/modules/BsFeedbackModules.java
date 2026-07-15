@@ -33,6 +33,8 @@ import static com.git.bs.demo.modules.ModuleSupport.*;
  *
  * <p>{@code iconGrid / iconFilterField} 持有 Icons 过滤状态；
  * {@code demoProgress / progressValue} 持有 Progress 控制状态。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class BsFeedbackModules {
 

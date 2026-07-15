@@ -1,3 +1,24 @@
+/*
+ * bs-ui — Bootstrap 风格的 libGDX Scene2D UI 组件库。
+ * Copyright (c) 2026 bs-ui contributors
+ *
+ * 基于 Apache License 2.0 开源，允许商用、修改和再分发。
+ * 使用本库的产品须在“关于”界面标注本项目，详见 LICENSE。
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Project home: https://github.com/authorZhao/bs-ui
+ */
 package com.git.bs.i18n;
 
 import com.badlogic.gdx.Gdx;
@@ -45,6 +66,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * <p><b>fallback 策略</b>：key 不存在 → 返回 key；locale 文件不存在 → 保留空 map（get 全返回 key），
  * 不抛异常，保证 UI 不崩。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public final class BsI18n {
 

@@ -58,7 +58,7 @@ publishing {
                         ? project.ext.publishArtifactId : project.name
                 description = project.ext.has('publishDescription')
                         ? project.ext.publishDescription : 'bs-ui library'
-                url = 'https://github.com/bs-ui/bs-ui'
+                url = 'https://github.com/authorZhao/bs-ui'
 
                 licenses {
                     license {
@@ -81,9 +81,9 @@ publishing {
                 }
 
                 scm {
-                    connection = 'scm:git:git://github.com/bs-ui/bs-ui.git'
-                    developerConnection = 'scm:git:ssh://github.com/bs-ui/bs-ui.git'
-                    url = 'https://github.com/bs-ui/bs-ui'
+                    connection = 'scm:git:git://github.com/authorZhao/bs-ui.git'
+                    developerConnection = 'scm:git:ssh://github.com/authorZhao/bs-ui.git'
+                    url = 'https://github.com/authorZhao/bs-ui'
                 }
             }
         }

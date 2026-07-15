@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 占位页：尚未实现的分类页用它兜底（保持 12 项导航都能点进去）。
  * 下一轮会逐个替换为真实分类页（BluetoothPage / NetworkPage / ...）。
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 class PlaceholderPage extends CategoryPage {

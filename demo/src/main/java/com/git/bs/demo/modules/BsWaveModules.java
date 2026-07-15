@@ -71,6 +71,8 @@ import static com.git.bs.demo.modules.ModuleSupport.*;
  * Wave 系列扩展组件模块组：P2Content / P2Carousel / Wave1-4 各项。
  *
  * <p>{@code dataTable} 持有 Wave2-Data 的表格状态。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class BsWaveModules {
 

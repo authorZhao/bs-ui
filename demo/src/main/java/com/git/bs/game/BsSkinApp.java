@@ -47,6 +47,8 @@ import java.util.Set;
  *   <li>oldSkin.dispose()（释放 Texture）</li>
  *   <li>隐藏旋转器</li>
  * </ol>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class BsSkinApp extends Game {

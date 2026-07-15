@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
  * 游戏页（按 Win11 真实结构）。
  *
  * <p>设置组：Xbox Game Bar / 捕获 / 游戏模式 / 游戏控制器 / 相关设置。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class GamingPage extends CategoryPage {

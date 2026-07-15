@@ -15,6 +15,7 @@ import com.git.bs.admin.modules.DashboardModule;
 import com.git.bs.admin.modules.UiDemoModule;
 import com.git.bs.admin.modules.UserListModule;
 import com.git.bs.game.AdminApp;
+import com.git.bs.ui.BsAboutDialog;
 import com.git.bs.ui.BsBreadcrumb;
 import com.git.bs.ui.BsButton;
 import com.git.bs.ui.BsLayoutAdmin;
@@ -45,6 +46,8 @@ import java.util.Map;
  * </ul>
  *
  * <p><b>新增模块</b>：实现 {@link AdminModule}，构造时 {@code register(new XxxModule())}。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class BsAdminShell extends ScreenAdapter {
@@ -117,6 +120,9 @@ public class BsAdminShell extends ScreenAdapter {
         // 顶栏菜单搜索框：输入实时过滤 sidebar 菜单
         layout.addMenuSearchBox();
 
+        // 顶栏常驻「关于」入口（醒目，登录后任何时候可见）
+        layout.addTopMenu("ⓘ 关于", () -> BsAboutDialog.show(stage, skin, "bs-ui Admin", false));
+
         // 内容区：把 scrollWrap 放进 contentWrap（圆角卡片），留 8px 内边距让内容不贴卡片边缘
         layout.setContent(scrollWrap);
         layout.contentPadding(8);
@@ -130,6 +136,7 @@ public class BsAdminShell extends ScreenAdapter {
         layout.addUserMenuItem("☀ Light", () -> switchTheme(BsLightTheme.INSTANCE));
         layout.addUserMenuItem("🌙 Dark", () -> switchTheme(BsDarkTheme.INSTANCE));
         layout.addUserMenuItem("🛡 Admin", () -> switchTheme(BsAdminTheme.INSTANCE));
+        layout.addUserMenuItem("ⓘ 关于 bs-ui", () -> BsAboutDialog.show(stage, skin, "bs-ui Admin", false));
         layout.addUserMenuItem("退出登录", this::logout);
 
         // 注册内置模块

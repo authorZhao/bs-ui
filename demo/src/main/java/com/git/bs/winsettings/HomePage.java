@@ -32,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>个性化卡：背景缩略图 + 色彩模式 + 浏览更多背景/颜色和主题</li>
  *   <li>底部：获取帮助 / 提供反馈</li>
  * </ol>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 @Slf4j
 public class HomePage extends SettingsPage {

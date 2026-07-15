@@ -22,6 +22,8 @@ import java.util.List;
  * 业务 UI 模块：示例业务页 —— 简化版任务/订单管理。
  * 路径："业务模块"。展示如何在单个模块里组合多个 bs-ui 组件：
  * BsDataTable + BsSwitch（状态切换） + BsModal（详情弹窗）。
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class BusinessDemoModule implements AdminModule {
 

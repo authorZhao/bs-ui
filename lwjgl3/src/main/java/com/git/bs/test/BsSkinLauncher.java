@@ -11,6 +11,8 @@ import com.git.bs.game.BsSkinApp;
 /**
  * Bs UI 控件测试启动器。
  * <p>用法（IDEA）：右键 Run；或命令行 {@code ./gradlew :lwjgl3:run -PmainClass=com.git.bs.test.BsControlsLauncher}。</p>
+ * @author authorZhao
+ * @since 2026-07-16
  */
 public class BsSkinLauncher {
 
