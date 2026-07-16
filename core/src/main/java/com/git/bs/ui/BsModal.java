@@ -116,15 +116,16 @@ public class BsModal extends Table {
         titleRow.add(titleIconWrap).padRight(8).left();
         // 标题文字（独立 LabelStyle，深色粗体感）
         Label.LabelStyle titleStyle = new Label.LabelStyle();
-        titleStyle.font = skin.getFont("default");
+        titleStyle.font = skin.getFont("font-lg");
         titleStyle.fontColor = BsTheme.tp();
         titleLabel = new Label(title == null ? "" : title, titleStyle);
         titleLabel.setColor(Color.WHITE);
-        titleLabel.setFontScale(1.1f);
         titleRow.add(titleLabel).growX().left();
         // 关闭按钮（右上角 X）
         TextButton closeBtn = new TextButton("×", skin, "bs-link");
-        closeBtn.getLabel().setFontScale(1.4f);
+        TextButton.TextButtonStyle closeStyle = new TextButton.TextButtonStyle(closeBtn.getStyle());
+        closeStyle.font = skin.getFont("font-xl");
+        closeBtn.setStyle(closeStyle);
         closeBtn.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { close(); }
         });

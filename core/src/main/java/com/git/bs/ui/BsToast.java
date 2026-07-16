@@ -106,9 +106,10 @@ public class BsToast extends Table {
         body.left().top();
         body.pad(0, 8, 0, 8);
         if (title != null && !title.isEmpty()) {
-            Label t = new Label(title, skin);
+            Label.LabelStyle tStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            tStyle.font = skin.getFont("font-lg");
+            Label t = new Label(title, tStyle);
             t.setColor(titleColor);
-            t.setFontScale(1.05f);
             body.add(t).left().row();
         }
         Label msg = new Label(message == null ? "" : message, skin);

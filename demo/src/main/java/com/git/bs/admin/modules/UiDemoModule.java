@@ -110,8 +110,9 @@ public class UiDemoModule {
 
         // 模块标题（与菜单名一致，/ 替换为 ·）
         String name = safeName(BsControlsSkinScreen.MODULES.get(moduleIdx));
-        Label title = new Label(name, skin);
-        title.setFontScale(1.3f);
+        Label.LabelStyle xl = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xl.font = skin.getFont("font-xl");
+        Label title = new Label(name, xl);
         title.setColor(BsTheme.tp());
         root.add(title).left().padBottom(8).row();
 

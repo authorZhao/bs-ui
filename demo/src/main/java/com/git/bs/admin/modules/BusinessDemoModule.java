@@ -63,8 +63,9 @@ public class BusinessDemoModule implements AdminModule {
         root.pad(16);
         root.defaults().top().left();
 
-        Label title = new Label("订单管理（业务示例）", skin);
-        title.setFontScale(1.3f);
+        Label.LabelStyle xl = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xl.font = skin.getFont("font-xl");
+        Label title = new Label("订单管理（业务示例）", xl);
         title.setColor(BsTheme.tp());
         root.add(title).left().padBottom(4).row();
 

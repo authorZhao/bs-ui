@@ -76,9 +76,10 @@ public class BsFileItem extends Table {
         nameLabel.setColor(BsTheme.tp());
         add(nameLabel).growX().left();
 
-        sizeLabel = new Label("", skin);
+        Label.LabelStyle sizeStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        sizeStyle.font = skin.getFont("font-sm");
+        sizeLabel = new Label("", sizeStyle);
         sizeLabel.setColor(BsTheme.ts());
-        sizeLabel.setFontScale(0.9f);
         add(sizeLabel).padRight(10).right();
 
         actionRow = new Table();

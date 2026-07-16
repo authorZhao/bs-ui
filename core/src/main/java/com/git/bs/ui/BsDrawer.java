@@ -130,9 +130,10 @@ public class BsDrawer extends Table {
         panel.add(buttonBar).growX();
 
         // 标题栏 × 关闭按钮（默认放最右）
-        Label x = new Label("×", skin);
+        Label.LabelStyle xStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xStyle.font = skin.getFont("font-xl");
+        Label x = new Label("×", xStyle);
         x.setColor(BsPalette.SECONDARY.getMain());
-        x.setFontScale(1.4f);
         Container<Label> xWrap = new Container<>(x);
         xWrap.setTouchable(Touchable.enabled);
         xWrap.addListener(new ClickListener() {
@@ -146,9 +147,11 @@ public class BsDrawer extends Table {
         Actor xCell = titleBar.getChildren().size > 0
                 ? titleBar.getChildren().get(titleBar.getChildren().size - 1) : null;
         titleBar.clearChildren();
-        Label t = new Label(title == null ? "" : title, BsUI.getSkin());
+        Skin skin = BsUI.getSkin();
+        Label.LabelStyle tStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        tStyle.font = skin.getFont("font-lg");
+        Label t = new Label(title == null ? "" : title, tStyle);
         t.setColor(BsTheme.tp());
-        t.setFontScale(1.15f);
         titleBar.add(t).left();
         if (xCell != null) titleBar.add(xCell).expandX().right();
         return this;

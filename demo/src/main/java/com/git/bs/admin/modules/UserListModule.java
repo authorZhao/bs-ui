@@ -77,8 +77,9 @@ public class UserListModule implements AdminModule {
         root.defaults().top().left();
 
         // 标题
-        Label title = new Label("用户列表", skin);
-        title.setFontScale(1.3f);
+        Label.LabelStyle xl = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xl.font = skin.getFont("font-xl");
+        Label title = new Label("用户列表", xl);
         title.setColor(BsTheme.tp());
         root.add(title).left().padBottom(8).row();
 

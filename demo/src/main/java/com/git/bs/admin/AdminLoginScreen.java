@@ -60,11 +60,13 @@ public class AdminLoginScreen extends ScreenAdapter {
         Table brand = new Table();
         brand.center();
         brand.defaults().pad(4).center();
-        Label brandTitle = new Label("bs-ui Admin", skin);
-        brandTitle.setFontScale(2.4f);
+        Label.LabelStyle xlStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xlStyle.font = skin.getFont("font-xl");
+        Label.LabelStyle lgStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        lgStyle.font = skin.getFont("font-lg");
+        Label brandTitle = new Label("bs-ui Admin", xlStyle);
         brandTitle.setColor(BsTheme.tp());
-        Label brandSub = new Label("管理后台模板 · Admin Template", skin);
-        brandSub.setFontScale(1.1f);
+        Label brandSub = new Label("管理后台模板 · Admin Template", lgStyle);
         brandSub.setColor(BsTheme.ts());
         brand.add(brandTitle).row();
         brand.add(brandSub).padTop(8).row();
@@ -81,8 +83,7 @@ public class AdminLoginScreen extends ScreenAdapter {
         center.center();
         center.defaults().center();
 
-        Label cardTitle = new Label("欢迎登录", skin);
-        cardTitle.setFontScale(1.4f);
+        Label cardTitle = new Label("欢迎登录", xlStyle);
         cardTitle.setColor(BsTheme.tp());
         Label cardSub = new Label("请输入账号密码", skin);
         cardSub.setColor(BsTheme.tm());
@@ -128,9 +129,8 @@ public class AdminLoginScreen extends ScreenAdapter {
         card.add(center).grow();
 
         // 底部提示
-        Label hint = new Label("演示账号：admin / 123456", skin);
+        Label hint = new Label("演示账号：admin / 123456", lgStyle);
         hint.setColor(BsTheme.tm());
-        hint.setFontScale(1.1f);
 
         // 组装：品牌区 + 卡片 + 提示，整体居中、留白合理
         Table cardWrap = new Table();

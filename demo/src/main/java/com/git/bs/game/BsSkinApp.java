@@ -235,9 +235,8 @@ public class BsSkinApp extends Game {
         // 旋转点（3 个圆点循环 alpha）
         Table dots = new Table();
         for (int i = 0; i < 3; i++) {
-            Label dot = new Label("•", new Label.LabelStyle(fonts.get("default"), Color.WHITE));
+            Label dot = new Label("•", new Label.LabelStyle(fonts.get("font-xl"), Color.WHITE));
             dot.setName("dot-" + i);
-            dot.setFontScale(2f);
             dots.add(dot).pad(4);
         }
         loadingOverlay.add(dots);

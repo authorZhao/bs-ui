@@ -32,6 +32,7 @@ import com.git.bs.ui.BsList;
 import com.git.bs.ui.BsModal;
 import com.git.bs.ui.BsScrollPane;
 import com.git.bs.ui.BsSkinExporter;
+import com.git.bs.ui.BsText;
 import com.git.bs.ui.BsTheme;
 import com.git.bs.ui.BsUI;
 import lombok.extern.slf4j.Slf4j;
@@ -160,12 +161,10 @@ public class BsControlsSkinScreen extends ScreenAdapter {
         root.setFillParent(true);
         stage.addActor(root);
 
-        // 顶部标题行：左标题 + 右主题切换
+        // 顶部标题行：左标题 + 右主题切换（直接用最大号烘焙字体，不缩放，避免发虚）
         Table header = new Table();
-        Label title = new Label("Bs UI 皮肤演示台  /  Skin-imported controls playground",
-                skin, "default");
-        title.setColor(BsTheme.tp());
-        title.setFontScale(1.6f);
+        BsText title = new BsText("Bs UI 皮肤演示台  /  Skin-imported controls playground",
+                BsText.Size.XL).bold();
         header.add(title).pad(10).left().growX();
 
         themeToggle = new com.badlogic.gdx.scenes.scene2d.ui.SelectBox<>(skin);
@@ -188,16 +187,6 @@ public class BsControlsSkinScreen extends ScreenAdapter {
             }
         });
         header.add(themeToggle).pad(8).right();
-
-        // 导出皮肤按钮
-        BsButton exportBtn = new BsButton("⭳ 导出皮肤", skin,
-                BsButton.Variant.SUCCESS, BsButton.Style.SOLID, BsButton.Size.SM);
-        exportBtn.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                showExportDialog();
-            }
-        });
-        header.add(exportBtn).pad(8).right();
 
         // 关于按钮（醒目：主色实心）
         BsButton aboutBtn = new BsButton("ⓘ 关于", skin,
@@ -382,9 +371,10 @@ public class BsControlsSkinScreen extends ScreenAdapter {
         form.add(new Label("字体页尺寸（仅烘焙模式；页越大字体 png 越少）", skin)).padTop(4).row();
         form.add(pageSizeBox).growX().left().row();
         form.add(bitmapBox).padTop(4).left().row();
-        Label hint = new Label("目录：bs-skin-export/   ·   多主题共用字体与字符集   ·   勾选「烘焙 BitmapFont」可让运行时免 FreeType/TTF/freetype.js", skin);
+        Label.LabelStyle hintStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        hintStyle.font = skin.getFont("font-sm");
+        Label hint = new Label("目录：bs-skin-export/   ·   多主题共用字体与字符集   ·   勾选「烘焙 BitmapFont」可让运行时免 FreeType/TTF/freetype.js", hintStyle);
         hint.setColor(BsTheme.tm());
-        hint.setFontScale(0.9f);
         hint.setWrap(true);
         form.add(hint).padTop(4).growX().row();
 

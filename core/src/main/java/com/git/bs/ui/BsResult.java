@@ -67,16 +67,17 @@ public class BsResult extends Table {
         center();
         defaults().center().padTop(6);
 
+        Label.LabelStyle xlStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xlStyle.font = skin.getFont("font-xl");
+
         // 大图标
-        iconLabel = new Label(iconChar(type), skin);
+        iconLabel = new Label(iconChar(type), xlStyle);
         iconLabel.setColor(colorFor(skin, type));
-        iconLabel.setFontScale(4f);
         add(iconLabel).padBottom(10).row();
 
         // 标题
-        titleLabel = new Label(defaultTitle(type), skin);
+        titleLabel = new Label(defaultTitle(type), xlStyle);
         titleLabel.setColor(BsTheme.tp());
-        titleLabel.setFontScale(1.4f);
         add(titleLabel).padTop(8).row();
 
         // 描述

@@ -175,6 +175,8 @@ public class BsListGroup extends Table {
         /** 构造内部内容（标题/副标题/图标/badge）。 */
         void build() {
             Skin skin = BsUI.getSkin();
+            Label.LabelStyle smStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            smStyle.font = skin.getFont("font-sm");
             contentRow.clearChildren();
             contentRow.left();
             // 图标
@@ -192,9 +194,8 @@ public class BsListGroup extends Table {
                 textCol.add(t).left().row();
             }
             if (subtitle != null) {
-                Label s = new Label(subtitle, skin);
+                Label s = new Label(subtitle, smStyle);
                 s.setColor(BsTheme.ts());
-                s.setFontScale(0.9f);
                 textCol.add(s).left();
             }
             contentRow.add(textCol).growX().left();
@@ -205,9 +206,8 @@ public class BsListGroup extends Table {
                 badgeWrap.setBackground(skin.newDrawable("white",
                         badgeColor != null ? badgeColor : BsPalette.DANGER.getMain()));
                 badgeWrap.pad(2, 8, 2, 8);
-                Label bl = new Label(badge, skin);
+                Label bl = new Label(badge, smStyle);
                 bl.setColor(Color.WHITE);
-                bl.setFontScale(0.85f);
                 badgeWrap.setActor(bl);
                 contentRow.add(badgeWrap).padLeft(8).right();
             }

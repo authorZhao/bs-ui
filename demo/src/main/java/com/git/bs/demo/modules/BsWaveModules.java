@@ -952,9 +952,10 @@ public class BsWaveModules {
         Table header1 = new Table(skin);
         header1.setBackground(skin.getDrawable("bs-menu-bar-bg"));
         header1.pad(8, 12, 8, 12);
-        Label h1 = new Label("第一组：基础信息", skin);
+        Label.LabelStyle lg = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        lg.font = skin.getFont("font-lg");
+        Label h1 = new Label("第一组：基础信息", lg);
         h1.setColor(new Color(0.1f, 0.1f, 0.12f, 1f));
-        h1.setFontScale(1.1f);
         header1.add(h1).left();
         innerContent.add(new BsAffix(skin, header1, BsAffix.Placement.TOP)).growX().row();
         for (int i = 0; i < 12; i++) {
@@ -963,9 +964,8 @@ public class BsWaveModules {
         Table header2 = new Table(skin);
         header2.setBackground(skin.getDrawable("bs-menu-bar-bg"));
         header2.pad(8, 12, 8, 12);
-        Label h2 = new Label("第二组：高级设置", skin);
+        Label h2 = new Label("第二组：高级设置", lg);
         h2.setColor(new Color(0.1f, 0.1f, 0.12f, 1f));
-        h2.setFontScale(1.1f);
         header2.add(h2).left();
         innerContent.add(new BsAffix(skin, header2, BsAffix.Placement.TOP)).growX().row();
         for (int i = 0; i < 15; i++) {

@@ -120,9 +120,10 @@ public class BsDataTable extends Table {
         footerRow = new Table();
         footerRow.left();
         footerRow.defaults().pad(4);
-        infoLabel = new Label(BsI18n.get("table.no_data", "(无数据)"), skin);
+        Label.LabelStyle infoStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        infoStyle.font = skin.getFont("font-sm");
+        infoLabel = new Label(BsI18n.get("table.no_data", "(无数据)"), infoStyle);
         infoLabel.setColor(BsPalette.SECONDARY.getMain());
-        infoLabel.setFontScale(0.9f);
         pagination = new BsPagination(skin);
         pagination.setOnChange(page -> {
             currentPage = page;

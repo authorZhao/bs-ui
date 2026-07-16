@@ -176,9 +176,8 @@ public class AdminApp extends Game {
         loadingOverlay.add(label).padBottom(20).row();
         Table dots = new Table();
         for (int i = 0; i < 3; i++) {
-            Label dot = new Label("•", new Label.LabelStyle(fonts.get("default"), Color.WHITE));
+            Label dot = new Label("•", new Label.LabelStyle(fonts.get("font-xl"), Color.WHITE));
             dot.setName("dot-" + i);
-            dot.setFontScale(2f);
             dots.add(dot).pad(4);
         }
         loadingOverlay.add(dots);

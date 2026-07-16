@@ -101,11 +101,11 @@ public class BsProfileCard extends Table {
         add(avatarWrap).size(avatarSize, avatarSize).padBottom(10).row();
 
         // 姓名（深色大字）
-        nameLabel = makeLabel("", BsTheme.tp(), 1.3f);
+        nameLabel = makeLabel("", BsTheme.tp(), "font-xl");
         add(nameLabel).padBottom(2).row();
 
         // handle（灰色小字）
-        handleLabel = makeLabel("", BsTheme.tm(), 0.95f);
+        handleLabel = makeLabel("", BsTheme.tm(), "font-sm");
         add(handleLabel).padBottom(6).row();
 
         // 角色 Badge（居中）
@@ -114,7 +114,7 @@ public class BsProfileCard extends Table {
         add(roleWrap).padBottom(8).row();
 
         // 简介（居中换行）
-        bioLabel = makeLabel("", BsTheme.ts(), 1f);
+        bioLabel = makeLabel("", BsTheme.ts(), "default");
         bioLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         bioLabel.setWrap(true);
         add(bioLabel).growX().padBottom(10).row();
@@ -168,15 +168,15 @@ public class BsProfileCard extends Table {
     public BsProfileCard stat(String label, String value) {
         Table stat = new Table();
         stat.defaults().center().pad(0);
-        Label num = makeLabel(value, BsTheme.tp(), 1.2f);
+        Label num = makeLabel(value, BsTheme.tp(), "font-lg");
         num.setAlignment(com.badlogic.gdx.utils.Align.center);
-        Label name = makeLabel(label, BsTheme.tm(), 0.85f);
+        Label name = makeLabel(label, BsTheme.tm(), "font-sm");
         name.setAlignment(com.badlogic.gdx.utils.Align.center);
         stat.add(num).row();
         stat.add(name).padTop(2);
         // 加分隔（如果不是第一个）
         if (statsRow.getCells().size > 0) {
-            Label sep = makeLabel("│", BsTheme.bd(), 1f);
+            Label sep = makeLabel("│", BsTheme.bd(), "default");
             statsRow.add(sep).pad(0, 12, 0, 12);
         }
         statsRow.add(stat);
@@ -185,13 +185,12 @@ public class BsProfileCard extends Table {
 
     // ========================= 工具 =========================
 
-    private Label makeLabel(String text, Color color, float scale) {
+    private Label makeLabel(String text, Color color, String fontKey) {
         Label.LabelStyle ls = new Label.LabelStyle();
-        ls.font = BsUI.getSkin().getFont("default");
+        ls.font = BsUI.getSkin().getFont(fontKey);
         ls.fontColor = color;
         Label l = new Label(text == null ? "" : text, ls);
         l.setColor(Color.WHITE);
-        l.setFontScale(scale);
         return l;
     }
 

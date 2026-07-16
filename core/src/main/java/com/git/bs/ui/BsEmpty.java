@@ -50,19 +50,23 @@ public class BsEmpty extends Table {
     public BsEmpty(Skin skin) {
         center();
         defaults().center().padTop(6);
+        Label.LabelStyle xlStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xlStyle.font = skin.getFont("font-xl");
+        Label.LabelStyle lgStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        lgStyle.font = skin.getFont("font-lg");
+        Label.LabelStyle smStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        smStyle.font = skin.getFont("font-sm");
+
         // 图标占位（用大字 emoji 兜底，无 icon 时显示一个圆角灰底）
-        Label iconLabel = new Label("📭", skin);
-        iconLabel.setFontScale(2.5f);
+        Label iconLabel = new Label("📭", xlStyle);
         add(iconLabel).padBottom(8).row();
 
-        Label title = new Label(BsI18n.get("core.empty", "暂无数据"), skin);
+        Label title = new Label(BsI18n.get("core.empty", "暂无数据"), lgStyle);
         title.setColor(BsTheme.tp());
-        title.setFontScale(1.1f);
         add(title).row();
 
-        Label desc = new Label(BsI18n.get("core.empty_desc", "没有符合条件的记录"), skin);
+        Label desc = new Label(BsI18n.get("core.empty_desc", "没有符合条件的记录"), smStyle);
         desc.setColor(BsTheme.ts());
-        desc.setFontScale(0.95f);
         add(desc).row();
     }
 

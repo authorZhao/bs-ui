@@ -146,14 +146,14 @@ public class BsTagInput extends Table {
             Table chip = new Table();
             chip.setBackground(skin.newDrawable("white", chipColor));
             chip.pad(2, 6, 2, 6);
-            Label l = new Label(t, skin);
+            Label.LabelStyle cs = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            cs.font = skin.getFont("font-sm");
+            Label l = new Label(t, cs);
             l.setColor(Color.WHITE);
-            l.setFontScale(0.9f);
             chip.add(l).padRight(4);
             // × 关闭按钮
-            Label x = new Label("×", skin);
+            Label x = new Label("×", cs);
             x.setColor(Color.WHITE);
-            x.setFontScale(0.95f);
             Container<Label> xWrap = new Container<>(x);
             xWrap.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
             final String tag = t;

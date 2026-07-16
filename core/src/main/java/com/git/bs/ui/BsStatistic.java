@@ -67,18 +67,20 @@ public class BsStatistic extends Table {
         left().top();
         defaults().growX().left();
 
+        Label.LabelStyle smStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        smStyle.font = skin.getFont("font-sm");
+        Label.LabelStyle xlStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xlStyle.font = skin.getFont("font-xl");
+
         titleRow = new Table();
         titleRow.left();
-        titleLabel = new Label("", skin);
+        titleLabel = new Label("", smStyle);
         titleLabel.setColor(BsTheme.ts());
-        titleLabel.setFontScale(0.95f);
 
-        valueLabel = new Label("", skin);
+        valueLabel = new Label("", xlStyle);
         valueLabel.setColor(BsTheme.tp());
-        valueLabel.setFontScale(1.8f);
 
-        trendLabel = new Label("", skin);
-        trendLabel.setFontScale(0.95f);
+        trendLabel = new Label("", smStyle);
 
         rebuild();
     }

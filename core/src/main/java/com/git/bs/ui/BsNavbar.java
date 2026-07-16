@@ -83,9 +83,11 @@ public class BsNavbar extends Table {
     /** 设置品牌名（左侧文字）。 */
     public BsNavbar setBrand(String name) {
         if (brandLabel == null) {
-            brandLabel = new Label(name, BsUI.getSkin());
+            Skin skin = BsUI.getSkin();
+            Label.LabelStyle bs = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            bs.font = skin.getFont("font-lg");
+            brandLabel = new Label(name, bs);
             brandLabel.setColor(BsTheme.tp());
-            brandLabel.setFontScale(1.2f);
         } else {
             brandLabel.setText(name);
         }

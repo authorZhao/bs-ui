@@ -71,9 +71,10 @@ public class BsComment extends Table {
         nameLabel = new Label("", skin);
         nameLabel.setColor(tp);
 
-        timeLabel = new Label("", skin);
+        Label.LabelStyle timeStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        timeStyle.font = skin.getFont("font-sm");
+        timeLabel = new Label("", timeStyle);
         timeLabel.setColor(tm);
-        timeLabel.setFontScale(0.85f);
 
         bodyLabel = new Label("", skin);
         bodyLabel.setColor(tp);

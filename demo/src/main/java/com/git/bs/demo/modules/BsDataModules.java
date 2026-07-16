@@ -349,8 +349,9 @@ public class BsDataModules {
         Table page = new Table();
         page.pad(10).left().top();
         page.defaults().left().pad(4);
-        Label title = new Label("【" + name + "】页面", skin);
-        title.setFontScale(1.4f);
+        Label.LabelStyle xl = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xl.font = skin.getFont("font-xl");
+        Label title = new Label("【" + name + "】页面", xl);
         page.add(title).row();
         page.add(new Label("这是 " + name + " 的演示内容。点击左侧 sidebar 切换不同模块。", skin)).padTop(8).row();
         page.add(new Label("• 数据 1", skin)).padTop(4).row();

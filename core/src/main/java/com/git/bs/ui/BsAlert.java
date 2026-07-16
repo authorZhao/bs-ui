@@ -96,9 +96,10 @@ public class BsAlert extends Table {
         Table textWrap = new Table();
         textWrap.left().top();
         if (title != null && !title.isEmpty()) {
-            Label t = new Label(title, skin);
+            Label.LabelStyle tStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            tStyle.font = skin.getFont("font-lg");
+            Label t = new Label(title, tStyle);
             t.setColor(darker(accent, 0.45f));   // 标题用 variant 加深色，呼应背景
-            t.setFontScale(1.1f);
             textWrap.add(t).left().row();
         }
         if (contentActor != null) {
@@ -114,9 +115,10 @@ public class BsAlert extends Table {
 
         // 右侧关闭按钮
         if (dismissible) {
-            Label x = new Label("×", skin);
+            Label.LabelStyle xStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            xStyle.font = skin.getFont("font-xl");
+            Label x = new Label("×", xStyle);
             x.setColor(darker(accent, 0.3f));
-            x.setFontScale(1.4f);
             Container<Label> xWrap = new Container<>(x);
             xWrap.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
             xWrap.addListener(new ClickListener() {

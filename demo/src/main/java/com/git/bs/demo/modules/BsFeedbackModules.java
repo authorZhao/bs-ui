@@ -236,8 +236,9 @@ public class BsFeedbackModules {
             cell.setBackground(cellBg);
             cell.pad(4);
             cell.add(img).size(28, 28).row();
-            Label lab = new Label(name, skin);
-            lab.setFontScale(0.7f);
+            Label.LabelStyle labS = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            labS.font = skin.getFont("font-sm");
+            Label lab = new Label(name, labS);
             lab.setColor(Color.LIGHT_GRAY);
             cell.add(lab);
             cell.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);

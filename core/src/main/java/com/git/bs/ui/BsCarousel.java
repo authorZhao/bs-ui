@@ -115,14 +115,16 @@ public class BsCarousel extends Table {
     }
 
     private void rebuildIndicators() {
+        Skin skin0 = BsUI.getSkin();
+        Label.LabelStyle lgStyle = new Label.LabelStyle(skin0.get(Label.LabelStyle.class));
+        lgStyle.font = skin0.getFont("font-lg");
         indicators.clearChildren();
         for (int i = 0; i < slides.size(); i++) {
             final int idx = i;
-            Label dot = new Label("●", BsUI.getSkin());
+            Label dot = new Label("●", lgStyle);
             dot.setColor(i == current
                     ? new Color(1, 1, 1, 1f)
                     : new Color(1, 1, 1, 0.4f));
-            dot.setFontScale(1.2f);
             Container<Label> wrap = new Container<>(dot);
             wrap.setTouchable(Touchable.enabled);
             wrap.addListener(new ClickListener() {
@@ -134,9 +136,10 @@ public class BsCarousel extends Table {
 
     private Actor makeArrow(String symbol, Runnable onClick) {
         Skin skin = BsUI.getSkin();
-        Label arrow = new Label(symbol, skin);
+        Label.LabelStyle xlStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xlStyle.font = skin.getFont("font-xl");
+        Label arrow = new Label(symbol, xlStyle);
         arrow.setColor(new Color(1, 1, 1, 0.85f));
-        arrow.setFontScale(2f);
         Container<Label> wrap = new Container<>(arrow);
         wrap.setBackground(skin.newDrawable("white", new Color(0, 0, 0, 0.3f)));
         wrap.pad(4, 10, 4, 10);

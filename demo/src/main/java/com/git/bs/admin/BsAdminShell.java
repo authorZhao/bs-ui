@@ -367,44 +367,75 @@ public class BsAdminShell extends ScreenAdapter {
 
         // 顶部栏：放大字号 + text-primary 深色字（只做一次，topBar 不重建）
         if (!topBarEnlarged) {
-            styleActors(layout.getTopBar(), 1.25f, BsTheme.tp());
+            styleActors(layout.getTopBar(), 1, BsTheme.tp());
             // 折叠按钮：换成"☰ 折叠"文字 + 加大点击区域（用命名查找，避免新增 hideTopBtn 后索引偏移）
             com.badlogic.gdx.scenes.scene2d.Actor toggleActor = layout.getTopBar().findActor("toggleSidebarBtn");
             if (toggleActor instanceof com.badlogic.gdx.scenes.scene2d.ui.TextButton) {
                 com.badlogic.gdx.scenes.scene2d.ui.TextButton toggleBtn =
                         (com.badlogic.gdx.scenes.scene2d.ui.TextButton) toggleActor;
                 toggleBtn.setText("☰  折叠");
-                toggleBtn.getLabel().setFontScale(1.2f);
+                com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle tbs =
+                        new com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle(toggleBtn.getStyle());
+                tbs.font = skin.getFont("font-lg");
+                toggleBtn.setStyle(tbs);
                 toggleBtn.setSize(110, 40);
             }
             topBarEnlarged = true;
         }
         // 侧边栏菜单：只放大字号，字色由 core setSidebarDarkStyle 控制（白字 + 按层级透明度）
-        styleActors(layout.getSidebar(), 1.2f, null);
+        styleActors(layout.getSidebar(), 1, null);
         lastEnlargedSidebarButtonCount = currentSidebarButtonCount();
     }
 
     /**
-     * 递归遍历 actor 子树，把 Label/TextButton 的 fontScale 乘以 factor；
+     * 递归遍历 actor 子树，把 Label/TextButton 的字号升 {@code steps} 档（sm→md→lg→xl，到顶不再升）；
      * color 非 null 时同时设字色（sidebar 传 null 保留 core 按层级设的白字透明度）。
+     *
+     * <p>用字号档升级替代原来的 fontScale 倍数缩放，避免字体发虚。</p>
      */
-    private void styleActors(com.badlogic.gdx.scenes.scene2d.Actor actor, float factor,
+    private void styleActors(com.badlogic.gdx.scenes.scene2d.Actor actor, int steps,
                              com.badlogic.gdx.graphics.Color color) {
         if (actor instanceof com.badlogic.gdx.scenes.scene2d.ui.Label) {
             com.badlogic.gdx.scenes.scene2d.ui.Label l = (com.badlogic.gdx.scenes.scene2d.ui.Label) actor;
-            l.setFontScale(l.getFontScaleX() * factor);
+            com.badlogic.gdx.graphics.g2d.BitmapFont f = bumpFont(l.getStyle().font, steps);
+            if (f != null) {
+                com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle ls =
+                        new com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle(l.getStyle());
+                ls.font = f;
+                l.setStyle(ls);
+            }
             if (color != null) l.setColor(color);
         } else if (actor instanceof com.badlogic.gdx.scenes.scene2d.ui.TextButton) {
             com.badlogic.gdx.scenes.scene2d.ui.TextButton b = (com.badlogic.gdx.scenes.scene2d.ui.TextButton) actor;
-            b.getLabel().setFontScale(b.getLabel().getFontScaleX() * factor);
+            com.badlogic.gdx.graphics.g2d.BitmapFont f = bumpFont(b.getLabel().getStyle().font, steps);
+            if (f != null) {
+                com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle ts =
+                        new com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle(b.getStyle());
+                ts.font = f;
+                b.setStyle(ts);
+            }
             if (color != null) b.getLabel().setColor(color);
         }
         if (actor instanceof com.badlogic.gdx.scenes.scene2d.ui.Table) {
             com.badlogic.gdx.scenes.scene2d.ui.Table t = (com.badlogic.gdx.scenes.scene2d.ui.Table) actor;
             for (com.badlogic.gdx.scenes.scene2d.Actor child : t.getChildren()) {
-                styleActors(child, factor, color);
+                styleActors(child, steps, color);
             }
         }
+    }
+
+    /** 把当前 font 在 sm/md(default)/lg/xl 序列上升 {@code steps} 档；无法识别或已到顶返回 null（保持原样）。 */
+    private com.badlogic.gdx.graphics.g2d.BitmapFont bumpFont(com.badlogic.gdx.graphics.g2d.BitmapFont cur, int steps) {
+        com.badlogic.gdx.scenes.scene2d.ui.Skin sk = skin;
+        java.util.List<String> order = java.util.Arrays.asList("font-sm", "default", "font-lg", "font-xl");
+        for (int i = 0; i < order.size(); i++) {
+            if (sk.has(order.get(i), com.badlogic.gdx.graphics.g2d.BitmapFont.class)
+                    && sk.getFont(order.get(i)) == cur) {
+                int target = Math.min(i + steps, order.size() - 1);
+                return sk.getFont(order.get(target));
+            }
+        }
+        return null;
     }
 
     @Override

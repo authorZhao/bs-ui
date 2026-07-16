@@ -100,14 +100,16 @@ public class BsInspectorPanel extends Table {
         iconImage.setScaling(com.badlogic.gdx.utils.Scaling.fit);
         titleBar.add(iconImage).size(20).padRight(8).left();
 
-        titleLabel = new Label(BsI18n.get("inspector.unselected", "(未选中)"), skin);
+        Label.LabelStyle lgStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        lgStyle.font = skin.getFont("font-lg");
+        Label.LabelStyle smStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        smStyle.font = skin.getFont("font-sm");
+        titleLabel = new Label(BsI18n.get("inspector.unselected", "(未选中)"), lgStyle);
         titleLabel.setColor(BsTheme.tp());
-        titleLabel.setFontScale(1.1f);
         titleBar.add(titleLabel).left();
 
-        typeBadge = new Label("", skin);
+        typeBadge = new Label("", smStyle);
         typeBadge.setColor(BsPalette.SECONDARY.getMain());
-        typeBadge.setFontScale(0.85f);
         Container<Label> badgeWrap = new Container<>(typeBadge);
         badgeWrap.setBackground(skin.getDrawable("bs-menu-title-hover"));
         badgeWrap.pad(2, 8, 2, 8);
@@ -115,9 +117,10 @@ public class BsInspectorPanel extends Table {
 
         titleBar.add().growX();   // 弹簧推 × 到右边
 
-        closeButton = new Label("×", skin);
+        Label.LabelStyle xlStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xlStyle.font = skin.getFont("font-xl");
+        closeButton = new Label("×", xlStyle);
         closeButton.setColor(BsPalette.SECONDARY.getMain());
-        closeButton.setFontScale(1.3f);
         Container<Label> closeWrap = new Container<>(closeButton);
         closeWrap.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
         closeWrap.addListener(new com.badlogic.gdx.scenes.scene2d.InputListener() {

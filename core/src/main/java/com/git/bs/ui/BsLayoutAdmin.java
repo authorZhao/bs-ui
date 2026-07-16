@@ -136,7 +136,9 @@ public class BsLayoutAdmin extends Table {
         // 折叠按钮（左上角 ☰ 或 ‹›）
         TextButton toggleBtn = new TextButton("☰", skin, "bs-link");
         toggleBtn.setName("toggleSidebarBtn");
-        toggleBtn.getLabel().setFontScale(1.3f);
+        TextButton.TextButtonStyle toggleStyle = new TextButton.TextButtonStyle(toggleBtn.getStyle());
+        toggleStyle.font = skin.getFont("font-xl");
+        toggleBtn.setStyle(toggleStyle);
         toggleBtn.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { toggleSidebar(); }
         });
@@ -145,13 +147,15 @@ public class BsLayoutAdmin extends Table {
         // 顶栏隐藏按钮（▾ 收起 / ▴ 展开）
         TextButton hideTopBtn = new TextButton("▾", skin, "bs-link");
         hideTopBtn.setName("hideTopBtn");
-        hideTopBtn.getLabel().setFontScale(1.2f);
+        TextButton.TextButtonStyle hideStyle = new TextButton.TextButtonStyle(hideTopBtn.getStyle());
+        hideStyle.font = skin.getFont("font-lg");
+        hideTopBtn.setStyle(hideStyle);
         hideTopBtn.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { toggleTopBar(); }
         });
         topBar.add(hideTopBtn).size(32, 32).padRight(8).left();
 
-        logoLabel = makeLabel("Logo", BsTheme.tp(), 1.3f);
+        logoLabel = makeLabel("Logo", BsTheme.tp(), "font-xl");
         topBar.add(logoLabel).padRight(20).left();
 
         topMenuRow = new Table();
@@ -336,7 +340,9 @@ public class BsLayoutAdmin extends Table {
         // 保证所有菜单的文字起点 X 一致（不会出现"二级比一级还左"）
         if (!isLeaf) {
             TextButton arrow = new TextButton(item.expanded ? "▾" : "▸", skin, "bs-link");
-            arrow.getLabel().setFontScale(0.9f);
+            TextButton.TextButtonStyle arrowStyle = new TextButton.TextButtonStyle(arrow.getStyle());
+            arrowStyle.font = skin.getFont("font-sm");
+            arrow.setStyle(arrowStyle);
             arrow.addListener(new ClickListener() {
                 @Override public void clicked(InputEvent event, float x, float y) {
                     item.expanded = !item.expanded;
@@ -384,9 +390,10 @@ public class BsLayoutAdmin extends Table {
             if (depth == 1) tc = BsTheme.ts();
             else if (depth >= 2) tc = BsTheme.tm();
         }
-        // 一级菜单字号稍大（视觉更突出）
-        float fontScale = depth == 0 ? 1.05f : 1.0f;
+        // 一级菜单字号稍大（视觉更突出）：depth==0 用 lg，子级用默认
+        String menuFontKey = depth == 0 ? "font-lg" : "default";
         TextButton.TextButtonStyle ts = new TextButton.TextButtonStyle(skin.get("bs-menu-title", TextButton.TextButtonStyle.class));
+        ts.font = skin.getFont(menuFontKey);
         ts.fontColor = tc;
         // 深色侧边栏模式：按钮背景用透明（让 sidebarWrap 的深色透出来，否则 bs-menu-title-up 白色会盖住）
         if (sidebarDarkStyle) {
@@ -399,10 +406,9 @@ public class BsLayoutAdmin extends Table {
             ts.down = transparent;
         }
         textBtn.setStyle(ts);
-        // setStyle 后再设对齐/字号（setStyle 会重建 Label，覆盖之前的设置）
+        // setStyle 会重建 Label，覆盖之前的对齐设置，故在此再设一次
         textBtn.left();
         textBtn.getLabel().setAlignment(com.badlogic.gdx.utils.Align.left);
-        textBtn.getLabel().setFontScale(fontScale);
 
         // textBtn 不 growX（按文字宽度），避免宽按钮里 Label 被居中导致文字偏右
         row.add(textBtn).height(28).padLeft(2).left();
@@ -643,13 +649,12 @@ public class BsLayoutAdmin extends Table {
 
     // ========================= 工具 =========================
 
-    private Label makeLabel(String text, Color color, float scale) {
+    private Label makeLabel(String text, Color color, String fontKey) {
         Label.LabelStyle ls = new Label.LabelStyle();
-        ls.font = BsUI.getSkin().getFont("default");
+        ls.font = BsUI.getSkin().getFont(fontKey);
         ls.fontColor = color;
         Label l = new Label(text, ls);
         l.setColor(Color.WHITE);
-        l.setFontScale(scale);
         return l;
     }
 }

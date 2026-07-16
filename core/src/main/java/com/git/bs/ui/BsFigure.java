@@ -107,9 +107,11 @@ public class BsFigure extends Table {
         return this;
     }
 
-    /** 图注字号缩放。 */
-    public BsFigure captionScale(float scale) {
-        captionLabel.setFontScale(scale);
+    /** 图注字号（传烘焙字号 key，如 "font-sm"/"font-lg"/"font-xl"，不缩放避免发虚）。 */
+    public BsFigure captionFont(String fontKey) {
+        Label.LabelStyle s = new Label.LabelStyle(captionLabel.getStyle());
+        s.font = BsUI.getSkin().getFont(fontKey);
+        captionLabel.setStyle(s);
         return this;
     }
 

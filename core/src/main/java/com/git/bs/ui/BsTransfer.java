@@ -114,9 +114,11 @@ public class BsTransfer extends Table {
     }
 
     private Label makeCountLabel() {
-        Label l = new Label("(0)", BsUI.getSkin());
+        Skin skin = BsUI.getSkin();
+        Label.LabelStyle s = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        s.font = skin.getFont("font-sm");
+        Label l = new Label("(0)", s);
         l.setColor(BsPalette.SECONDARY.getMain());
-        l.setFontScale(0.85f);
         return l;
     }
 
@@ -130,9 +132,10 @@ public class BsTransfer extends Table {
         titleRow.left();
         titleRow.setBackground(skin.getDrawable("bs-menu-bar-bg"));
         titleRow.pad(6, 8, 6, 8);
-        Label t = new Label(title, skin);
+        Label.LabelStyle ts = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        ts.font = skin.getFont("font-sm");
+        Label t = new Label(title, ts);
         t.setColor(BsTheme.tp());
-        t.setFontScale(0.95f);
         titleRow.add(t).left();
         titleRow.add(count).right().padLeft(8);
         wrap.add(titleRow).growX().row();

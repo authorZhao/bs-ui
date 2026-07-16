@@ -273,9 +273,10 @@ public class BsSteps extends Table {
             // 直接用 Label.setBounds + setAlignment(center) 让 scene2d 自己处理居中
 
             // 圆内的数字/勾
-            Label cl = new Label(circleLabel, skin);
+            Label.LabelStyle clStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            clStyle.font = skin.getFont("font-sm");
+            Label cl = new Label(circleLabel, clStyle);
             cl.setColor(outlined ? labelColor : Color.WHITE);
-            cl.setFontScale(0.95f);
             cl.setAlignment(com.badlogic.gdx.utils.Align.center);   // 文字在 Label 内部居中
             cl.setSize(circleSize, circleSize);
             cl.setBounds(getX() + cx - circleSize / 2f,
@@ -284,9 +285,10 @@ public class BsSteps extends Table {
             cl.draw(batch, parentAlpha);
 
             // 圆下方的标题
-            Label tl = new Label(title, skin);
+            Label.LabelStyle tlStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            tlStyle.font = skin.getFont("font-sm");
+            Label tl = new Label(title, tlStyle);
             tl.setColor(labelColor);
-            tl.setFontScale(0.95f);
             tl.setAlignment(com.badlogic.gdx.utils.Align.center);
             float tWidth = circleSize + 30;
             tl.setSize(tWidth, titleHeight);

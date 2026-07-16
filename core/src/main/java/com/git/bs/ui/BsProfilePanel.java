@@ -99,16 +99,16 @@ public class BsProfilePanel extends Table {
         infoTable.left().top();
         infoTable.defaults().left().padBottom(4);
 
-        nameLabel = makeLabel("", BsTheme.tp(), 1.2f);
+        nameLabel = makeLabel("", BsTheme.tp(), "font-lg");
         infoTable.add(nameLabel).growX().row();
 
-        handleLabel = makeLabel("", BsTheme.ts(), 0.95f);
+        handleLabel = makeLabel("", BsTheme.ts(), "font-sm");
         infoTable.add(handleLabel).growX().row();
 
-        roleLabel = makeLabel("", BsPalette.PRIMARY.getMain(), 0.95f);
+        roleLabel = makeLabel("", BsPalette.PRIMARY.getMain(), "font-sm");
         infoTable.add(roleLabel).growX().padTop(2).row();
 
-        bioLabel = makeLabel("", BsTheme.ts(), 1f);
+        bioLabel = makeLabel("", BsTheme.ts(), "default");
         bioLabel.setWrap(true);
         infoTable.add(bioLabel).growX().padTop(6).row();
 
@@ -172,8 +172,8 @@ public class BsProfilePanel extends Table {
     public BsProfilePanel stat(String label, String value) {
         Table stat = new Table();
         stat.defaults().left().pad(0);
-        Label num = makeLabel(value, BsTheme.tp(), 1.1f);
-        Label name = makeLabel(label, BsTheme.tm(), 0.85f);
+        Label num = makeLabel(value, BsTheme.tp(), "font-lg");
+        Label name = makeLabel(label, BsTheme.tm(), "font-sm");
         stat.add(num).row();
         stat.add(name).padTop(0);
         statsRow.add(stat);
@@ -199,13 +199,12 @@ public class BsProfilePanel extends Table {
 
     // ========================= 工具 =========================
 
-    private Label makeLabel(String text, Color color, float scale) {
+    private Label makeLabel(String text, Color color, String fontKey) {
         Label.LabelStyle ls = new Label.LabelStyle();
-        ls.font = BsUI.getSkin().getFont("default");
+        ls.font = BsUI.getSkin().getFont(fontKey);
         ls.fontColor = color;
         Label l = new Label(text == null ? "" : text, ls);
         l.setColor(Color.WHITE);
-        l.setFontScale(scale);
         return l;
     }
 

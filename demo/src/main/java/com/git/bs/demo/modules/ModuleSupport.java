@@ -38,9 +38,10 @@ public final class ModuleSupport {
 
     /** 生成模块大标题 Label（深色、fontScale 1.4）。 */
     public static Label sectionTitle(Skin skin, String text) {
-        Label l = new Label(text, skin);
+        Label.LabelStyle s = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        s.font = skin.getFont("font-xl");
+        Label l = new Label(text, s);
         l.setColor(new Color(0.1f, 0.1f, 0.15f, 1f));
-        l.setFontScale(1.4f);
         return l;
     }
 
@@ -174,12 +175,14 @@ public final class ModuleSupport {
         Table t = new Table(skin);
         t.setBackground(skin.newDrawable("white", bg));
         t.center();
-        Label t1 = new Label(title, skin);
+        Label.LabelStyle xl = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xl.font = skin.getFont("font-xl");
+        Label.LabelStyle lg = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        lg.font = skin.getFont("font-lg");
+        Label t1 = new Label(title, xl);
         t1.setColor(Color.WHITE);
-        t1.setFontScale(1.6f);
-        Label t2 = new Label(subtitle, skin);
+        Label t2 = new Label(subtitle, lg);
         t2.setColor(new Color(1, 1, 1, 0.85f));
-        t2.setFontScale(1.1f);
         t.add(t1).row();
         t.add(t2).padTop(8).row();
         return t;
@@ -191,9 +194,10 @@ public final class ModuleSupport {
         Table t = new Table(skin);
         t.setBackground(img);
         t.bottom().left();
-        Label tagLabel = new Label(tag, skin);
+        Label.LabelStyle lg = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        lg.font = skin.getFont("font-lg");
+        Label tagLabel = new Label(tag, lg);
         tagLabel.setColor(Color.WHITE);
-        tagLabel.setFontScale(1.1f);
         Container<Label> tagWrap = new Container<>(tagLabel);
         tagWrap.setBackground(skin.newDrawable("white", new Color(0, 0, 0, 0.5f)));
         tagWrap.pad(4, 10, 4, 10);
@@ -206,9 +210,11 @@ public final class ModuleSupport {
         Table t = new Table();
         t.top();
         t.add(av).row();
-        com.badlogic.gdx.scenes.scene2d.ui.Label l = new com.badlogic.gdx.scenes.scene2d.ui.Label(label, skin);
+        com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle ls =
+                new com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle(skin.get(com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle.class));
+        ls.font = skin.getFont("font-sm");
+        com.badlogic.gdx.scenes.scene2d.ui.Label l = new com.badlogic.gdx.scenes.scene2d.ui.Label(label, ls);
         l.setColor(Color.GRAY);
-        l.setFontScale(0.85f);
         t.add(l).padTop(4);
         return t;
     }

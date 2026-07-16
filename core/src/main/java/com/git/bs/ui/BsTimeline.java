@@ -171,10 +171,11 @@ public class BsTimeline extends Table {
             Table textCol = new Table();
             textCol.left().top();
             textCol.defaults().growX().left();
+            Label.LabelStyle sm = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            sm.font = skin.getFont("font-sm");
             if (time != null) {
-                Label tl = new Label(time, skin);
+                Label tl = new Label(time, sm);
                 tl.setColor(new com.badlogic.gdx.graphics.Color(0x6C / 255f, 0x75 / 255f, 0x7D / 255f, 1f));
-                tl.setFontScale(0.85f);
                 textCol.add(tl).left().row();
             }
             if (title != null) {
@@ -183,9 +184,8 @@ public class BsTimeline extends Table {
                 textCol.add(t).left().row();
             }
             if (subtitle != null) {
-                Label s = new Label(subtitle, skin);
+                Label s = new Label(subtitle, sm);
                 s.setColor(new com.badlogic.gdx.graphics.Color(0x49 / 255f, 0x50 / 255f, 0x57 / 255f, 1f));
-                s.setFontScale(0.9f);
                 s.setWrap(true);
                 textCol.add(s).growX().left().padTop(2);
             }

@@ -110,12 +110,12 @@ public class BsBreadcrumb extends Table {
             final Item it = items.get(i);
             if (i > 0) {
                 // 分隔符 ›
-                Label sep = makeLabel("›", sepColor(), 1f);
+                Label sep = makeLabel("›", sepColor(), "default");
                 add(sep).padLeft(4).padRight(4);
             }
             if (it.current) {
                 // 当前页：深色不可点
-                Label l = makeLabel(it.text, currentColor(), 1f);
+                Label l = makeLabel(it.text, currentColor(), "default");
                 add(l);
             } else {
                 // 链接
@@ -130,13 +130,12 @@ public class BsBreadcrumb extends Table {
         }
     }
 
-    private Label makeLabel(String text, Color color, float scale) {
+    private Label makeLabel(String text, Color color, String fontKey) {
         Label.LabelStyle ls = new Label.LabelStyle();
-        ls.font = BsUI.getSkin().getFont("default");
+        ls.font = BsUI.getSkin().getFont(fontKey);
         ls.fontColor = color;
         Label l = new Label(text, ls);
         l.setColor(Color.WHITE);
-        l.setFontScale(scale);
         return l;
     }
 }

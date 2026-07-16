@@ -72,9 +72,10 @@ public class BsFloatingLabel extends Table {
         defaults().growX();
 
         // 浮起的标签（默认高度 0，浮起时显示）
-        floatingLabel = new Label(placeholder, skin);
+        Label.LabelStyle flStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        flStyle.font = skin.getFont("font-sm");
+        floatingLabel = new Label(placeholder, flStyle);
         floatingLabel.setColor(BsTheme.ts());
-        floatingLabel.setFontScale(0.75f);
         labelWrap = new Container<>(floatingLabel);
         labelWrap.pad(0, 4, 0, 4);
         labelWrap.fillX();

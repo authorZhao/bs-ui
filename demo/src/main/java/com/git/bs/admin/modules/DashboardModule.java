@@ -34,8 +34,9 @@ public class DashboardModule implements AdminModule {
         root.defaults().top().left().pad(8);
 
         // 标题
-        Label title = new Label("仪表盘", skin);
-        title.setFontScale(1.3f);
+        Label.LabelStyle xl = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        xl.font = skin.getFont("font-xl");
+        Label title = new Label("仪表盘", xl);
         title.setColor(BsTheme.tp());
         root.add(title).left().padBottom(8).row();
 
@@ -64,8 +65,9 @@ public class DashboardModule implements AdminModule {
 
         Label n = new Label(name, skin);
         n.setColor(BsTheme.ts());
-        Label v = new Label(value, skin);
-        v.setFontScale(1.5f);
+        Label.LabelStyle vStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        vStyle.font = skin.getFont("font-xl");
+        Label v = new Label(value, vStyle);
         v.setColor(BsTheme.tp());
         Label d = new Label(delta, skin);
         d.setColor(BsTheme.colorOf("success"));

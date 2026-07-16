@@ -114,9 +114,10 @@ public class BsAboutDialog extends BsModal {
     /** 追加一个带小标题的分节（用于"致谢"列表等）。 */
     public BsAboutDialog appendSection(String heading, String... lines) {
         if (heading != null && !heading.isEmpty()) {
-            Label h = new Label(heading, skin);
+            Label.LabelStyle hStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            hStyle.font = skin.getFont("font-lg");
+            Label h = new Label(heading, hStyle);
             h.setColor(BsTheme.tp());
-            h.setFontScale(1.05f);
             contentTable.add(h).growX().padTop(10).row();
         }
         for (String line : lines) {

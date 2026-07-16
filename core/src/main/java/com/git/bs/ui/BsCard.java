@@ -144,19 +144,19 @@ public class BsCard extends Table {
 
     /** 标题（粗体感深色）。 */
     public BsCard title(String t) {
-        addOrReplace("title", makeLabel(t, BsTheme.tp(), 1.15f), true);
+        addOrReplace("title", makeLabel(t, BsTheme.tp(), "font-lg"), true);
         return this;
     }
 
     /** 副标题（灰色，小号）。 */
     public BsCard subtitle(String s) {
-        addOrReplace("subtitle", makeLabel(s, BsTheme.tm(), 0.95f), true);
+        addOrReplace("subtitle", makeLabel(s, BsTheme.tm(), "font-sm"), true);
         return this;
     }
 
     /** 正文（自动换行）。 */
     public BsCard body(String b) {
-        Label body = makeLabel(b, BsTheme.ts(), 1f);
+        Label body = makeLabel(b, BsTheme.ts(), "default");
         body.setWrap(true);
         addOrReplace("body", body, true);
         return this;
@@ -200,13 +200,12 @@ public class BsCard extends Table {
 
     // ========================= 内部工具 =========================
 
-    private Label makeLabel(String text, Color color, float scale) {
+    private Label makeLabel(String text, Color color, String fontKey) {
         Label.LabelStyle ls = new Label.LabelStyle();
-        ls.font = BsUI.getSkin().getFont("default");
+        ls.font = BsUI.getSkin().getFont(fontKey);
         ls.fontColor = color;
         Label l = new Label(text == null ? "" : text, ls);
         l.setColor(Color.WHITE);
-        l.setFontScale(scale);
         return l;
     }
 

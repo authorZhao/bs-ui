@@ -85,9 +85,11 @@ public class BsPropertySheet extends Table {
 
     /** 添加一个分组标题（视觉分隔）。 */
     public BsPropertySheet addSection(String title) {
-        Label t = new Label(title, BsUI.getSkin());
+        Skin skin = BsUI.getSkin();
+        Label.LabelStyle s = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        s.font = skin.getFont("font-sm");
+        Label t = new Label(title, s);
         t.setColor(BsPalette.SECONDARY.getMain());
-        t.setFontScale(0.95f);
         Container<Label> wrap = new Container<>(t);
         wrap.fill();
         wrap.pad(8, 0, 4, 0);

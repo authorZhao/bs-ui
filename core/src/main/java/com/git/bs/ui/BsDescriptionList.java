@@ -78,9 +78,10 @@ public class BsDescriptionList extends Table {
     public BsDescriptionList addItem(String label, String value) {
         Skin skin = BsUI.getSkin();
         // dt
-        Label dt = new Label(label, skin);
+        Label.LabelStyle dtStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        dtStyle.font = skin.getFont("font-sm");
+        Label dt = new Label(label, dtStyle);
         dt.setColor(labelColor());
-        dt.setFontScale(0.9f);
         add(dt).width(labelWidth).left().padTop(6).padRight(8);
         // dd
         Label dd = new Label(value == null ? "-" : value, skin);

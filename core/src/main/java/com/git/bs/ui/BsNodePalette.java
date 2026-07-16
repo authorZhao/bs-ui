@@ -168,9 +168,10 @@ public class BsNodePalette extends Table {
             row.add(new Label("•", skin)).padRight(8).left();
         }
         // 节点名
-        Label l = new Label(entry.name, skin);
+        Label.LabelStyle ns = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        ns.font = skin.getFont("font-sm");
+        Label l = new Label(entry.name, ns);
         l.setColor(BsTheme.tp());
-        l.setFontScale(0.95f);
         row.add(l).growX().left();
         row.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
         row.addListener(new ClickListener() {
@@ -218,9 +219,10 @@ public class BsNodePalette extends Table {
             header.defaults().pad(0).left();
             Label arrow = new Label(collapsed ? "▸" : "▾", skin);
             arrow.setColor(BsPalette.SECONDARY.getMain());
-            Label title = new Label(name, skin);
+            Label.LabelStyle ts = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            ts.font = skin.getFont("font-sm");
+            Label title = new Label(name, ts);
             title.setColor(BsTheme.ts());
-            title.setFontScale(0.95f);
             header.add(arrow).padRight(6).left();
             header.add(title).left();
             header.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
