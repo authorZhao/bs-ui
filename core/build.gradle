@@ -21,3 +21,11 @@ dependencies {
 ext.publishArtifactId  = 'bs-ui-core'
 ext.publishDescription = 'bs-ui: Bootstrap-style UI components for libGDX (core library)'
 apply from: "$rootDir/gradle/publish.gradle"
+
+// P1 spike：PakFileHandle 表面确定性检查（不依赖 GL）
+tasks.register('pakSurfaceCheck', JavaExec) {
+  group = 'verification'
+  description = 'P1 spike: PakFileHandle 表面确定性检查'
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.git.bs.res.PakSurfaceCheck'
+}
