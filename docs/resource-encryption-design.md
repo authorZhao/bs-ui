@@ -266,6 +266,18 @@ public final class PakBootstrap {
 
 S1、S2 先在 **lwjgl3**（完整 JVM，最快验证）跑通，再移植 teavm。
 
+### P1 验证结果（2026-07-17，lwjgl3）
+
+**S1 通过**：`Gdx.files` 在启动期重赋值为 `PakFiles` 包装，app 正常启动并渲染（WinSettingsApp 加载 3 套烘焙皮肤 + emoji + 进入 home 页），baseline（不开 pak）同样跑通。
+
+**S2 通过**：32 个 skin 资源（3 套 json/atlas/png + 4 个 .fnt + 22 个字体页 PNG）全部经 `PakFileHandle` 从内存包加载，app 渲染正常。sibling 链（json→atlas→png、json→fnt）正常。
+
+**关键发现（必读，否则 P3 字体会断）**：libGDX `BitmapFont` 加载字体页贴图走的是 `Gdx.files.getFileHandle(path, Internal)`（`fontFile != null` 分支），**不是** `internal()`。`PakFiles` 必须**同时拦截 `getFileHandle(Internal)`**，否则字体 PNG 页绕过 pak 从磁盘加载——P3 加密后磁盘无明文，字体页 404、字体全断。已在 `PakFiles.getFileHandle` 修复，`PakSurfaceCheck` 覆盖。
+
+**预存 bug（与本方案无关）**：`WinSettingsApp.dispose()` 遍历 skin 字体 map 调 `remove(key)` 时遇到 null key 抛 `name cannot be null`。baseline（不开 pak）也复现，是 app 原有清理逻辑的问题，非 pak 引起。
+
+**接入开关**：spike 默认关，`-Dbs.pak.spike=true` 启用、`=exit` 跑完自动退出；`PakSurfaceCheck`（`./gradlew :core:pakSurfaceCheck`）做无 GL 的确定性表面检查（21 项）。
+
 ---
 
 ## 13. 落地计划（每步独立可测、可回退）
