@@ -30,9 +30,9 @@ import lombok.extern.slf4j.Slf4j;
  * 启动期安装资源包包装。必须在任何 {@code Gdx.files.internal(...)} 资源加载之前调用
  * （早于 {@code BsUI.init()} / {@code BsSkinLoader.loadAllThemes()}）。
  *
- * <p><b>P1 spike 行为</b>：从真实 {@code Gdx.files} 枚举 {@code com/git/bs/ui/skin} 目录，
- * 把每个文件读进 {@link MemoryResourcePack}（明文，模拟 pak 已解密加载），再包装 {@code Gdx.files}。
- * P3 会改成读取加密 {@code assets.pak}、解密后建包。</p>
+ * <p><b>行为</b>：从 classpath 读 {@code assets.pak}（由 {@link PakPacker}/packResources 任务产出），
+ * 用 {@link FileResourcePack} 解析，再包装 {@code Gdx.files}。P2 用 {@link IdentityCipher}（明文），
+ * P3 换 ChaCha20。{@code assets.pak} 不在 classpath 时优雅跳过（资源走明文磁盘，方便开发）。</p>
  *
  * <p>开关：默认关闭，避免影响正常开发；验证时加 {@code -Dbs.pak.spike=true} 启用。</p>
  *
@@ -42,26 +42,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class PakBootstrap {
 
-    /** P1 spike 装载的资源根目录（classpath 风格）。 */
-    private static final String SKIN_CP = "com/git/bs/ui/skin";
-
-    /**
-     * P1 spike：skin 已知资源清单。
-     * <p>lwjgl3 下 {@code internal(dir).list()} 对 classpath 目录不可靠（返回空），
-     * 改用已知清单逐个 {@code internal(path).readBytes()}。真实 pak 打包器有自己的索引，
-     * 这里用 skin 已知列表模拟。TTF/chinese.txt 烘焙路径不用，略。</p>
-     */
-    private static final String[] SKIN_FILES = {
-            "bs-admin.atlas", "bs-admin.json", "bs-admin.png",
-            "bs-dark.atlas", "bs-dark.json", "bs-dark.png",
-            "bs-light.atlas", "bs-light.json", "bs-light.png",
-            "default-font.fnt", "default-font_0.png", "default-font_1.png", "default-font_2.png",
-            "font-lg.fnt", "font-lg_0.png", "font-lg_1.png", "font-lg_2.png", "font-lg_3.png", "font-lg_4.png",
-            "font-md.fnt", "font-md_0.png", "font-md_1.png", "font-md_2.png",
-            "font-sm.fnt", "font-sm_0.png", "font-sm_1.png",
-            "font-xl.fnt", "font-xl_0.png", "font-xl_1.png", "font-xl_2.png", "font-xl_3.png",
-            "font-xl_4.png", "font-xl_5.png", "font-xl_6.png", "font-xl_7.png", "font-xl_8.png",
-    };
+    /** 打包器产出的资源包在 classpath 下的名字（见 {@link PakPacker} / packResources 任务）。 */
+    private static final String PAK_PATH = "assets.pak";
 
     private PakBootstrap() {}
 
@@ -76,23 +58,16 @@ public final class PakBootstrap {
             return;
         }
 
-        MemoryResourcePack pack = new MemoryResourcePack();
-        int n = 0;
-        long bytes = 0;
-        for (String name : SKIN_FILES) {
-            String path = SKIN_CP + "/" + name;
-            FileHandle fh = real.internal(path);
-            if (!fh.exists()) continue; // 缺失则跳过（如 default-font 未生成）
-            byte[] data = fh.readBytes();
-            pack.put(path, data);
-            n++;
-            bytes += data.length;
+        FileHandle pakFile = real.internal(PAK_PATH);
+        if (!pakFile.exists()) {
+            log.warn("PakBootstrap: classpath 下没有 {}，跳过（需先跑 packResources 任务）；资源走明文磁盘。",
+                    PAK_PATH);
+            return;
         }
-
+        byte[] pakBytes = pakFile.readBytes();
+        FileResourcePack pack = FileResourcePack.open(pakBytes); // P2 identity cipher；P3 传 ChaCha20
         Gdx.files = new PakFiles(real, pack);
-        log.info("PakBootstrap[spike]: 装载 {} 个资源 ({} 字节)，已包装 Gdx.files", n, bytes);
-        if (n == 0) {
-            log.warn("PakBootstrap[spike]: 内存表为空——skin 文件都读不到？检查 classpath。");
-        }
+        log.info("PakBootstrap: 从 {} 加载 {} 个资源（pak {} 字节），已包装 Gdx.files",
+                PAK_PATH, pack.size(), pakBytes.length);
     }
 }
