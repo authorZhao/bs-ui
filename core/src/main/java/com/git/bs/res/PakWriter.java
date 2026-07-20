@@ -1,0 +1,114 @@
+/*
+ * bs-ui — Bootstrap 风格的 libGDX Scene2D UI 组件库。
+ * Copyright (c) 2026 bs-ui contributors
+ *
+ * 基于 Apache License 2.0 开源，允许商用、修改和再分发。
+ * 使用本库的产品须在“关于”界面标注本项目，详见 LICENSE。
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Project home: https://github.com/authorZhao/bs-ui
+ */
+package com.git.bs.res;
+
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * 把 {@code path -> 明文字节}（按插入顺序）构建成 BPK1 字节流。
+ *
+ * <p>P2：{@link IdentityCipher}、条目不压缩（eflags=0）。格式本身支持压缩/加密，
+ * P3 换 cipher + 打开压缩即可，本类无需改动。</p>
+ *
+ * @author authorZhao
+ * @since 2026-07-20
+ */
+public final class PakWriter {
+
+    /**
+     * @param entries 按插入顺序的 path -> 明文字节（调用方不再持有/改写这些数组）
+     * @param cipher  对索引和条目做对称处理（P2 用 {@link IdentityCipher#INSTANCE}）
+     * @param salt    16 字节盐（写入 header；P3 参与派生 nonce），长度不足 16 补 0、超出截断
+     * @return 完整的 BPK1 字节流
+     */
+    public static byte[] write(LinkedHashMap<String, byte[]> entries, PakCipher cipher, byte[] salt) {
+        int n = entries.size();
+        byte[][] pathBytes = new byte[n][];
+        byte[][] stored = new byte[n][];
+        int[] rawLens = new int[n];
+
+        int ordinal = 0;
+        for (Map.Entry<String, byte[]> e : entries.entrySet()) {
+            pathBytes[ordinal] = e.getKey().getBytes(StandardCharsets.UTF_8);
+            byte[] raw = e.getValue();
+            rawLens[ordinal] = raw.length;
+            // P2 identity：原样；P3 chacha：等长异或。条目暂不压缩（eflags=0）。
+            stored[ordinal] = cipher.apply(raw, salt, ordinal);
+            ordinal++;
+        }
+
+        // 索引明文：blobOff 用「相对 blob 区起点」的偏移，与索引大小解耦
+        int indexPlainLen = 4; // entryCount
+        int[] blobRelOff = new int[n];
+        int cum = 0;
+        for (int i = 0; i < n; i++) {
+            blobRelOff[i] = cum;
+            cum += stored[i].length;
+            indexPlainLen += 2 + pathBytes[i].length + 1 + 4 + 4 + 4;
+        }
+        byte[] indexPlain = new byte[indexPlainLen];
+        int p = 0;
+        PakFormat.writeU32(indexPlain, p, n);
+        p += 4;
+        for (int i = 0; i < n; i++) {
+            PakFormat.writeU16(indexPlain, p, pathBytes[i].length);
+            p += 2;
+            System.arraycopy(pathBytes[i], 0, indexPlain, p, pathBytes[i].length);
+            p += pathBytes[i].length;
+            indexPlain[p++] = 0; // eflags：不压缩
+            PakFormat.writeU32(indexPlain, p, blobRelOff[i]);
+            p += 4;
+            PakFormat.writeU32(indexPlain, p, stored[i].length);
+            p += 4;
+            PakFormat.writeU32(indexPlain, p, rawLens[i]);
+            p += 4;
+        }
+
+        // cipher 处理索引（ordinal=-1）；长度不变（流密码契约），故 indexLen == indexPlainLen
+        byte[] indexStored = cipher.apply(indexPlain, salt, -1);
+        int indexLen = indexStored.length;
+        int flags = 0; // 索引不压缩（P3 可打开）
+
+        // 拼装：header + indexStored + blobs
+        byte[] header = new byte[PakFormat.HEADER_SIZE];
+        System.arraycopy(PakFormat.MAGIC, 0, header, PakFormat.OFF_MAGIC, 4);
+        header[PakFormat.OFF_VERSION] = (byte) PakFormat.VERSION;
+        header[PakFormat.OFF_FLAGS] = (byte) flags;
+        int saltCopy = Math.min(salt.length, PakFormat.SALT_LEN);
+        System.arraycopy(salt, 0, header, PakFormat.OFF_SALT, saltCopy);
+        PakFormat.writeU32(header, PakFormat.OFF_INDEX_OFF, PakFormat.HEADER_SIZE);
+        PakFormat.writeU32(header, PakFormat.OFF_INDEX_LEN, indexLen);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream(PakFormat.HEADER_SIZE + indexLen + cum);
+        out.write(header, 0, header.length);
+        out.write(indexStored, 0, indexStored.length);
+        for (int i = 0; i < n; i++) {
+            out.write(stored[i], 0, stored[i].length);
+        }
+        return out.toByteArray();
+    }
+
+    private PakWriter() {}
+}
