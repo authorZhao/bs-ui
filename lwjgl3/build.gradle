@@ -11,7 +11,7 @@ plugins {
 
 sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
 
-def mainClassName = 'com.git.bs.test.BsControlsLauncher'
+def mainClassName = project.findProperty('mainClass')?.toString() ?: 'com.git.bs.test.BsControlsLauncher'
 application.setMainClass(mainClassName)
 eclipse.project.name = appName + '-lwjgl3'
 java.sourceCompatibility = JavaVersion.VERSION_25
@@ -57,8 +57,33 @@ run {
   workingDir = rootProject.file('assets').path
   setIgnoreExitValue(true)
 
+  // 把 bs.* 系统属性转发到 run 的 JVM（如 -Dbs.pak.spike=true）
+  System.getProperties().each { k, v ->
+    if (k.toString().startsWith('bs.')) systemProperty k.toString(), v
+  }
+
   if (os.contains('mac')) jvmArgs += "-XstartOnFirstThread"
 }
+
+// P2：打包 core 的 skin 资源为 assets.pak（明文条目），放进 lwjgl3 classpath。
+// 放消费模块而非 core：避免 core 的 processResources↔packResources↔classes 循环依赖。
+def pakDir = file('build/pak')
+def pakFile = file("${pakDir}/assets.pak")
+tasks.register('packResources', JavaExec) {
+  group = 'build'
+  description = 'P2: 打包 core 的 skin 资源为 assets.pak'
+  dependsOn ':core:classes'
+  classpath = project(':core').sourceSets.main.runtimeClasspath
+  mainClass = 'com.git.bs.res.PakPacker'
+  args = [project(':core').file('src/main/resources/com/git/bs/ui/skin').absolutePath,
+          'com/git/bs/ui/skin',
+          pakFile.absolutePath]
+  inputs.dir project(':core').file('src/main/resources/com/git/bs/ui/skin')
+  outputs.file pakFile
+  doFirst { pakDir.mkdirs() }
+}
+sourceSets.main.resources.srcDir(pakDir)
+processResources.dependsOn('packResources')
 
 jar {
   archiveFileName.set("${appName}-${projectVersion}.jar")
