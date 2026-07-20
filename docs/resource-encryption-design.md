@@ -278,6 +278,16 @@ S1、S2 先在 **lwjgl3**（完整 JVM，最快验证）跑通，再移植 teavm
 
 **接入开关**：spike 默认关，`-Dbs.pak.spike=true` 启用、`=exit` 跑完自动退出；`PakSurfaceCheck`（`./gradlew :core:pakSurfaceCheck`）做无 GL 的确定性表面检查（21 项）。
 
+### P2 验证结果（2026-07-20，lwjgl3）
+
+**完成**：BPK1 二进制格式（`PakFormat`/`PakEntry`）+ 加密抽象（`PakCipher` + `IdentityCipher`，P3 换 ChaCha20）+ `PakWriter`（打包）/`FileResourcePack`（读取，implements ResourcePack）+ 构建期打包器 `PakPacker`（gradle `packResources` 任务）。
+
+**确定性**：`./gradlew :core:pakFormatCheck` 20/20（round-trip：写 pak → 读回 → 逐条字节一致、顺序保留、空文件、缺失返回 null）。
+
+**端到端**：`packResources` 把 33 个 skin 资源打成 `assets.pak`（18.9MB，明文、无压缩，pak ≈ 输入 + 索引/头开销）；`PakBootstrap` 从 classpath 读 `assets.pak` → `FileResourcePack` → 包装 `Gdx.files`；运行时 32 个 skin 资源（含**全部字体页 PNG**）经 `PakFileHandle` 从 pak **文件**加载（非 P1 的内存表），app 正常启动渲染。仍是 identity cipher、无压缩——P3 换 ChaCha20 + 打开 DEFLATE 即可，**格式/打包器/读取器零改动**（blobOff 用相对偏移、cipher 长度不变契约已为此设计）。
+
+**gradle 循环依赖坑（必读）**：`packResources` 不能放 core——pak 要进 classpath 被 `processResources` 消费，而打包器又要 core 的 classes，会形成 `processResources↔packResources↔classes` 成环。解法：任务放**消费模块**（lwjgl3/teavm），pak 进该模块 classpath，打包器依赖 `:core:classes`（core:classes 不反向依赖消费模块，无环）。
+
 ---
 
 ## 13. 落地计划（每步独立可测、可回退）
