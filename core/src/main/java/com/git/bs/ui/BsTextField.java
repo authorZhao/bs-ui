@@ -32,10 +32,12 @@ import java.lang.reflect.Field;
 public class BsTextField extends TextField {
     public BsTextField(String text, Skin skin) {
         super(text, skin);
+        WebIme.attach(this);
     }
 
     public BsTextField(String text, Skin skin, String styleName) {
         super(text, skin, styleName);
+        WebIme.attach(this);
     }
 
     /// 程序化设值：绕过 TextFieldFilter。
