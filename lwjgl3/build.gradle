@@ -113,6 +113,23 @@ tasks.register('distWinSettings', Jar) {
   manifest { attributes 'Main-Class': 'com.git.bs.test.WinSettingsLauncher' }
 }
 
+// distBsSkin：BsSkinLauncher 的加密 pak 可执行 jar（同 distWinSettings，只换 Main-Class / 输出目录）。
+// 运行：java -Dbs.exit=true -jar build/dist-bsskin/*.jar（bs.exit 仅无界面验证用；正式跑 java -jar）
+tasks.register('distBsSkin', Jar) {
+  group = 'distribution'
+  description = '可执行 jar（BsSkinLauncher）：代码+core i18n+assets.pak 入 jar，明文素材排除'
+  dependsOn classes, configurations.runtimeClasspath
+  archiveFileName.set("${appName}-bsskin-${projectVersion}.jar")
+  destinationDirectory.set(file("${buildDir}/dist-bsskin"))
+  duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+  from sourceSets.main.output
+  from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+  exclude('com/git/bs/ui/skin/**', 'com/git/bs/ui/emoji/**', 'com/git/bs/ui/icons/**',
+          'com/git/bs/demo/i18n/**')
+  exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/maven/**')
+  manifest { attributes 'Main-Class': 'com.git.bs.test.BsSkinLauncher' }
+}
+
 jar {
   archiveFileName.set("${appName}-${projectVersion}.jar")
   duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
