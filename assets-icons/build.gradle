@@ -1,0 +1,13 @@
+plugins {
+  id 'java-library'
+  id 'maven-publish'
+}
+
+group = 'com.git.bs'
+
+eclipse.project.name = appName + '-assets-icons'
+
+// 纯资源模块：bootstrap-icons 图标集（atlas + png），classpath 路径 com/git/bs/ui/icons/**。
+ext.publishArtifactId  = 'bs-assets-icons'
+ext.publishDescription = 'bs-ui: bootstrap-icons atlas + png'
+apply from: "$rootDir/gradle/publish.gradle"

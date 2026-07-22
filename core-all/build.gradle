@@ -1,0 +1,23 @@
+plugins {
+  id 'java-library'
+  id 'maven-publish'
+}
+
+group = 'com.git.bs'
+
+eclipse.project.name = appName + '-core-all'
+
+// 聚合模块（bs-ui-core-all）：core（代码 + i18n）+ 全部素材。
+// 用户只依赖 bs-ui-core-all 一个，Maven 传递依赖把 core 和三个 bs-assets-* 都拉下来，
+// 即"开箱即用"。本模块自身无源码/资源，jar 为空，意义在 POM 的依赖聚合。
+// （若后续想要字面意义的单 fat jar，再加 com.github.johnrengelman.shadow 插件做变体。）
+dependencies {
+  api project(':core')
+  api project(':assets-skin')
+  api project(':assets-emoji')
+  api project(':assets-icons')
+}
+
+ext.publishArtifactId  = 'bs-ui-core-all'
+ext.publishDescription = 'bs-ui: core + all assets bundled (drop-in; aggregates bs-assets-*)'
+apply from: "$rootDir/gradle/publish.gradle"

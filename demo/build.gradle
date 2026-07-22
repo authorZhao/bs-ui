@@ -5,7 +5,7 @@ group = 'com.git.bs'
 eclipse.project.name = appName + '-demo'
 
 dependencies {
-  api project(':core')
+  api project(':core-all')
 
   implementation "org.slf4j:slf4j-api:$slf4jVersion"
 

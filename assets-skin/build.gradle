@@ -1,0 +1,15 @@
+plugins {
+  id 'java-library'
+  id 'maven-publish'
+}
+
+group = 'com.git.bs'
+
+eclipse.project.name = appName + '-assets-skin'
+
+// 纯资源模块：烘焙好的 skin（atlas/png/json + 位图字体 fnt/png），classpath 路径
+// com/git/bs/ui/skin/**，和原 core 里一致——加载代码 Gdx.files.internal(...) 无需改动。
+// 无 Java 源码；jar 只含资源。
+ext.publishArtifactId  = 'bs-assets-skin'
+ext.publishDescription = 'bs-ui: baked skin assets (atlas/png/json + bitmap fonts)'
+apply from: "$rootDir/gradle/publish.gradle"

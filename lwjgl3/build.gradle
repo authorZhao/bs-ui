@@ -75,10 +75,10 @@ tasks.register('packResources', JavaExec) {
   dependsOn ':core:classes'
   classpath = project(':core').sourceSets.main.runtimeClasspath
   mainClass = 'com.git.bs.res.PakPacker'
-  args = [project(':core').file('src/main/resources/com/git/bs/ui/skin').absolutePath,
+  args = [project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin').absolutePath,
           'com/git/bs/ui/skin',
           pakFile.absolutePath]
-  inputs.dir project(':core').file('src/main/resources/com/git/bs/ui/skin')
+  inputs.dir project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin')
   outputs.file pakFile
   doFirst { pakDir.mkdirs() }
 }
