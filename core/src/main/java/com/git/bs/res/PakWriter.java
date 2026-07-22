@@ -49,13 +49,18 @@ public final class PakWriter {
         byte[][] stored = new byte[n][];
         int[] rawLens = new int[n];
 
+        boolean[] compressed = new boolean[n];
         int ordinal = 0;
         for (Map.Entry<String, byte[]> e : entries.entrySet()) {
-            pathBytes[ordinal] = e.getKey().getBytes(StandardCharsets.UTF_8);
+            String path = e.getKey();
+            pathBytes[ordinal] = path.getBytes(StandardCharsets.UTF_8);
             byte[] raw = e.getValue();
             rawLens[ordinal] = raw.length;
-            // P2 identity：原样；P3 chacha：等长异或。条目暂不压缩（eflags=0）。
-            stored[ordinal] = cipher.apply(raw, salt, ordinal);
+            // 文本类先 DEFLATE 再加密（压缩必须在加密前——密文不可压）；PNG/wasm 已压缩不压。
+            boolean c = compressible(path);
+            compressed[ordinal] = c;
+            byte[] pre = c ? deflate(raw) : raw;
+            stored[ordinal] = cipher.apply(pre, salt, ordinal);
             ordinal++;
         }
 
@@ -77,7 +82,7 @@ public final class PakWriter {
             p += 2;
             System.arraycopy(pathBytes[i], 0, indexPlain, p, pathBytes[i].length);
             p += pathBytes[i].length;
-            indexPlain[p++] = 0; // eflags：不压缩
+            indexPlain[p++] = (byte) (compressed[i] ? PakFormat.EFLAG_COMPRESSED : 0); // eflags bit0：是否 DEFLATE
             PakFormat.writeU32(indexPlain, p, blobRelOff[i]);
             p += 4;
             PakFormat.writeU32(indexPlain, p, stored[i].length);
@@ -106,6 +111,27 @@ public final class PakWriter {
         out.write(indexStored, 0, indexStored.length);
         for (int i = 0; i < n; i++) {
             out.write(stored[i], 0, stored[i].length);
+        }
+        return out.toByteArray();
+    }
+
+    /** 文本类压缩收益大；PNG/wasm/ttf 等已压缩、再压几乎无收益甚至变大，跳过。 */
+    private static boolean compressible(String path) {
+        int dot = path.lastIndexOf('.');
+        if (dot < 0) return false;
+        String ext = path.substring(dot).toLowerCase(java.util.Locale.ROOT);
+        return ext.equals(".json") || ext.equals(".atlas") || ext.equals(".fnt")
+                || ext.equals(".properties") || ext.equals(".txt");
+    }
+
+    /** DEFLATE 压缩（zlib 包装，与 FileResourcePack 的 InflaterInputStream 默认搭配）。 */
+    private static byte[] deflate(byte[] data) {
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.DeflaterOutputStream dos = new java.util.zip.DeflaterOutputStream(
+                out, new java.util.zip.Deflater(java.util.zip.Deflater.BEST_COMPRESSION))) {
+            dos.write(data);
+        } catch (java.io.IOException ex) {
+            throw new RuntimeException("DEFLATE 压缩失败", ex);
         }
         return out.toByteArray();
     }
