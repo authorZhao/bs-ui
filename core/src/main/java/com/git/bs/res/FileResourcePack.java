@@ -145,7 +145,7 @@ public final class FileResourcePack implements ResourcePack {
         return d;
     }
 
-    /** 解 raw DEFLATE（无 zlib 头）。P2 不触发（条目均未压缩）；P3 压缩时走这里。 */
+    /** 解 zlib 包装的 DEFLATE（与 PakWriter.deflate 搭配；默认 InflaterInputStream = zlib）。 */
     private static byte[] inflate(byte[] deflated) {
         try (ByteArrayInputStream bin = new ByteArrayInputStream(deflated);
              InflaterInputStream in = new InflaterInputStream(bin)) {
