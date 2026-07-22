@@ -146,8 +146,18 @@ public class BsSkinApp extends Game {
 
     @Override
     public void create() {
+        com.git.bs.res.PakBootstrap.init(); // 资源 pak 加解密（必须在 BsUI.init 之前；无 pak 时自动跳过）
         log.info("BsControlsTest init: 同步加载 default 字体 + 分帧预热 4 档字号");
         BsUI.init();
+//        // 观测/验证：皮肤加载后打印从 pak 服务过的路径；bs.exit=true 时 1s 自动退出（无界面验证）
+//        java.util.Set<String> served = com.git.bs.res.PakFileHandle.servedPaths();
+//        log.info("[pak] 已从 pak 服务 {} 个资源", served.size());
+//        served.forEach(p -> log.info("[pak]   pak> {}", p));
+//        if ("true".equalsIgnoreCase(System.getProperty("bs.exit"))) {
+//            com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+//                @Override public void run() { Gdx.app.exit(); }
+//            }, 1f);
+//        }
         BsI18n.addBundle("com/git/bs/demo/i18n/");
         BsI18n.init();
         log.info("BsControlsTest 所有主题皮肤加载完毕");
@@ -293,23 +303,10 @@ public class BsSkinApp extends Game {
     @Override
     public void dispose() {
         super.dispose();
-        java.util.List<Skin> allSkins = new java.util.ArrayList<>(BsUI.registeredSkins());
-        if (skin != null && !allSkins.contains(skin)) allSkins.add(skin);
-
-        Set<BitmapFont> fontSet = new HashSet<>();
-        for (Skin s : allSkins) {
-            if (s == null) continue;
-            ObjectMap<String, BitmapFont> all = s.getAll(BitmapFont.class);
-            all.forEach(i->{
-                fontSet.add(i.value);
-                s.remove(i.key, BitmapFont.class);
-            });
-        }
-        // 字体最后释放
-        for (var f : fontSet) {
-            try { f.dispose(); } catch (Throwable ignored) {}
-        }
-        fonts.clear();
+        BsUI.registeredSkins().forEach(Skin::dispose);
+        BsSkin.disposeFontCache();
+        com.git.bs.ui.BsEmoji.dispose();
+        com.git.bs.ui.BsIcon.dispose();
         if (overlayStage != null) overlayStage.dispose();
         BsUI.dispose();
     }
