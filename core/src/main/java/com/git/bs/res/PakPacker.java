@@ -31,14 +31,15 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 
 /**
- * 构建期打包器：把一个资源目录里的文件打成 BPK1 {@code assets.pak}。
+ * 构建期打包器：把多个资源目录打进一个 BPK1 {@code assets.pak}。
  *
  * <p>构建期跑（gradle {@code packResources}），直接读文件系统目录——没有运行时 classpath
- * 目录不可枚举的问题。逻辑路径 = {@code pathPrefix + "/" + 文件名}。</p>
+ * 目录不可枚举的问题。每个 {@code (dir, prefix)} 对：dir 下（扁平）的每个文件，
+ * 逻辑路径 = {@code prefix.isEmpty() ? name : prefix + "/" + name}。</p>
  *
- * <p>用法：{@code PakPacker <resourceDir> <pathPrefix> <outputFile>}。
- * 跳过 {@code .ttf}（25MB 字体，烘焙路径不用）。P2 用 {@link IdentityCipher}、不压缩；
- * P3 换 cipher + 打开压缩即可。</p>
+ * <p>用法：{@code PakPacker <outputFile> <dir1> <prefix1> [<dir2> <prefix2> ...]}。
+ * 例如把 skin/emoji/icons/demo-i18n 四处资源打成一个 pak。跳过 {@code .ttf}
+ *（25MB 字体，烘焙路径不用）。P2 用 {@link IdentityCipher}、不压缩；P3 换 cipher + 开压缩。</p>
  *
  * @author authorZhao
  * @since 2026-07-20
@@ -46,28 +47,29 @@ import java.util.LinkedHashMap;
 public final class PakPacker {
 
     public static void main(String[] args) throws IOException {
-        if (args.length < 3) {
-            System.err.println("用法: PakPacker <resourceDir> <pathPrefix> <outputFile>");
+        if (args.length < 3 || ((args.length - 1) & 1) != 0) {
+            System.err.println("用法: PakPacker <outputFile> <dir1> <prefix1> [<dir2> <prefix2> ...]");
             System.exit(2);
         }
-        File dir = new File(args[0]);
-        String prefix = args[1];
-        File out = new File(args[2]);
-        if (!dir.isDirectory()) {
-            System.err.println("资源目录不存在: " + dir);
-            System.exit(2);
-        }
-
-        File[] files = dir.listFiles(f -> f.isFile() && !f.getName().endsWith(".ttf"));
-        if (files == null) files = new File[0];
-        Arrays.sort(files, Comparator.comparing(File::getName)); // 确定性顺序
-
+        File out = new File(args[0]);
         LinkedHashMap<String, byte[]> entries = new LinkedHashMap<>();
         long inBytes = 0;
-        for (File f : files) {
-            byte[] data = readAll(f);
-            entries.put(prefix + "/" + f.getName(), data);
-            inBytes += data.length;
+        for (int i = 1; i < args.length; i += 2) {
+            File dir = new File(args[i]);
+            String prefix = args[i + 1];
+            if (!dir.isDirectory()) {
+                System.err.println("[PakPacker] 跳过不存在的目录: " + dir);
+                continue;
+            }
+            File[] files = dir.listFiles(f -> f.isFile() && !f.getName().endsWith(".ttf"));
+            if (files == null) continue;
+            Arrays.sort(files, Comparator.comparing(File::getName)); // 确定性顺序
+            for (File f : files) {
+                String path = prefix.isEmpty() ? f.getName() : prefix + "/" + f.getName();
+                byte[] data = readAll(f);
+                entries.put(path, data);
+                inBytes += data.length;
+            }
         }
 
         byte[] salt = new byte[PakFormat.SALT_LEN];
