@@ -38,6 +38,14 @@ tasks.register('pakFormatCheck', JavaExec) {
   mainClass = 'com.git.bs.res.PakFormatCheck'
 }
 
+// 生成新 pak 密钥：打印 PARTS/MASK，贴进 PakKeys.java
+tasks.register('pakKeyGen', JavaExec) {
+  group = 'verification'
+  description = '生成新 pak 密钥（PARTS/MASK），贴进 PakKeys.java'
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.git.bs.res.PakKeyGen'
+}
+
 // 注意：packResources（产出 assets.pak）不放 core，而放消费模块（lwjgl3/teavm）。
 // 原因：pak 要进 classpath（被 processResources 消费），打包器又要 core 的 classes，
 // 放 core 会形成 processResources ↔ packResources ↔ classes 循环依赖。
