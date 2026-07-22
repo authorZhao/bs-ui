@@ -51,14 +51,18 @@ public final class PakFormatCheck {
 
         byte[] salt = new byte[PakFormat.SALT_LEN];
         new java.security.SecureRandom().nextBytes(salt);
-        byte[] pak = PakWriter.write(in, IdentityCipher.INSTANCE, salt);
+        byte[] pak = PakWriter.write(in, new ChaCha20Cipher(PakKeys.KEY), salt);
 
         // header
         check(pak.length > PakFormat.HEADER_SIZE, "pak 长度 " + pak.length + " > header");
         check("BPK1".equals(new String(pak, 0, 4, StandardCharsets.US_ASCII)), "magic = BPK1");
         check((pak[PakFormat.OFF_VERSION] & 0xff) == PakFormat.VERSION, "version = " + PakFormat.VERSION);
 
-        FileResourcePack pack = FileResourcePack.open(pak);
+        // 加密生效：索引已加密，pak 字节里不应出现明文路径
+        String pakStr = new String(pak, StandardCharsets.ISO_8859_1);
+        check(!pakStr.contains("bs-dark.json"), "加密生效：pak 不含明文路径 'bs-dark.json'");
+
+        FileResourcePack pack = FileResourcePack.open(pak, new ChaCha20Cipher(PakKeys.KEY));
         check(pack.size() == in.size(), "条目数 = " + pack.size() + "（期望 " + in.size() + "）");
 
         // 逐条 round-trip
