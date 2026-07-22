@@ -71,6 +71,7 @@ public class WinSettingsApp extends Game {
         BsUI.registeredSkins().forEach(Skin::dispose);
         BsSkin.disposeFontCache();
         com.git.bs.ui.BsEmoji.dispose();
+        com.git.bs.ui.BsIcon.dispose();
         BsUI.dispose();
     }
 }
