@@ -96,9 +96,9 @@ public final class FileResourcePack implements ResourcePack {
         }
     }
 
-    /** 用默认（P2 identity）cipher 打开。 */
+    /** 用默认 cipher（ChaCha20 + PakKeys.KEY）打开。 */
     public static FileResourcePack open(byte[] pak) {
-        return open(pak, IdentityCipher.INSTANCE);
+        return open(pak, new ChaCha20Cipher(PakKeys.KEY));
     }
 
     /** 用指定 cipher 打开（P3 传 ChaCha20）。 */
