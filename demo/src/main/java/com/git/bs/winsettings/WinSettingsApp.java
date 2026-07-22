@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.git.bs.i18n.BsI18n;
 import com.git.bs.ui.BsDarkTheme;
 import com.git.bs.ui.BsLightTheme;
+import com.git.bs.ui.BsSkin;
 import com.git.bs.ui.BsUI;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,19 +68,8 @@ public class WinSettingsApp extends Game {
     @Override
     public void dispose() {
         super.dispose();
-        // 烘焙 skin 字体由 app 主动释放（字体全皮肤公用，Set 去重）
-        Set<BitmapFont> fontSet = new HashSet<>();
-        for (Skin s : BsUI.registeredSkins()) {
-            if (s == null) continue;
-            ObjectMap<String, BitmapFont> all = s.getAll(BitmapFont.class);
-            for (ObjectMap.Entry<String, BitmapFont> e : all) {
-                fontSet.add(e.value);
-                s.remove(e.key, BitmapFont.class);
-            }
-        }
-        for (BitmapFont f : fontSet) {
-            try { f.dispose(); } catch (Throwable ignored) {}
-        }
+        BsUI.registeredSkins().forEach(Skin::dispose);
+        BsSkin.disposeFontCache();
         com.git.bs.ui.BsEmoji.dispose();
         BsUI.dispose();
     }
