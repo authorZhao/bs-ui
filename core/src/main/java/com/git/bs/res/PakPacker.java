@@ -74,7 +74,7 @@ public final class PakPacker {
 
         byte[] salt = new byte[PakFormat.SALT_LEN];
         new SecureRandom().nextBytes(salt);
-        byte[] pak = PakWriter.write(entries, IdentityCipher.INSTANCE, salt);
+        byte[] pak = PakWriter.write(entries, new ChaCha20Cipher(PakKeys.KEY), salt);
 
         File parent = out.getParentFile();
         if (parent != null) parent.mkdirs();
