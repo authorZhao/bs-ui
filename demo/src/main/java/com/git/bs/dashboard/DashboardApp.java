@@ -72,14 +72,22 @@ public class DashboardApp extends Game {
     @Override
     public void dispose() {
         super.dispose();
-        // 烘焙 skin 的字体由 app 主动释放（BsUI.dispose 不管 skin 字体）；字体全皮肤公用，Set 去重。
+        // 烘焙 skin 的字体由 app 主动释放；字体全皮肤公用，Set 去重。
         Set<BitmapFont> fontSet = new HashSet<>();
         for (Skin s : BsUI.registeredSkins()) {
             if (s == null) continue;
             ObjectMap<String, BitmapFont> all = s.getAll(BitmapFont.class);
+            // 只 remove 非 null key——Skin.remove(null) 会抛 "name cannot be null"（skin 里偶有 null-key
+            // 字体条目）；先收集 key 再 remove，避免迭代中改 map 触发 ConcurrentModification。
+            java.util.List<String> keys = new java.util.ArrayList<>();
             for (ObjectMap.Entry<String, BitmapFont> e : all) {
-                fontSet.add(e.value);
-                s.remove(e.key, BitmapFont.class);
+                if (e.key != null) {
+                    keys.add(e.key);
+                    fontSet.add(e.value);
+                }
+            }
+            for (String k : keys) {
+                try { s.remove(k, BitmapFont.class); } catch (Throwable ignored) {}
             }
         }
         if (bigNumFont != null) fontSet.add(bigNumFont);
