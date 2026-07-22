@@ -75,3 +75,51 @@ tasks.register("run"){
   dependsOn runRelease
 }
 build.dependsOn buildRelease
+
+// ---- releasePak：发布线上版（资源打进 assets.pak，单文件 HTTP + 后续加密）----
+// 原 buildRelease/runRelease/runDebug 不动——开发走散列资源（改了即生效、免打包）。
+// releasePak 才打包：packResources 产出 assets.pak，TeaVMBuilder 以 "pak" 参数只列 assets.pak。
+// packResources 产出 assets.pak；releasePak 把它的绝对路径通过 -Dbs.pak.file 传给 TeaVMBuilder，
+// TeaVMBuilder 用 new AssetFileHandle(绝对路径)（FileType.Absolute，disk 方式）让 gdx-teavm 直接读文件拷进 dist。
+// （Classpath 方式 gdx-teavm 没识别到 assets.pak，故改用绝对路径。）
+def pakDir = file("${buildDir}/pak")
+def pakFile = file("${pakDir}/assets.pak")
+tasks.register("packResources", JavaExec) {
+  group = 'build'
+  description = '打包 skin/emoji/icons/core-i18n/demo-i18n 为 assets.pak（web：core i18n 也进 pak）'
+  dependsOn ':core:classes'
+  classpath = project(':core').sourceSets.main.runtimeClasspath
+  mainClass = 'com.git.bs.res.PakPacker'
+  args = [pakFile.absolutePath,
+          project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin').absolutePath, 'com/git/bs/ui/skin',
+          project(':assets-emoji').file('src/main/resources/com/git/bs/ui/emoji').absolutePath, 'com/git/bs/ui/emoji',
+          project(':assets-icons').file('src/main/resources/com/git/bs/ui/icons').absolutePath, 'com/git/bs/ui/icons',
+          project(':core').file('src/main/resources/com/git/bs/i18n').absolutePath, 'com/git/bs/i18n',
+          project(':demo').file('src/main/resources/com/git/bs/demo/i18n').absolutePath, 'com/git/bs/demo/i18n']
+  inputs.dir project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin')
+  inputs.dir project(':assets-emoji').file('src/main/resources/com/git/bs/ui/emoji')
+  inputs.dir project(':assets-icons').file('src/main/resources/com/git/bs/ui/icons')
+  inputs.dir project(':core').file('src/main/resources/com/git/bs/i18n')
+  inputs.dir project(':demo').file('src/main/resources/com/git/bs/demo/i18n')
+  outputs.file pakFile
+  doFirst { pakFile.getParentFile().mkdirs() }
+}
+tasks.register("releasePak", JavaExec) {
+  description = "Build the TeaVM application with assets.pak（发布线上：资源打进 pak；后续加密）；doesn't run directly"
+  group("build")
+  dependsOn(classes)
+  dependsOn(packResources)
+  mainClass.set(project.mainClassName)
+  setClasspath(sourceSets.main.runtimeClasspath)
+  args += ["pak"]
+  doLast {
+    // 不靠 gdx-teavm 的 addAssets（copyDirectory 对单文件直接跳过）——直接把 assets.pak 拷进成品
+    // assets 目录 build/dist/webapp/assets/，并在 preload 清单补一行（同目录的 preload.txt），
+    // 让 gdx-teavm 启动时预加载它，PakBootstrap 才能经 internal("assets.pak") 读到。
+    def distAssets = file("${buildDir}/dist/webapp/assets")
+    def pakTarget = new File(distAssets, "assets.pak")
+    pakTarget.bytes = pakFile.bytes
+    def preload = new File(distAssets, "preload.txt")
+    preload.append("i:b:/assets.pak:${pakTarget.length()}:1${System.lineSeparator()}")
+  }
+}
