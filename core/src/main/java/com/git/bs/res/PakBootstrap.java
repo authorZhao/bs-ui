@@ -48,13 +48,9 @@ public final class PakBootstrap {
     private PakBootstrap() {}
 
     public static void init() {
-        String flag = System.getProperty("bs.pak.spike");
-        if (flag == null || flag.equalsIgnoreCase("false")) {
-            return; // 默认关；验证时加 -Dbs.pak.spike=true（或 =exit 跑完自动退出）
-        }
         Files real = Gdx.files;
         if (real == null) {
-            log.warn("PakBootstrap[spike]: Gdx.files 未就绪，跳过");
+            log.warn("PakBootstrap: Gdx.files 未就绪，跳过");
             return;
         }
 
