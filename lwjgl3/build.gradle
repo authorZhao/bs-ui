@@ -65,25 +65,53 @@ run {
   if (os.contains('mac')) jvmArgs += "-XstartOnFirstThread"
 }
 
-// P2：打包 core 的 skin 资源为 assets.pak（明文条目），放进 lwjgl3 classpath。
+// 打包 skin/emoji/icons/demo-i18n 为 assets.pak（明文条目，P2；P3 才加密/压缩）。
 // 放消费模块而非 core：避免 core 的 processResources↔packResources↔classes 循环依赖。
 def pakDir = file('build/pak')
 def pakFile = file("${pakDir}/assets.pak")
+def skinDir = project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin')
+def emojiDir = project(':assets-emoji').file('src/main/resources/com/git/bs/ui/emoji')
+def iconsDir = project(':assets-icons').file('src/main/resources/com/git/bs/ui/icons')
+def demoI18nDir = project(':demo').file('src/main/resources/com/git/bs/demo/i18n')
 tasks.register('packResources', JavaExec) {
   group = 'build'
-  description = 'P2: 打包 core 的 skin 资源为 assets.pak'
+  description = '打包 skin/emoji/icons/demo-i18n 为 assets.pak'
   dependsOn ':core:classes'
   classpath = project(':core').sourceSets.main.runtimeClasspath
   mainClass = 'com.git.bs.res.PakPacker'
-  args = [project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin').absolutePath,
-          'com/git/bs/ui/skin',
-          pakFile.absolutePath]
-  inputs.dir project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin')
+  args = [pakFile.absolutePath,
+          skinDir.absolutePath, 'com/git/bs/ui/skin',
+          emojiDir.absolutePath, 'com/git/bs/ui/emoji',
+          iconsDir.absolutePath, 'com/git/bs/ui/icons',
+          demoI18nDir.absolutePath, 'com/git/bs/demo/i18n']
+  inputs.dir skinDir
+  inputs.dir emojiDir
+  inputs.dir iconsDir
+  inputs.dir demoI18nDir
   outputs.file pakFile
   doFirst { pakDir.mkdirs() }
 }
 sourceSets.main.resources.srcDir(pakDir)
 processResources.dependsOn('packResources')
+
+// 可执行 jar（WinSettingsLauncher）：代码 + core i18n + assets.pak 全部入 jar；
+// 明文 skin/emoji/icons/demo-i18n 排除（已在 pak 里，不能以明文留在 jar）。
+// 运行：java -Dbs.pak.spike=exit -jar build/dist-winsettings/*.jar
+def winDistDir = file("${buildDir}/dist-winsettings")
+tasks.register('distWinSettings', Jar) {
+  group = 'distribution'
+  description = '可执行 jar（WinSettingsLauncher）：代码+core i18n+assets.pak 入 jar，明文素材排除'
+  dependsOn classes, configurations.runtimeClasspath
+  archiveFileName.set("${appName}-winsettings-${projectVersion}.jar")
+  destinationDirectory.set(winDistDir)
+  duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+  from sourceSets.main.output
+  from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+  exclude('com/git/bs/ui/skin/**', 'com/git/bs/ui/emoji/**', 'com/git/bs/ui/icons/**',
+          'com/git/bs/demo/i18n/**')
+  exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/maven/**')
+  manifest { attributes 'Main-Class': 'com.git.bs.test.WinSettingsLauncher' }
+}
 
 jar {
   archiveFileName.set("${appName}-${projectVersion}.jar")
