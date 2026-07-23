@@ -115,7 +115,7 @@ bs-ui 当前：
 
 - 无真系统菜单栏（只有自绘的 `BsMenuBar`）。
 - 无系统托盘、无全局快捷键、无 accessibility。
-- 文件选择等通过 `Platform` 接口委托各平台实现（桌面端用 gdx-nativefilechooser）。
+- 文件选择等通过 `Platform` 接口委托各平台实现。
 
 > 这些在"应用型桌面软件"里很重要，但在"游戏/UI 引擎"场景里基本用不到，故未实现。
 
