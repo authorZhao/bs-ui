@@ -121,5 +121,31 @@ tasks.register("releasePak", JavaExec) {
     pakTarget.bytes = pakFile.bytes
     def preload = new File(distAssets, "preload.txt")
     preload.append("i:b:/assets.pak:${pakTarget.length()}:1${System.lineSeparator()}")
+
   }
+}
+
+// ---- app.wasm 加密（-PwasmCrypt=true，默认关）----
+// 独立 JavaExec 任务（releasePak 后 finalizedBy 触发）：加密 app.wasm + 拷 loader.js + 注入 index.html。
+// （Gradle 9 移除了 doLast 里的 javaexec/exec，故用独立任务跑 WasmEncrypter。）
+// ⚠️ loader.js 的浏览器运行时解密【需实测】；构建期加密已 WasmEncrypterTest 验证。
+tasks.register('encryptWasm', JavaExec) {
+  group = 'build'
+  description = "加密 app.wasm + 注入 loader.js（releasePak -PwasmCrypt 后自动跑）"
+  classpath = project(':core').sourceSets.main.runtimeClasspath
+  mainClass = 'com.git.bs.res.WasmEncrypter'
+  args = [file("${buildDir}/dist/webapp/app.wasm").absolutePath]
+  doLast {
+    def webapp = file("${buildDir}/dist/webapp")
+    new File(webapp, 'loader.js').bytes = rootProject.file('deploy/loader.js').bytes
+    def idx = new File(webapp, 'index.html')
+    if (idx.exists() && !idx.text.contains('loader.js')) {
+      idx.text = idx.text.replaceFirst('(?=<script)',
+              '<script src="loader.js"></script>' + System.lineSeparator())
+    }
+    println('[wasmCrypt] app.wasm 已加密 + loader.js 已注入 index.html（需浏览器实测）')
+  }
+}
+if (project.hasProperty('wasmCrypt')) {
+  tasks.named('releasePak') { finalizedBy 'encryptWasm' }
 }
