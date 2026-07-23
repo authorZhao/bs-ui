@@ -111,7 +111,6 @@ BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);        // ③ 注册�
 - **[霞鹜文楷 / LXGW WenKai](https://github.com/lxgw/LxgwWenKai)** —— 内置中文字体，清新易读
 - **[gdx-liftoff](https://github.com/libgdx/gdx-liftoff)** —— 项目脚手架生成
 - **[gdx-teavm](https://github.com/xpenatan/gdx-teavm)** —— libGDX 的 TeaVM/Web 后端
-- **[gdx-nativefilechooser](https://github.com/spdqdd/gdx-nativefilechooser)** —— 跨平台原生文件选择
 - **[Apache Batik](https://xmlgraphics.apache.org/batik/)** —— iconpkg 工具用于 SVG → PNG/atlas 转换
 - **[Lombok](https://projectlombok.org/) / [SLF4J](http://www.slf4j.org/) / [Fastjson2](https://github.com/alibaba/fastjson2)** —— 开发基础设施
 
@@ -259,7 +258,6 @@ This project stands on the shoulders of these excellent open-source projects; wi
 - **[noto-emoji/](https://github.com/googlefonts/noto-emoji.git)** emoji
 - **[gdx-liftoff](https://github.com/libgdx/gdx-liftoff)** — project scaffolding generator
 - **[gdx-teavm](https://github.com/xpenatan/gdx-teavm)** — TeaVM/Web backend for libGDX
-- **[gdx-nativefilechooser](https://github.com/spdqdd/gdx-nativefilechooser)** — cross-platform native file chooser
 - **[Apache Batik](https://xmlgraphics.apache.org/batik/)** — used by the iconpkg tool for SVG → PNG/atlas conversion
 - **[Lombok](https://projectlombok.org/) / [SLF4J](http://www.slf4j.org/) / [Fastjson2](https://github.com/alibaba/fastjson2) / (...other)** — development infrastructure
 
