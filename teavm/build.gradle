@@ -137,7 +137,7 @@ tasks.register('encryptWasm', JavaExec) {
   args = [file("${buildDir}/dist/webapp/app.wasm").absolutePath]
   doLast {
     def webapp = file("${buildDir}/dist/webapp")
-    new File(webapp, 'loader.js').bytes = rootProject.file('deploy/loader.js').bytes
+    new File(webapp, 'loader.js').bytes = file('web/loader.js').bytes
     def idx = new File(webapp, 'index.html')
     if (idx.exists() && !idx.text.contains('loader.js')) {
       idx.text = idx.text.replaceFirst('(?=<script)',
