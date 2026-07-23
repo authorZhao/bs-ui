@@ -90,7 +90,6 @@ License 2.0 之范围内**。如再分发，请遵守对应协议（多数为 SI
     （gdx / gdx-freetype / gdx-backend-lwjgl3 / gdx-tools / gdx-box2d-gwt）
   - gdx-teavm 1.5.6                    https://github.com/xpenatan/gdx-teavm               Apache 2.0
     （backend-web / gdx-freetype-teavm）
-  - gdx-nativefilechooser 2.4.0        https://github.com/spdqdd/gdx-nativefilechooser     Apache 2.0
   - Apache Batik 1.19                  https://xmlgraphics.apache.org/batik/               Apache 2.0
     （batik-all，iconpkg 工具用于 SVG→PNG/atlas）
   - Lombok 1.18.42                     https://projectlombok.org/                          MIT
