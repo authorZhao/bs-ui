@@ -29,10 +29,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
-import com.badlogic.gdx.utils.SerializationException;
+import com.badlogic.gdx.utils.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
@@ -273,4 +270,15 @@ public class BsSkin extends Skin {
             }
         }
     }
+
+
+    public static Map<String, BitmapFont> getFontCache(Skin skin) {
+        var all = skin.getAll(BitmapFont.class);
+        var map = new HashMap<String, BitmapFont>();
+        for (var entry : all) {
+            map.put(entry.key, entry.value);
+        }
+        return map;
+    }
+
 }

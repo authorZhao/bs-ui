@@ -13,7 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.git.bs.common.SkinUtil;
+import com.git.bs.ui.BsSkin;
 import com.git.bs.demo.BsControlsSkinScreen;
 import com.git.bs.demo.BsControlsTestScreen;
 import com.git.bs.i18n.BsI18n;
@@ -165,7 +165,7 @@ public class BsSkinApp extends Game {
         BsUI.setTheme(currentTheme);
         skin = BsUI.getSkin();
 
-        var fontCache = SkinUtil.getFontCache(skin);
+        var fontCache = BsSkin.getFontCache(skin);
         fonts.putAll(fontCache);
 
         // ③ 旋转器 overlay stage（独立）

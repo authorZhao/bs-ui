@@ -1,5 +1,5 @@
 // A list of which subprojects to load as part of the same larger project.
 // You can remove Strings from the list and reload the Gradle project
 // if you want to temporarily disable a subproject.
-include 'common', 'core', 'assets-skin', 'assets-emoji', 'assets-icons', 'core-all', 'demo', 'lwjgl3', 'teavm'
+include 'common', 'core', 'bs-res', 'assets-skin', 'assets-emoji', 'assets-icons', 'core-all', 'demo', 'lwjgl3', 'teavm'
 

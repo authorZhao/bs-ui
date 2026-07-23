@@ -1,0 +1,41 @@
+plugins {
+  id 'java-library'
+  id 'maven-publish'
+}
+
+group = 'com.git.bs'
+
+eclipse.project.name = appName + '-bs-res'
+
+dependencies {
+  implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+  implementation "org.slf4j:slf4j-api:$slf4jVersion"
+
+  compileOnly "org.projectlombok:lombok:$lombokVersion"
+  annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+}
+
+// 发布配置（发布到 mavenLocal；远程仓库见 gradle/publish.gradle 的注释段）
+ext.publishArtifactId  = 'bs-ui-res'
+ext.publishDescription = 'bs-ui: resource encryption/pak toolkit (BPK1, ChaCha20, PakBootstrap)'
+apply from: "$rootDir/gradle/publish.gradle"
+
+// 从 core 迁入的 3 个 verification task（与被验证代码同模块）
+tasks.register('pakSurfaceCheck', JavaExec) {
+  group = 'verification'
+  description = 'P1: PakFileHandle 表面检查'
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.git.bs.res.PakSurfaceCheck'
+}
+tasks.register('pakFormatCheck', JavaExec) {
+  group = 'verification'
+  description = 'P2: BPK1 格式 round-trip 检查'
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.git.bs.res.PakFormatCheck'
+}
+tasks.register('pakKeyGen', JavaExec) {
+  group = 'verification'
+  description = '生成新 pak 密钥（PARTS/MASK），贴进 PakKeys.java'
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.git.bs.res.PakKeyGen'
+}

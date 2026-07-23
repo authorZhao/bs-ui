@@ -87,8 +87,8 @@ def pakFile = file("${pakDir}/assets.pak")
 tasks.register("packResources", JavaExec) {
   group = 'build'
   description = '打包 skin/emoji/icons/core-i18n/demo-i18n 为 assets.pak（web：core i18n 也进 pak）'
-  dependsOn ':core:classes'
-  classpath = project(':core').sourceSets.main.runtimeClasspath
+  dependsOn ':bs-res:classes'
+  classpath = project(':bs-res').sourceSets.main.runtimeClasspath
   mainClass = 'com.git.bs.res.PakPacker'
   args = [pakFile.absolutePath,
           project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin').absolutePath, 'com/git/bs/ui/skin',

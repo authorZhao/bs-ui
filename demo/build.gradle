@@ -6,6 +6,7 @@ eclipse.project.name = appName + '-demo'
 
 dependencies {
   api project(':core-all')
+  implementation project(':bs-res')
 
   implementation "org.slf4j:slf4j-api:$slf4jVersion"
 

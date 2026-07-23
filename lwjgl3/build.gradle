@@ -45,6 +45,8 @@ dependencies {
 
   testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+
+  testImplementation project(':bs-res')
 }
 
 test {
@@ -80,8 +82,8 @@ def demoI18nDir = project(':demo').file('src/main/resources/com/git/bs/demo/i18n
 tasks.register('packResources', JavaExec) {
   group = 'build'
   description = '打包 skin/emoji/icons/demo-i18n 为 assets.pak'
-  dependsOn ':core:classes'
-  classpath = project(':core').sourceSets.main.runtimeClasspath
+  dependsOn ':bs-res:classes'
+  classpath = project(':bs-res').sourceSets.main.runtimeClasspath
   mainClass = 'com.git.bs.res.PakPacker'
   args = [pakFile.absolutePath,
           skinDir.absolutePath, 'com/git/bs/ui/skin',

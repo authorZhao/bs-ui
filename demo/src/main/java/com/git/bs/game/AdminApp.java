@@ -12,8 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.git.bs.admin.AdminLoginScreen;
-import com.git.bs.common.SkinUtil;
 import com.git.bs.ui.BsAdminTheme;
+import com.git.bs.ui.BsSkin;
 import com.git.bs.ui.BsDarkTheme;
 import com.git.bs.ui.BsLightTheme;
 import com.git.bs.ui.BsSkinLoader;
@@ -103,7 +103,7 @@ public class AdminApp extends Game {
         BsUI.setTheme(currentTheme);
         skin = BsUI.getSkin();
 
-        var fontCache = SkinUtil.getFontCache(skin);
+        var fontCache = BsSkin.getFontCache(skin);
         fonts.putAll(fontCache);
 
 

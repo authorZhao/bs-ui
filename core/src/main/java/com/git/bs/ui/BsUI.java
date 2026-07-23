@@ -24,7 +24,6 @@ package com.git.bs.ui;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.git.bs.common.SkinUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -140,7 +139,7 @@ public final class BsUI {
     public static void disposeAllSkins() {
         List<BitmapFont> fontList = new ArrayList<>();
         for (var skin : registeredSkins.values()) {
-            Map<String, BitmapFont> fontCache = SkinUtil.getFontCache(skin);
+            Map<String, BitmapFont> fontCache = BsSkin.getFontCache(skin);
             fontCache.forEach((name, font) -> {
                 skin.remove(name, BitmapFont.class);
                 fontList.add(font);
