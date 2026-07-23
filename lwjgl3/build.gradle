@@ -30,9 +30,6 @@ dependencies {
   implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 
-  // DeskPlatform 用 nativefilechooser-desktop-lwjgl 变体
-  implementation "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:$gdxNativefilechooserVersion"
-
   // Bootstrap Icons SVG → PNG+atlas 转换工具（Batik）：iconpkg 用
   // exclude xpp3 + pull-parser：它们注册的 SAXParserFactory 不识别 external-general-entities
   // feature，会让 Batik 在 JDK 21 上抛 SAXNotRecognizedException
@@ -45,6 +42,13 @@ dependencies {
   compileOnly "org.projectlombok:lombok:$lombokVersion"
   annotationProcessor "org.projectlombok:lombok:$lombokVersion"
   implementation "com.alibaba.fastjson2:fastjson2:$fastjson2Version"
+
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+}
+
+test {
+  useJUnitPlatform()
 }
 
 def os = System.properties['os.name'].toLowerCase()
