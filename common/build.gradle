@@ -9,7 +9,6 @@ eclipse.project.name = appName + '-common'
 
 dependencies {
 
-  implementation "org.projectlombok:lombok:$lombokVersion"
   // Platform 接口签名引用了 NativeFileChooser，必须 api 传递
   implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
   implementation "org.slf4j:slf4j-api:$slf4jVersion"
