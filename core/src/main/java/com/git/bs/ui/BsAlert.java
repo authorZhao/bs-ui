@@ -54,6 +54,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
  */
 public class BsAlert extends Table {
 
+    /** 色条背景缓存：按颜色 int 值缓存 roundRect。 */
+    private static final java.util.Map<Integer, Drawable> STRIPE_CACHE = new java.util.HashMap<>();
+
     public enum Variant { PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO }
 
     private final Variant variant;
@@ -85,9 +88,10 @@ public class BsAlert extends Table {
         pad(10, 14, 10, 14);
         left();
 
-        // 左色条（6px 宽，饱和 accent 色）
+        // 左色条（6px 宽，饱和 accent 色）——roundRect 3px 圆角 + 按色缓存，不用 white 1×1
         Container<Actor> stripe = new Container<>();
-        Drawable stripeD = skin.newDrawable("white", accent);
+        Drawable stripeD = STRIPE_CACHE.computeIfAbsent(accent.toIntBits(),
+                k -> BsSkinFactory.roundRect(accent, accent, 3, 0));
         stripe.setBackground(stripeD);
         stripe.fill();
         add(stripe).width(6).growY().padRight(10).top();
