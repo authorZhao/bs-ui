@@ -31,10 +31,8 @@ import lombok.extern.slf4j.Slf4j;
  * （早于 {@code BsUI.init()} / {@code BsSkinLoader.loadAllThemes()}）。
  *
  * <p><b>行为</b>：从 classpath 读 {@code assets.pak}（由 {@link PakPacker}/packResources 任务产出），
- * 用 {@link FileResourcePack} 解析，再包装 {@code Gdx.files}。P2 用 {@link IdentityCipher}（明文），
- * P3 换 ChaCha20。{@code assets.pak} 不在 classpath 时优雅跳过（资源走明文磁盘，方便开发）。</p>
- *
- * <p>开关：默认关闭，避免影响正常开发；验证时加 {@code -Dbs.pak.spike=true} 启用。</p>
+ * 用 {@link FileResourcePack} 解析（默认 ChaCha20 + PakKeys.KEY 解密），再包装 {@code Gdx.files}。
+ * {@code assets.pak} 不在 classpath 时优雅跳过（资源走明文磁盘，方便开发）。</p>
  *
  * @author authorZhao
  * @since 2026-07-17
@@ -61,7 +59,7 @@ public final class PakBootstrap {
             return;
         }
         byte[] pakBytes = pakFile.readBytes();
-        FileResourcePack pack = FileResourcePack.open(pakBytes); // P2 identity cipher；P3 传 ChaCha20
+        FileResourcePack pack = FileResourcePack.open(pakBytes); // 默认 ChaCha20(PakKeys.KEY)
         Gdx.files = new PakFiles(real, pack);
         log.info("PakBootstrap: 从 {} 加载 {} 个资源（pak {} 字节），已包装 Gdx.files",
                 PAK_PATH, pack.size(), pakBytes.length);
