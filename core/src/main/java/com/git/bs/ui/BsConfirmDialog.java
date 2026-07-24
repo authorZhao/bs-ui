@@ -21,6 +21,7 @@
  */
 package com.git.bs.ui;
 
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -53,8 +54,9 @@ public class BsConfirmDialog extends BsModal {
         super(title == null ? BsI18n.get("dialog.confirm_title", "请确认") : title, skin);
         this.onResult = onResult;
 
-        // 标题前问号色块（蓝色，象征询问）
-        setTitleIcon(BsUI.getSkin().newDrawable("white", BsPalette.PRIMARY.getMain()));
+        // 标题前问号图标（蓝色，象征询问）——优先用 atlas 图标，回退色块
+        Drawable qIcon = BsIcon.get("question-circle", BsPalette.PRIMARY.getMain());
+        setTitleIcon(qIcon != null ? qIcon : BsUI.getSkin().newDrawable("white", BsPalette.PRIMARY.getMain()));
 
         // 内容
         Label msg = new Label(message == null ? "" : message, skin);
