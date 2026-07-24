@@ -117,3 +117,34 @@ publishing {
         // }
     }
 }
+
+// ============================================================================
+// Maven Central 发布（默认【关】）：gradle <task> -PcentralRelease=true 启用
+// 前置（详见 docs/publish-maven-central.md）：
+//   - ~/.gradle/gradle.properties 配 centralUser / centralToken / signingKey / signingPassword
+//   - group 必须是 Central 可验证 namespace（com.git.bs 不可验证，见文档 §0）
+// ============================================================================
+if (project.hasProperty('centralRelease')) {
+    apply plugin: 'signing'
+    signing {
+        useInMemoryPgpKeys(
+                findProperty('signingKey') as String,
+                findProperty('signingPassword') as String)
+        sign publishing.publications.mavenJava
+    }
+    publishing {
+        repositories {
+            maven {
+                name = 'centralPortal'
+                // Central Portal 发布端点；URL 偶有变动，发布前以官方文档为准
+                url = version.toString().endsWith('SNAPSHOT')
+                        ? uri('https://central.sonatype.com/repository/maven-snapshots/')
+                        : uri('https://central.sonatype.com/repository/maven-central/')
+                credentials {
+                    username = findProperty('centralUser') as String
+                    password = findProperty('centralToken') as String
+                }
+            }
+        }
+    }
+}
