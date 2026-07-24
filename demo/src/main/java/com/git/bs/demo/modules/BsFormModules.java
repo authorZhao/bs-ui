@@ -259,12 +259,12 @@ public class BsFormModules {
         Table btnRow = new Table();
         btnRow.defaults().pad(6);
 
-        // 1. 基础模态框
-        BsButton basic = new BsButton("基础模态框", skin,
+        // 1. 基础模态框（无图标）
+        BsButton basic = new BsButton("基础模态框(无图标)", skin,
                 BsButton.Variant.PRIMARY, BsButton.Style.SOLID, BsButton.Size.MD);
         basic.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
-                Label content = new Label("这是一个基础模态框。三行结构：标题 / 内容 / 按钮。\n点击取消或确认关闭。", skin);
+                Label content = new Label("这是一个基础模态框（无图标）。三行结构：标题 / 内容 / 按钮。\n点击取消或确认关闭。", skin);
                 content.setWrap(true);
                 new BsModal("提示", skin)
                         .content(content)
@@ -277,15 +277,15 @@ public class BsFormModules {
         });
         btnRow.add(basic);
 
-        // 2. 带标题图标
-        BsButton withIcon = new BsButton("带标题图标", skin,
+        // 2. 带标题图标（有图标）
+        BsButton withIcon = new BsButton("带标题图标(有图标)", skin,
                 BsButton.Variant.INFO, BsButton.Style.SOLID, BsButton.Size.MD);
         withIcon.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 Label content = new Label("标题前面有一个图标（蓝色色块占位）。可换成任意 drawable。", skin);
                 content.setWrap(true);
                 new BsModal("操作确认", skin)
-                        .setTitleIcon(skin.newDrawable("white", Color.valueOf("#0D6EFD")))
+                        .setTitleIcon(com.git.bs.ui.BsIcon.get("info-circle-fill", Color.valueOf("#0D6EFD")))
                         .content(content)
                         .contentWidth(360)
                         .separator(true)
@@ -382,6 +382,36 @@ public class BsFormModules {
         });
         row1.add(bNotice);
         row1.add(bAutoClose).row();
+
+        // 无图标 Alert（对比：setTitleIcon(null) 显式去掉图标）
+        Table row0 = new Table();
+        row0.defaults().pad(6);
+        row0.add(new Label("无图标对比:", skin)).right().padRight(8);
+        BsButton bNoticeNoIcon = new BsButton("通知(无图标)", skin,
+                BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE, BsButton.Size.SM);
+        bNoticeNoIcon.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent event, float x, float y) {
+                com.git.bs.ui.BsAlertDialog d = new com.git.bs.ui.BsAlertDialog(
+                        "通知(无图标)", "这个对话框没有标题图标——标题文字直接顶到左边。",
+                        com.git.bs.ui.BsAlertDialog.Level.NOTICE, skin);
+                d.setTitleIcon(null);
+                d.showModal(stage);
+            }
+        });
+        BsButton bConfirmNoIcon = new BsButton("确认(无图标)", skin,
+                BsButton.Variant.SECONDARY, BsButton.Style.OUTLINE, BsButton.Size.SM);
+        bConfirmNoIcon.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent event, float x, float y) {
+                com.git.bs.ui.BsConfirmDialog d = new com.git.bs.ui.BsConfirmDialog(
+                        "确认(无图标)", "没有图标的确认对话框。", skin,
+                        ok -> setStatus.accept(ok ? "确认(无图标): 是" : "确认(无图标): 否"));
+                d.setTitleIcon(null);
+                d.showModal(stage);
+            }
+        });
+        row0.add(bNoticeNoIcon);
+        row0.add(bConfirmNoIcon);
+        c.add(row0).left().padTop(4).row();
 
         Table row2 = new Table();
         row2.defaults().pad(6);
