@@ -86,7 +86,7 @@ public class BsInputNumber extends Table {
     private float holdTimer = 0;
 
     public BsInputNumber(Skin skin) {
-        minusBtn = new BsButton("−", skin, BsButton.Variant.SECONDARY, BsButton.Style.SOLID, BsButton.Size.SM);
+        minusBtn = new BsButton("-", skin, BsButton.Variant.SECONDARY, BsButton.Style.SOLID, BsButton.Size.SM);
         plusBtn = new BsButton("+", skin, BsButton.Variant.SECONDARY, BsButton.Style.SOLID, BsButton.Size.SM);
         field = new BsTextField("0", skin);
         field.setAlignment(1);  // center
