@@ -21,6 +21,7 @@
  */
 package com.git.bs.ui;
 
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -59,7 +60,8 @@ public class BsPromptDialog extends BsModal {
         super(title == null ? BsI18n.get("dialog.input_title", "请输入") : title, skin);
         this.onResult = onResult;
 
-        setTitleIcon(skin.newDrawable("white", BsPalette.SUCCESS.getMain()));
+        Drawable pIcon = BsIcon.get("keyboard", BsPalette.SUCCESS.getMain());
+        setTitleIcon(pIcon != null ? pIcon : skin.newDrawable("white", BsPalette.SUCCESS.getMain()));
 
         // 内容：消息 + 输入框 + 错误提示
         com.badlogic.gdx.scenes.scene2d.ui.Table content = new com.badlogic.gdx.scenes.scene2d.ui.Table();
