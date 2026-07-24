@@ -92,6 +92,7 @@ public class BsModal extends Table {
     private final Container<Table> sepBeforeButtons;
 
     private final Label titleLabel;
+    private final TextButton closeBtn;
     private Image titleIconImage;
     private Container<Image> titleIconWrap;
     private Table backdrop;
@@ -110,10 +111,6 @@ public class BsModal extends Table {
         titleRow = new Table();
         titleRow.pad(14, 18, 14, 18);  // 顶部 padding 加大，避免标题贴上边框
         titleRow.left();
-        // 图标占位（默认不显示）
-        titleIconWrap = new Container<>();
-        titleIconWrap.setVisible(false);
-        titleRow.add(titleIconWrap).padRight(8).left();
         // 标题文字（独立 LabelStyle，深色粗体感）
         Label.LabelStyle titleStyle = new Label.LabelStyle();
         titleStyle.font = skin.getFont("font-lg");
@@ -122,7 +119,7 @@ public class BsModal extends Table {
         titleLabel.setColor(Color.WHITE);
         titleRow.add(titleLabel).growX().left();
         // 关闭按钮（右上角 X）
-        TextButton closeBtn = new TextButton("×", skin, "bs-link");
+        closeBtn = new TextButton("×", skin, "bs-link");
         TextButton.TextButtonStyle closeStyle = new TextButton.TextButtonStyle(closeBtn.getStyle());
         closeStyle.font = skin.getFont("font-xl");
         closeBtn.setStyle(closeStyle);
@@ -169,14 +166,24 @@ public class BsModal extends Table {
 
     public BsModal setTitle(String t) { titleLabel.setText(t); return this; }
 
-    /** 设置标题前的小图标（任意 drawable，建议 16×16 或 24×24）。 */
+    /** 设置标题前的小图标（任意 drawable，建议 16×16 或 24×24）。首次调用时动态插入到标题行最前。 */
     public BsModal setTitleIcon(Drawable icon) {
         if (icon != null) {
-            titleIconImage = new Image(icon);
-            titleIconWrap.setActor(titleIconImage);
-            titleIconWrap.size(20, 20);
-            titleIconWrap.setVisible(true);
-        } else {
+            if (titleIconWrap == null) {
+                // 首次设图标：创建 Container + Image，插入 titleRow 最前面
+                titleIconWrap = new Container<>();
+                titleIconImage = new Image(icon);
+                titleIconWrap.setActor(titleIconImage);
+                titleIconWrap.size(20, 20);
+                titleRow.clearChildren();
+                titleRow.add(titleIconWrap).size(20, 20).padRight(8).left();
+                titleRow.add(titleLabel).growX().left();
+                titleRow.add(closeBtn).size(28, 28).right();
+            } else {
+                titleIconImage.setDrawable(icon);
+                titleIconWrap.setVisible(true);
+            }
+        } else if (titleIconWrap != null) {
             titleIconWrap.setVisible(false);
         }
         return this;
