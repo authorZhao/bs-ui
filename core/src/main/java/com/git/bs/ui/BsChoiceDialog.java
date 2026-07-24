@@ -21,6 +21,7 @@
  */
 package com.git.bs.ui;
 
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -60,7 +61,9 @@ public class BsChoiceDialog extends BsModal {
         super(title == null ? BsI18n.get("core.choose", "请选择") : title, skin);
         this.onResult = onResult;
 
-        setTitleIcon(skin.newDrawable("white", new Color(0x66 / 255f, 0x10 / 255f, 0xF2 / 255f, 1f)));
+        Color choiceAccent = new Color(0x66 / 255f, 0x10 / 255f, 0xF2 / 255f, 1f);
+        Drawable cIcon = BsIcon.get("lightbulb-fill", choiceAccent);
+        setTitleIcon(cIcon != null ? cIcon : skin.newDrawable("white", choiceAccent));
 
         // 内容
         Table content = new Table();
