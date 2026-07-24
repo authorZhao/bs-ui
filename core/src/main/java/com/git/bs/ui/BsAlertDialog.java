@@ -21,6 +21,7 @@
  */
 package com.git.bs.ui;
 
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -87,11 +88,12 @@ public class BsAlertDialog extends BsModal {
         closeOnBackdrop(true);
     }
 
-    /** 根据级别配置：图标色块 + 标题 banner + 入场/出场动画 + 按钮回调 */
+    /** 根据级别配置：图标 + 标题 banner + 入场/出场动画 + 按钮回调 */
     private void configByLevel(Level l) {
         Color accent = levelColor(BsUI.getSkin(), l);
-        // 标题前小色块图标（Pixmap 已有的 white drawable 染色）
-        setTitleIcon(BsUI.getSkin().newDrawable("white", accent));
+        // 标题前图标：优先用 bootstrap-icons atlas 里的图标（染色），atlas 未加载时回退色块
+        Drawable icon = BsIcon.get(levelIconName(l), accent);
+        setTitleIcon(icon != null ? icon : BsUI.getSkin().newDrawable("white", accent));
         // 入场 + 出场动画：NOTICE/SUCCESS 淡入+淡出（柔和），WARNING 上滑入+下滑出，
         // ERROR 缩放进入+缩放退出。出场时长拉长让动画更明显。
         switch (l) {
@@ -139,6 +141,17 @@ public class BsAlertDialog extends BsModal {
     }
 
     // ========================= 级别 → 视觉 =========================
+
+    /** 级别 → bootstrap-icons 图标名。 */
+    public static String levelIconName(Level l) {
+        switch (l) {
+            case NOTICE:  return "info-circle-fill";
+            case WARNING: return "exclamation-triangle-fill";
+            case ERROR:   return "x-circle-fill";
+            case SUCCESS: return "check-circle-fill";
+            default:      return "info-circle-fill";
+        }
+    }
 
     /** 级别 → 配色（参考 Bootstrap alert）。V2：必须传 skin。 */
     public static Color levelColor(Skin skin, Level l) {
