@@ -81,7 +81,7 @@ public class BsAvatar extends Table {
     /** 设置头像图片。null 则保留占位。 */
     public BsAvatar image(Drawable d) {
         if (d == null) {
-            image.setDrawable(BsUI.getSkin().newDrawable("white", bgColor()));
+            image.setDrawable(BsSkinFactory.drawableOf(bgColor()));
             return this;
         }
         Drawable view = (shape == Shape.CIRCLE)
@@ -115,7 +115,7 @@ public class BsAvatar extends Table {
         dot.setColor(BsPalette.SUCCESS.getMain());   // success 绿
         Container<com.badlogic.gdx.scenes.scene2d.ui.Label> dotWrap = new Container<>(dot);
         // 白色边框底色
-        dotWrap.setBackground(skin.newDrawable("white", Color.WHITE));
+        dotWrap.setBackground(BsSkinFactory.drawableOf(Color.WHITE));
         dotWrap.pad(1, 2, 1, 2);
         float dotSize = Math.max(10, avatarSize * 0.28f);
         badgeLayer.add(dotWrap).size(dotSize, dotSize).expand().bottom().right();

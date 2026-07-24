@@ -16,7 +16,6 @@ import com.git.bs.ui.BsChart;
 import com.git.bs.ui.BsCircularProgress;
 import com.git.bs.ui.BsDoughnutChart;
 import com.git.bs.ui.BsLineChart;
-import com.git.bs.ui.BsRingProgress;
 import com.git.bs.ui.BsScrollPane;
 import com.git.bs.ui.BsStatistic;
 import com.git.bs.ui.BsText;
@@ -215,7 +214,7 @@ public class DashboardScreen implements Screen {
         Table jvmRow = new Table();
         jvmRow.left().top();
         jvmRow.defaults().pad(6).left();
-        heapRing = new BsRingProgress(skin, BsCircularProgress.Variant.PRIMARY);
+        heapRing = new BsCircularProgress(skin, BsCircularProgress.Variant.PRIMARY);
         heapRing.setShowLabel(true);
         jvmRow.add(heapRing).size(116).padRight(14);
 

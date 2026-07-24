@@ -21,14 +21,10 @@
  */
 package com.git.bs.ui;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 
 /**
@@ -36,7 +32,7 @@ import com.badlogic.gdx.utils.Align;
  *
  * <p>两种样式：</p>
  * <ul>
- *   <li>{@link Style#BORDER} —— 圆环旋转（spinner-border）：1/4 圆弧绕中心转。
+ *   <li>{@link Style#BORDER} —— 圆环旋转（spinner-border）：3/4 圆弧（270°）绕中心转。
  *       视觉接近 Bootstrap 默认 spinner-border。</li>
  *   <li>{@link Style#GROW} —— 脉冲缩放（spinner-grow）：实心圆周期性缩放。</li>
  * </ul>
@@ -49,8 +45,11 @@ import com.badlogic.gdx.utils.Align;
  * // act 由 stage 自动驱动；想停止：spinner.setSpinning(false)
  * }</pre>
  *
- * <p>实现：重写 {@link #act(float)} 累加旋转角度/缩放；
- * {@link #draw(Batch, float)} 用程序化生成的圆环/圆盘 drawable 渲染。</p>
+ * <p>实现：用 {@link ShapeRenderer} 自绘（和 BsRingProgress 一致）——
+ * BORDER 用三角形带画 270° 粗弧（{@link BsShapeDraw#drawRingArc}），
+ * GROW 用实心圆 + scale。不再用 Pixmap 像素拼凑（旧实现擦除逻辑错误，
+ * 只画出"一个小钩"，已废弃）。ShapeRenderer 为 static 共享单例，避免每实例泄漏 OpenGL 资源。</p>
+ *
  * @author authorZhao
  * @since 2026-07-16
  */
@@ -60,10 +59,16 @@ public class BsSpinner extends Actor {
 
     private static final float BORDER_SPEED_DEG = 270f;  // 每秒转 270°（Bootstrap 默认 0.75s/圈）
     private static final float GROW_PERIOD = 1.0f;       // 缩放周期 1s
+    /** BORDER 弧的扫过角度（Bootstrap spinner-border 标准是 270°，剩 90° 透明缺口）。 */
+    private static final float BORDER_SWEEP_DEG = 270f;
+
+    /** 共享 ShapeRenderer（static 单例，所有 spinner 共用，避免每实例 new 泄漏 native 资源）。
+     *  libgdx UI 都在 render 线程，单例无并发问题。 */
+    private static ShapeRenderer sharedSR;
 
     private final Style style;
-    private final TextureRegionDrawable drawable;
-    private final Texture texture;
+    /** draw 复用：避免每帧 new Color（alpha 合成用）。 */
+    private final Color tmpColor = new Color();
     private float angle;
     private float scaleTime;
     private boolean spinning = true;
@@ -74,8 +79,7 @@ public class BsSpinner extends Actor {
 
     public BsSpinner(com.badlogic.gdx.scenes.scene2d.ui.Skin skin, Style style, Color color) {
         this.style = style;
-        this.texture = makeSpinnerTexture(style, color);
-        this.drawable = new TextureRegionDrawable(new TextureRegion(texture));
+        setColor(color);   // 用 Actor.setColor（scene2d 惯例，draw 里 getColor() 取色）
         setSize(32, 32);
         setOrigin(Align.center);
     }
@@ -85,6 +89,11 @@ public class BsSpinner extends Actor {
     }
 
     public boolean isSpinning() { return spinning; }
+
+    private static synchronized ShapeRenderer sr() {
+        if (sharedSR == null) sharedSR = new ShapeRenderer();
+        return sharedSR;
+    }
 
     @Override
     public void act(float delta) {
@@ -99,78 +108,48 @@ public class BsSpinner extends Actor {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        // 旋转中心用 actor 的中心
-        float cx = getX() + getWidth() / 2f;
-        float cy = getY() + getHeight() / 2f;
-        if (style == Style.BORDER) {
-            batch.draw(drawable.getRegion(),
-                    getX(), getY(),
-                    getWidth() / 2f, getHeight() / 2f,   // originX/Y（旋转中心）
-                    getWidth(), getHeight(),
-                    1, 1,
-                    angle);
-        } else {
-            // GROW: scale 从 0 → 1 周期变化
-            float t = scaleTime / GROW_PERIOD;  // 0~1
-            float s = 0.5f + 0.5f * (float) Math.sin(t * Math.PI * 2 - Math.PI / 2); // 0~1 平滑
-            s = Math.max(0.1f, s);
-            float drawW = getWidth() * s;
-            float drawH = getHeight() * s;
-            batch.draw(drawable.getRegion(),
-                    cx - drawW / 2f, cy - drawH / 2f,
-                    drawW, drawH);
-        }
-    }
+        // cx/cy 用 actor 局部坐标（不含 getX()/getY()），配合下方 translate(getX(), getY()) 定位
+        float cx = getWidth() / 2f;
+        float cy = getHeight() / 2f;
+        float size = Math.min(getWidth(), getHeight());
+        Color c = getColor();
+        float alpha = c.a * parentAlpha;
 
-    @Override
-    public boolean remove() {
-        if (texture != null) texture.dispose();
-        return super.remove();
-    }
+        // 切到 ShapeRenderer 渲染（和 BsRingProgress/BsRating 同模式）
+        batch.end();
+        try {
+            ShapeRenderer s = sr();
+            s.setProjectionMatrix(batch.getProjectionMatrix());
+            s.setTransformMatrix(batch.getTransformMatrix());
+            s.setColor(1, 1, 1, 1);
+            s.begin(ShapeRenderer.ShapeType.Filled);
+            try {
+                s.translate(getX(), getY(), 0);
 
-    /** 生成 spinner Pixmap：BORDER 画 1/4 圆弧（剩余透明），GROW 画实心圆。 */
-    private static Texture makeSpinnerTexture(Style style, Color color) {
-        int size = 64;
-        Pixmap pix = new Pixmap(size, size, Pixmap.Format.RGBA8888);
-        pix.setBlending(Pixmap.Blending.None);
-        if (style == Style.BORDER) {
-            // 画一个空心圆环（粗一些，模拟 border-width: 0.25em）
-            int r = size / 2 - 2;
-            int cx = size / 2, cy = size / 2;
-            int thickness = 6;
-            // 画整圈圆环（用 drawCircle 多圈模拟厚度）
-            pix.setColor(color);
-            for (int i = 0; i < thickness; i++) {
-                pix.drawCircle(cx, cy, r - i);
-            }
-            // 然后用一个透明矩形把右下 1/2 圆覆盖掉，剩下左上 1/4 圆 + 右上一段 + 左下一小段
-            // 实际 Bootstrap 是"3/4 圆透明" + "1/4 实色"。简化：把下半圆完全擦掉，再让右上半的右半部分擦掉
-            // → 剩下左上 1/4 + 左下 1/4 的一小部分？复杂。简化为 3/4 圆 + 1/4 透明：
-            // 直接画 3/4 圆环（270°）。Pixmap drawCircle 没法控制角度，只能用 fillCircle 擦除
-            // 用透明色 fill 矩形覆盖右下角 + 右上角 = 只剩左半边
-            pix.setColor(0, 0, 0, 0);
-            // 把右侧 1/2 擦掉（x > cx）
-            for (int x = cx; x < size; x++) {
-                for (int y = 0; y < size; y++) {
-                    pix.drawPixel(x, y);
+                if (style == Style.BORDER) {
+                    // 3/4 圆弧（270°）旋转。thickness 约为 size 的 1/8（Bootstrap border-width 0.25em）
+                    float r = size / 2f;
+                    float thickness = Math.max(3f, size / 8f);
+                    Color base = getColor();
+                    tmpColor.set(base.r, base.g, base.b, alpha);
+                    BsShapeDraw.drawRingArc(s, cx, cy, r - thickness / 2f, thickness,
+                            90f + angle, BORDER_SWEEP_DEG, tmpColor);
+                } else {
+                    // GROW: 实心圆脉冲缩放（0 → 1，用 sin 平滑）
+                    float t = scaleTime / GROW_PERIOD;  // 0~1
+                    float scale = 0.5f + 0.5f * (float) Math.sin(t * Math.PI * 2 - Math.PI / 2); // 0~1
+                    scale = Math.max(0.1f, scale);
+                    float radius = (size / 2f) * scale;
+                    Color base = getColor();
+                    s.setColor(base.r, base.g, base.b, alpha);
+                    s.circle(cx, cy, radius);
                 }
+            } finally {
+                s.identity();
+                s.end();
             }
-            // 把左下 1/4 也擦掉（剩下左上 1/4 圆弧）
-            for (int x = 0; x < cx; x++) {
-                for (int y = cy; y < size; y++) {
-                    pix.drawPixel(x, y);
-                }
-            }
-            // 实际上 Bootstrap 是 3/4 圆环旋转。我把上方擦法做反了 —— 现在剩下的是左上 1/4 圆弧
-            // 但旋转视觉效果还可以（一个小钩绕中心转）。继续。
-        } else {
-            // GROW: 实心圆
-            pix.setColor(color);
-            pix.fillCircle(size / 2, size / 2, size / 2 - 2);
+        } finally {
+            batch.begin();
         }
-        Texture tex = new Texture(pix);
-        tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        pix.dispose();
-        return tex;
     }
 }

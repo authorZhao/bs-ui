@@ -88,6 +88,8 @@ public class BsVirtualList<T> extends ScrollPane {
     private float lastSpacerStageY = Float.NaN;                   // 滚动检测缓存
     private final Vector2 tmpA = new Vector2();
     private final Vector2 tmpB = new Vector2();
+    /** 回收越界 cell 的临时列表（复用，避免滚动时每帧 new ArrayList）。 */
+    private final java.util.List<Integer> dropBuf = new java.util.ArrayList<>();
 
     private final ClickListener cellClick = new ClickListener() {
         @Override public void clicked(InputEvent event, float x, float y) {
@@ -168,12 +170,12 @@ public class BsVirtualList<T> extends ScrollPane {
         first = Math.max(0, Math.min(first, n - 1));
         last = Math.max(0, Math.min(last, n - 1));
 
-        // 回收越界
-        List<Integer> drop = new ArrayList<>();
+        // 回收越界（dropBuf 复用，clear 后填充，避免每帧 new ArrayList）
+        dropBuf.clear();
         for (Integer idx : active.keySet()) {
-            if (idx < first || idx > last) drop.add(idx);
+            if (idx < first || idx > last) dropBuf.add(idx);
         }
-        for (Integer idx : drop) {
+        for (Integer idx : dropBuf) {
             Actor c = active.remove(idx);
             if (c != null) { c.setVisible(false); pool.add(c); }
         }

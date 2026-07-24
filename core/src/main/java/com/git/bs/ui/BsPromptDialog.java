@@ -61,7 +61,7 @@ public class BsPromptDialog extends BsModal {
         this.onResult = onResult;
 
         Drawable pIcon = BsIcon.get("keyboard", BsPalette.SUCCESS.getMain());
-        setTitleIcon(pIcon != null ? pIcon : skin.newDrawable("white", BsPalette.SUCCESS.getMain()));
+        setTitleIcon(pIcon != null ? pIcon : BsSkinFactory.drawableOf(BsPalette.SUCCESS.getMain()));
 
         // 内容：消息 + 输入框 + 错误提示
         com.badlogic.gdx.scenes.scene2d.ui.Table content = new com.badlogic.gdx.scenes.scene2d.ui.Table();

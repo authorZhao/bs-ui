@@ -79,7 +79,7 @@ public class BsWindow extends Window {
         removeBackdrop();
         backdrop = new Table(getSkin());
         // 用 bs-overlay token（主题驱动，与 BsModal 的 backdrop 保持一致）
-        backdrop.setBackground(getSkin().newDrawable("white", BsTheme.ov()));
+        backdrop.setBackground(BsSkinFactory.drawableOf(BsTheme.ov()));
         backdrop.setFillParent(true);
         backdrop.setTouchable(Touchable.enabled);
         // backdrop 点击 → 关闭窗口（Bootstrap 5 模态默认行为）

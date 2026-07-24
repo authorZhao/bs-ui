@@ -144,7 +144,7 @@ public class BsTagInput extends Table {
         for (String t : tags) {
             // chip = [文字] [×]
             Table chip = new Table();
-            chip.setBackground(skin.newDrawable("white", chipColor));
+            chip.setBackground(BsSkinFactory.drawableOf(chipColor));
             chip.pad(2, 6, 2, 6);
             Label.LabelStyle cs = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
             cs.font = skin.getFont("font-sm");

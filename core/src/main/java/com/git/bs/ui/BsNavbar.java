@@ -169,7 +169,7 @@ public class BsNavbar extends Table {
     public BsNavbar showBottomBorder(boolean show) {
         if (show) {
             Table line = new Table();
-            line.setBackground(BsUI.getSkin().newDrawable("white", BsTheme.bds()));
+            line.setBackground(BsSkinFactory.drawableOf(BsTheme.bds()));
             row();
             add(line).growX().height(1).colspan(2);
         }

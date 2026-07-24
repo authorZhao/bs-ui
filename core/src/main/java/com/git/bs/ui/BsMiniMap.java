@@ -131,6 +131,14 @@ public class BsMiniMap extends Table {
         List<Node> nodes = new ArrayList<>();
         List<float[]> connections = new ArrayList<>();
         ShapeRenderer sr;
+        // draw 阶段复用：避免每帧 new Color / float[]（节点多时数组爆炸）
+        private final float[] tmpA = new float[2];
+        private final float[] tmpB = new float[2];
+        private final Color cBgHeader = new Color();
+        private final Color cBds = new Color();
+        private final Color cTm = new Color();
+        private final Color cPrimarySoft = new Color();
+        private final Color cPrimaryStroke = new Color();
 
         MiniMapActor() {
             setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
@@ -165,14 +173,14 @@ public class BsMiniMap extends Table {
                 try {
                     sr.translate(getX(), getY(), 0);
                     // 背景
-                    Color bgHeader = new Color(BsTheme.bhH());
-                    bgHeader.a = parentAlpha;
-                    sr.setColor(bgHeader);
+                    cBgHeader.set(BsTheme.bhH());
+                    cBgHeader.a = parentAlpha;
+                    sr.setColor(cBgHeader);
                     sr.rect(0, 0, getWidth(), getHeight());
                     // 边框
-                    Color bds = new Color(BsTheme.bds());
-                    bds.a = parentAlpha;
-                    sr.setColor(bds);
+                    cBds.set(BsTheme.bds());
+                    cBds.a = parentAlpha;
+                    sr.setColor(cBds);
                     float bw = 1.5f;
                     sr.rect(0, 0, getWidth(), bw);
                     sr.rect(0, getHeight() - bw, getWidth(), bw);
@@ -180,38 +188,38 @@ public class BsMiniMap extends Table {
                     sr.rect(getWidth() - bw, 0, bw, getHeight());
 
                     // 连线
-                    Color tm = new Color(BsTheme.tm());
-                    tm.a = parentAlpha;
-                    sr.setColor(tm);
+                    cTm.set(BsTheme.tm());
+                    cTm.a = parentAlpha;
+                    sr.setColor(cTm);
                     for (float[] c : connections) {
-                        float[] p1 = canvasToMini(c[0], c[1]);
-                        float[] p2 = canvasToMini(c[2], c[3]);
-                        rectLine(sr, p1[0], p1[1], p2[0], p2[1], 1);
+                        canvasToMini(c[0], c[1], tmpA);
+                        canvasToMini(c[2], c[3], tmpB);
+                        rectLine(sr, tmpA[0], tmpA[1], tmpB[0], tmpB[1], 1);
                     }
 
                     // 节点
                     for (Node n : nodes) {
-                        float[] p = canvasToMini(n.x, n.y);
+                        canvasToMini(n.x, n.y, tmpA);
                         Color c = n.color != null ? n.color : BsPalette.PRIMARY.getMain();
                         sr.setColor(c.r, c.g, c.b, c.a * parentAlpha);
-                        sr.rect(p[0] - 2, p[1] - 2, 4, 4);
+                        sr.rect(tmpA[0] - 2, tmpA[1] - 2, 4, 4);
                     }
 
                     // 视口矩形
-                    float[] vp1 = canvasToMini(viewX, viewY);
-                    float[] vp2 = canvasToMini(viewX + viewW, viewY + viewH);
-                    float vx = Math.min(vp1[0], vp2[0]);
-                    float vy = Math.min(vp1[1], vp2[1]);
-                    float vw = Math.abs(vp2[0] - vp1[0]);
-                    float vh = Math.abs(vp2[1] - vp1[1]);
-                    Color primarySoft = new Color(BsPalette.PRIMARY.getMain());
-                    primarySoft.a = 0.3f * parentAlpha;
-                    sr.setColor(primarySoft);
+                    canvasToMini(viewX, viewY, tmpA);
+                    canvasToMini(viewX + viewW, viewY + viewH, tmpB);
+                    float vx = Math.min(tmpA[0], tmpB[0]);
+                    float vy = Math.min(tmpA[1], tmpB[1]);
+                    float vw = Math.abs(tmpB[0] - tmpA[0]);
+                    float vh = Math.abs(tmpB[1] - tmpA[1]);
+                    cPrimarySoft.set(BsPalette.PRIMARY.getMain());
+                    cPrimarySoft.a = 0.3f * parentAlpha;
+                    sr.setColor(cPrimarySoft);
                     sr.rect(vx, vy, vw, vh);
                     // 视口描边
-                    Color primaryStroke = new Color(BsPalette.PRIMARY.getMain());
-                    primaryStroke.a = parentAlpha;
-                    sr.setColor(primaryStroke);
+                    cPrimaryStroke.set(BsPalette.PRIMARY.getMain());
+                    cPrimaryStroke.a = parentAlpha;
+                    sr.setColor(cPrimaryStroke);
                     rectLine(sr, vx, vy, vx + vw, vy, 1);
                     rectLine(sr, vx, vy + vh, vx + vw, vy + vh, 1);
                     rectLine(sr, vx, vy, vx, vy + vh, 1);
@@ -225,10 +233,10 @@ public class BsMiniMap extends Table {
             }
         }
 
-        private float[] canvasToMini(float cx, float cy) {
-            float mx = (cx - canvasX) / canvasW * getWidth();
-            float my = (1 - (cy - canvasY) / canvasH) * getHeight();   // Y 翻转
-            return new float[]{mx, my};
+        /** canvas 坐标 → mini 坐标，结果写入 out（避免每帧 new float[]）。 */
+        private void canvasToMini(float cx, float cy, float[] out) {
+            out[0] = (cx - canvasX) / canvasW * getWidth();
+            out[1] = (1 - (cy - canvasY) / canvasH) * getHeight();   // Y 翻转
         }
 
         private void rectLine(ShapeRenderer sr, float x1, float y1, float x2, float y2, float w) {

@@ -178,6 +178,26 @@ public class BsAlert extends Table {
         return Color.GRAY;
     }
 
+    /**
+     * 推荐 contentActor 内文本使用的颜色：variant 主色加深 35%。
+     * <p><b>背景是浅色 soft-bg（始终为浅色，与主题无关，Bootstrap alert 规范），
+     * 因此内容必须用深色文本</b>——直接用 {@code new Label(..., skin)} 会拿到当前主题
+     * 的 bs-text-primary（dark 主题下是浅色），导致内容在浅色 Alert 背景上"看不见"。
+     * 富内容里的 Label 请用此色显式染色。</p>
+     * <p>例：</p>
+     * <pre>{@code
+     * Table content = new Table();
+     * Color c = BsAlert.contentTextColor(variant);
+     * Label l = new Label("...", skin);
+     * l.setColor(c);
+     * content.add(l).left().row();
+     * alert.setContentActor(content);
+     * }</pre>
+     */
+    public static Color contentTextColor(Variant v) {
+        return darker(colorOf(null, v), 0.35f);
+    }
+
     /** 给基色与白色混合（factor 越大越白）。 */
     private static Color lightTint(Color base, float factor) {
         return new Color(

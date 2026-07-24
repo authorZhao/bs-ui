@@ -236,7 +236,7 @@ public class BsColorPickerPopup {
         previewImage.setColor(hsvToColor());   // Image.setColor 染色（白底 × actor color = 目标色）
         Container<Image> previewWrap = new Container<>(previewImage);
         previewWrap.size(60, 28);
-        previewWrap.background(skin.newDrawable("white", BsTheme.bh()));
+        previewWrap.background(BsSkinFactory.drawableOf(BsTheme.bh()));
         previewRow.add(previewWrap).padRight(6);
 
         previewRow.add(new Label("Hex:", skin)).padRight(4);
@@ -449,9 +449,9 @@ public class BsColorPickerPopup {
      * 纯色 drawable：自建 Pixmap 染色（不依赖 skin 的 "white" drawable），Texture 登记
      * 到 {@link #solidTextures}，close 时统一释放。
      *
-     * <p>不能改用 {@code skin.newDrawable("white", c)}：在浮层里反复 tint 同名 drawable 会命中
-     * libgdx 的 TintedDrawable 缓存，导致预设色板色块渲染为透明/错误颜色（看不见）。
-     * 故走 {@link BsSkinFactory#solidTexture} 自建 Texture，再登记生命周期。</p>
+     * <p>不走 {@code BsSkinFactory.drawableOf(c)}：后者是全局缓存、永不释放，色板的 N 个颜色
+     * 一旦取过就永久驻留显存（即使关闭取色器）。这里需要独立生命周期——浮层 close 时统一
+     * dispose 这批 Texture。走 {@link BsSkinFactory#solidTexture} 自建 Texture 再登记。</p>
      */
     private Drawable makeSolidDrawable(Color c) {
         Texture tex = BsSkinFactory.solidTexture(c);

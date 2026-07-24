@@ -63,7 +63,7 @@ public class BsChoiceDialog extends BsModal {
 
         Color choiceAccent = new Color(0x66 / 255f, 0x10 / 255f, 0xF2 / 255f, 1f);
         Drawable cIcon = BsIcon.get("lightbulb-fill", choiceAccent);
-        setTitleIcon(cIcon != null ? cIcon : skin.newDrawable("white", choiceAccent));
+        setTitleIcon(cIcon != null ? cIcon : BsSkinFactory.drawableOf(choiceAccent));
 
         // 内容
         Table content = new Table();

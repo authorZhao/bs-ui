@@ -107,7 +107,7 @@ public class BsDrawer extends Table {
 
         // 标题与内容之间的分隔线
         Table sep = new Table();
-        sep.setBackground(skin.newDrawable("white", BsTheme.bds()));
+        sep.setBackground(BsSkinFactory.drawableOf(BsTheme.bds()));
         panel.add(sep).height(1).growX().row();
 
         // 内容区
@@ -125,7 +125,7 @@ public class BsDrawer extends Table {
         buttonBar.setVisible(false);
         // 按钮栏上方分隔线
         Table sep2 = new Table();
-        sep2.setBackground(skin.newDrawable("white", BsTheme.bds()));
+        sep2.setBackground(BsSkinFactory.drawableOf(BsTheme.bds()));
         panel.add(sep2).height(1).growX().row();
         panel.add(buttonBar).growX();
 
@@ -192,7 +192,7 @@ public class BsDrawer extends Table {
         shown = true;
         // backdrop
         backdrop = new Table();
-        backdrop.setBackground(BsUI.getSkin().newDrawable("white", BsTheme.ov()));
+        backdrop.setBackground(BsSkinFactory.drawableOf(BsTheme.ov()));
         backdrop.setFillParent(true);
         backdrop.setTouchable(Touchable.enabled);
         backdrop.addListener(new ClickListener() {

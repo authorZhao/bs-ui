@@ -9,6 +9,7 @@ import com.git.bs.i18n.BsI18n;
 import com.git.bs.ui.BsButton;
 import com.git.bs.ui.BsModal;
 import com.git.bs.ui.BsPalette;
+import com.git.bs.ui.BsSkinFactory;
 import com.git.bs.ui.BsTheme;
 import com.git.bs.ui.BsToast;
 import lombok.extern.slf4j.Slf4j;
@@ -124,7 +125,7 @@ public class PrivacySecurityPage extends CategoryPage {
         log.info("[隐私安全] 弹危险确认");
         BsModal modal = new BsModal(BsI18n.get("demo.danger_title"), skin);
         // 红色标题图标（DANGER 主题色）
-        modal.setTitleIcon(skin.newDrawable("white",
+        modal.setTitleIcon(BsSkinFactory.drawableOf(
                 BsPalette.DANGER.getMain()));
 
         // 警告正文

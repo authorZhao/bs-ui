@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.git.bs.game.AdminApp;
 import com.git.bs.ui.BsAlertDialog;
 import com.git.bs.ui.BsButton;
+import com.git.bs.ui.BsSkinFactory;
 import com.git.bs.ui.BsTextField;
 import com.git.bs.ui.BsTheme;
 import com.git.bs.ui.BsToast;
@@ -73,7 +74,7 @@ public class AdminLoginScreen extends ScreenAdapter {
 
         // 登录卡片：直接用 Table 控制布局，柔和浅色背景（不那么刺眼的白）
         Table card = new Table();
-        card.setBackground(skin.newDrawable("white",
+        card.setBackground(BsSkinFactory.drawableOf(
                 new com.badlogic.gdx.graphics.Color(0.97f, 0.975f, 0.98f, 1f)));
         card.pad(28);
         card.center();

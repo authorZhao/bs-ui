@@ -93,7 +93,7 @@ public class BsAlertDialog extends BsModal {
         Color accent = levelColor(BsUI.getSkin(), l);
         // 标题前图标：优先用 bootstrap-icons atlas 里的图标（染色），atlas 未加载时回退色块
         Drawable icon = BsIcon.get(levelIconName(l), accent);
-        setTitleIcon(icon != null ? icon : BsUI.getSkin().newDrawable("white", accent));
+        setTitleIcon(icon != null ? icon : BsSkinFactory.drawableOf(accent));
         // 入场 + 出场动画：NOTICE/SUCCESS 淡入+淡出（柔和），WARNING 上滑入+下滑出，
         // ERROR 缩放进入+缩放退出。出场时长拉长让动画更明显。
         switch (l) {

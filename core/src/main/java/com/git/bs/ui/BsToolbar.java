@@ -128,7 +128,7 @@ public class BsToolbar extends Table {
     /** 添加一条垂直分隔线。 */
     public BsToolbar addSeparator() {
         Container<Actor> sep = new Container<>();
-        sep.setBackground(BsUI.getSkin().newDrawable("white", BsTheme.bds()));
+        sep.setBackground(BsSkinFactory.drawableOf(BsTheme.bds()));
         sep.size(1, 22);
         add(sep).size(1, 22).padLeft(8).padRight(8);
         return this;

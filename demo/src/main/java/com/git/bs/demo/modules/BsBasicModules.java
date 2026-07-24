@@ -22,7 +22,9 @@ import com.git.bs.ui.BsRadioButton;
 import com.git.bs.ui.BsRadioButtonGroup;
 import com.git.bs.ui.BsScrollPane;
 import com.git.bs.ui.BsSelectBox;
+import com.git.bs.ui.BsSkinFactory;
 import com.git.bs.ui.BsSlider;
+import com.git.bs.ui.BsTheme;
 import com.git.bs.ui.BsStatusLabel;
 import com.git.bs.ui.BsTextArea;
 import com.git.bs.ui.BsTextField;
@@ -450,9 +452,9 @@ public class BsBasicModules {
         c.add(new Label("TextField:", skin)).padTop(8).row();
         c.add(tf).width(360).row();
 
-        // 2. 挂到 Table 行
+        // 2. 挂到 Table 行（背景用主题 surface 色，light=浅灰/dark=admin=深色，三主题对比都正确）
         Table tableRow = new Table();
-        tableRow.setBackground(skin.newDrawable("white", Color.valueOf("#F8F9FA")));
+        tableRow.setBackground(BsSkinFactory.drawableOf(BsTheme.bs()));
         tableRow.add(new Label("📊 张三的档案 —— 右键点这一行", skin)).pad(10).left();
         new BsContextMenu(skin)
                 .add("查看详情", () -> setStatus.accept("行 → 查看详情"))

@@ -173,10 +173,16 @@ public class BsInputGroup extends Table {
         return c;
     }
 
-    /** 图标 addon：浅灰底 + 居中图标。 */
+    /**
+     * 图标 addon：浅灰底 + 居中图标。
+     * <p>图标 atlas 默认按白色烘焙（见 BootstrapIconPackager 默认 fillColor=#FFFFFF），
+     * 直接绘制在浅灰 addon 背景上会"看不见"。这里用 Image.setColor 乘法染色为
+     * 当前主题的次要文本色（light=深灰 / dark=浅灰），保证 light/dark/admin 三主题下都清晰。</p>
+     */
     private Actor makeIconAddon(Drawable icon) {
         Image img = new Image(icon);
         img.setScaling(Scaling.fit);
+        img.setColor(BsTheme.ts());   // 主题次要文本色，与 addon 底色形成对比
         Container<Image> c = new Container<>(img);
         c.setBackground(BsUI.getSkin().getDrawable("bs-menu-title-up"));
         c.pad(0, 8, 0, 8);

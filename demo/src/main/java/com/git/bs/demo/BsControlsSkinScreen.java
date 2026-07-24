@@ -32,6 +32,7 @@ import com.git.bs.ui.BsList;
 import com.git.bs.ui.BsModal;
 import com.git.bs.ui.BsScrollPane;
 import com.git.bs.ui.BsSkinExporter;
+import com.git.bs.ui.BsSkinFactory;
 import com.git.bs.ui.BsText;
 import com.git.bs.ui.BsTheme;
 import com.git.bs.ui.BsUI;
@@ -157,7 +158,7 @@ public class BsControlsSkinScreen extends ScreenAdapter {
      */
     private void buildLayout() {
         Table root = new Table();
-        root.setBackground(skin.newDrawable("white", BsTheme.bb()));
+        root.setBackground(BsSkinFactory.drawableOf(BsTheme.bb()));
         root.setFillParent(true);
         stage.addActor(root);
 
@@ -213,7 +214,7 @@ public class BsControlsSkinScreen extends ScreenAdapter {
         navScroll.setFadeScrollBars(false);
         navScroll.setScrollingDisabled(true, false);
         Container<Actor> navWrap = new Container<>(navScroll);
-        navWrap.background(skin.newDrawable("white", BsTheme.bs())).pad(4);
+        navWrap.background(BsSkinFactory.drawableOf(BsTheme.bs())).pad(4);
         navWrap.fill();
         body.add(navWrap).width(220).top().padRight(8).expandY();
 

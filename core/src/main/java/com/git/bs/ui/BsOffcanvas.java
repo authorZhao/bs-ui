@@ -96,7 +96,7 @@ public class BsOffcanvas extends Table {
 
         // 标题与内容之间的分隔线
         Table sep = new Table();
-        sep.setBackground(skin.newDrawable("white", BsTheme.bds()));
+        sep.setBackground(BsSkinFactory.drawableOf(BsTheme.bds()));
         sep.setHeight(1);
         panel.add(sep).height(1).growX().row();
 
@@ -165,7 +165,7 @@ public class BsOffcanvas extends Table {
 
         // backdrop：半透明黑色遮罩，覆盖全屏
         backdrop = new Table();
-        backdrop.setBackground(BsUI.getSkin().newDrawable("white", BsTheme.ov()));
+        backdrop.setBackground(BsSkinFactory.drawableOf(BsTheme.ov()));
         backdrop.setFillParent(true);
         backdrop.setTouchable(Touchable.enabled);
         backdrop.addListener(new ClickListener() {

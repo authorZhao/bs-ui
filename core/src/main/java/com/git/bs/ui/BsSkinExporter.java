@@ -501,6 +501,13 @@ public final class BsSkinExporter {
         } else {
             fillRoundRect(pix, spec.fillColor, 0, 0, size, size, corner);
         }
+        // 与 BsSkinFactory.roundRect/outlineRoundRect 保持一致：修透明像素 RGB，
+        // 防 Linear 过滤时圆角处出现暗 fringe（红边）。否则导出 atlas 与运行时生成的
+        // skin 视觉不一致（导出版本圆角会有红边，运行时无）。
+        // pad 色：有边框且 fill≠border 取 borderColor（与 roundRect 第 667 行同逻辑），
+        // 否则取 fillColor。borderColor 可能为 null（progress-track/btn-group-inactive 等）。
+        Color padColor = (diffBorder && spec.borderColor != null) ? spec.borderColor : spec.fillColor;
+        BsSkinFactory.padTransparentRGB(pix, BsSkinFactory.colorToHex(padColor));
         return pix;
     }
 
@@ -757,25 +764,27 @@ public final class BsSkinExporter {
         }
 
         // ===== Style 桶 =====
-        addTextButtonSection(root, skin);
-        addCheckBoxSection(root, skin);
-        addLabelSection(root, skin);
+        // 带 font 的 section 传 effectiveSizes 做字号过滤（未烘焙字号的 style 不导出，
+        // 避免 json 引用悬空的 font-{size}）。不带 font 的 section 不过滤（仅冗余，无加载风险）。
+        addTextButtonSection(root, skin, effectiveSizes);
+        addCheckBoxSection(root, skin, effectiveSizes);
+        addLabelSection(root, skin, effectiveSizes);
         addSliderSection(root, skin);
         addSplitPaneSection(root, skin);
         addScrollPaneSection(root, skin);
-        addListSection(root, skin);
-        addTextFieldSection(root, skin);
-        addSelectBoxSection(root, skin);
-        addWindowSection(root, skin);
+        addListSection(root, skin, effectiveSizes);
+        addTextFieldSection(root, skin, effectiveSizes);
+        addSelectBoxSection(root, skin, effectiveSizes);
+        addWindowSection(root, skin, effectiveSizes);
         // libgdx 自带 style 补全：覆盖 defaultTagClasses 里其余 Style 类。
         // 子类样式（ImageButton/ImageTextButton/Slider）把父类字段一并显式写出，不依赖 JSON parent。
         addButtonSection(root, skin);
         addImageButtonSection(root, skin);
-        addImageTextButtonSection(root, skin);
+        addImageTextButtonSection(root, skin, effectiveSizes);
         addProgressBarSection(root, skin);
         addTextTooltipSection(root, skin);
         addTouchpadSection(root, skin);
-        addTreeSection(root, skin);
+        addTreeSection(root, skin, effectiveSizes);
 
         // ===== 补齐 style 中引用的 Color（如果 Color 桶里不存在，按命名推断追加） =====
         // 例如 style 里 "overFontColor": "white"，但 Color 桶没有 "white"
@@ -1013,13 +1022,35 @@ public final class BsSkinExporter {
         if (name != null) v.put(field, name);
     }
 
+    /**
+     * 判断 style key 是否应导出（字号过滤）。
+     * <p>命名约定：{@code bs-btn-{variant}-{style}-{size}}、{@code bs-label-{variant}-{size}} 等，
+     * size 后缀取自 {@link #ALL_SIZE_SUFFIXES}（xs/sm/md/lg/xl/xxl）。</p>
+     * <p>规则：若 key 以 {@code -{size}} 结尾，且该 size 不在 effectiveSizes 集合中，则跳过
+     * （对应的 font-{size} 字体没烘焙，style 引用会悬空，加载报错）。不带 size 后缀的 style
+     * 永远导出（默认字号走 default-font）。</p>
+     * @param key            style 名（如 "bs-btn-ghost-danger-xs"）
+     * @param effectiveSizes 已烘焙的字号后缀集合；null = 不过滤（全部导出，向后兼容）
+     */
+    private static boolean shouldExportStyle(String key, java.util.Set<String> effectiveSizes) {
+        if (effectiveSizes == null) return true;   // null = 全部导出（向后兼容）
+        for (String size : ALL_SIZE_SUFFIXES) {
+            if (key.endsWith("-" + size) && !effectiveSizes.contains(size)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // =================== 各 style section ===================
 
-    private static void addTextButtonSection(Map<String, Object> root, Skin skin) {
+    private static void addTextButtonSection(Map<String, Object> root, Skin skin,
+                                             java.util.Set<String> effectiveSizes) {
         ObjectMap<String, TextButtonStyle> ss = skin.getAll(TextButtonStyle.class);
         if (ss == null || ss.size == 0) return;
         Map<String, Object> section = new LinkedHashMap<>();
         for (ObjectMap.Entry<String, TextButtonStyle> e : ss.entries()) {
+            if (!shouldExportStyle(e.key, effectiveSizes)) continue;
             TextButtonStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             // font
@@ -1056,11 +1087,13 @@ public final class BsSkinExporter {
         root.put("com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle", section);
     }
 
-    private static void addCheckBoxSection(Map<String, Object> root, Skin skin) {
+    private static void addCheckBoxSection(Map<String, Object> root, Skin skin,
+                                           java.util.Set<String> effectiveSizes) {
         ObjectMap<String, CheckBoxStyle> ss = skin.getAll(CheckBoxStyle.class);
         if (ss == null || ss.size == 0) return;
         Map<String, Object> section = new LinkedHashMap<>();
         for (ObjectMap.Entry<String, CheckBoxStyle> e : ss.entries()) {
+            if (!shouldExportStyle(e.key, effectiveSizes)) continue;
             CheckBoxStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             // font（CheckBoxStyle 继承 TextButtonStyle）
@@ -1097,11 +1130,13 @@ public final class BsSkinExporter {
         root.put("com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle", section);
     }
 
-    private static void addLabelSection(Map<String, Object> root, Skin skin) {
+    private static void addLabelSection(Map<String, Object> root, Skin skin,
+                                        java.util.Set<String> effectiveSizes) {
         ObjectMap<String, LabelStyle> ss = skin.getAll(LabelStyle.class);
         if (ss == null || ss.size == 0) return;
         Map<String, Object> section = new LinkedHashMap<>();
         for (ObjectMap.Entry<String, LabelStyle> e : ss.entries()) {
+            if (!shouldExportStyle(e.key, effectiveSizes)) continue;
             LabelStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             putFont(v, "font", skin, s.font, "default-font");
@@ -1173,11 +1208,13 @@ public final class BsSkinExporter {
         root.put("com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle", section);
     }
 
-    private static void addListSection(Map<String, Object> root, Skin skin) {
+    private static void addListSection(Map<String, Object> root, Skin skin,
+                                       java.util.Set<String> effectiveSizes) {
         ObjectMap<String, ListStyle> ss = skin.getAll(ListStyle.class);
         if (ss == null || ss.size == 0) return;
         Map<String, Object> section = new LinkedHashMap<>();
         for (ObjectMap.Entry<String, ListStyle> e : ss.entries()) {
+            if (!shouldExportStyle(e.key, effectiveSizes)) continue;
             ListStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             putFont(v, "font", skin, s.font, "default-font");
@@ -1192,11 +1229,13 @@ public final class BsSkinExporter {
         root.put("com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle", section);
     }
 
-    private static void addTextFieldSection(Map<String, Object> root, Skin skin) {
+    private static void addTextFieldSection(Map<String, Object> root, Skin skin,
+                                            java.util.Set<String> effectiveSizes) {
         ObjectMap<String, TextFieldStyle> ss = skin.getAll(TextFieldStyle.class);
         if (ss == null || ss.size == 0) return;
         Map<String, Object> section = new LinkedHashMap<>();
         for (ObjectMap.Entry<String, TextFieldStyle> e : ss.entries()) {
+            if (!shouldExportStyle(e.key, effectiveSizes)) continue;
             TextFieldStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             putFont(v, "font", skin, s.font, "default-font");
@@ -1215,11 +1254,13 @@ public final class BsSkinExporter {
         root.put("com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle", section);
     }
 
-    private static void addSelectBoxSection(Map<String, Object> root, Skin skin) {
+    private static void addSelectBoxSection(Map<String, Object> root, Skin skin,
+                                            java.util.Set<String> effectiveSizes) {
         ObjectMap<String, SelectBoxStyle> ss = skin.getAll(SelectBoxStyle.class);
         if (ss == null || ss.size == 0) return;
         Map<String, Object> section = new LinkedHashMap<>();
         for (ObjectMap.Entry<String, SelectBoxStyle> e : ss.entries()) {
+            if (!shouldExportStyle(e.key, effectiveSizes)) continue;
             SelectBoxStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             putFont(v, "font", skin, s.font, "default-font");
@@ -1238,11 +1279,13 @@ public final class BsSkinExporter {
         root.put("com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle", section);
     }
 
-    private static void addWindowSection(Map<String, Object> root, Skin skin) {
+    private static void addWindowSection(Map<String, Object> root, Skin skin,
+                                         java.util.Set<String> effectiveSizes) {
         ObjectMap<String, WindowStyle> ss = skin.getAll(WindowStyle.class);
         if (ss == null || ss.size == 0) return;
         Map<String, Object> section = new LinkedHashMap<>();
         for (ObjectMap.Entry<String, WindowStyle> e : ss.entries()) {
+            if (!shouldExportStyle(e.key, effectiveSizes)) continue;
             WindowStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             putFont(v, "titleFont", skin, s.titleFont, "default-font");
@@ -1332,11 +1375,13 @@ public final class BsSkinExporter {
         root.put("com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle", section);
     }
 
-    private static void addImageTextButtonSection(Map<String, Object> root, Skin skin) {
+    private static void addImageTextButtonSection(Map<String, Object> root, Skin skin,
+                                                  java.util.Set<String> effectiveSizes) {
         ObjectMap<String, ImageTextButton.ImageTextButtonStyle> ss = skin.getAll(ImageTextButton.ImageTextButtonStyle.class);
         if (ss == null || ss.size == 0) return;
         Map<String, Object> section = new LinkedHashMap<>();
         for (ObjectMap.Entry<String, ImageTextButton.ImageTextButtonStyle> e : ss.entries()) {
+            if (!shouldExportStyle(e.key, effectiveSizes)) continue;
             ImageTextButton.ImageTextButtonStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             // 继承自 TextButtonStyle：font + fontColor 全套
@@ -1432,11 +1477,13 @@ public final class BsSkinExporter {
         root.put("com.badlogic.gdx.scenes.scene2d.ui.Touchpad$TouchpadStyle", section);
     }
 
-    private static void addTreeSection(Map<String, Object> root, Skin skin) {
+    private static void addTreeSection(Map<String, Object> root, Skin skin,
+                                       java.util.Set<String> effectiveSizes) {
         ObjectMap<String, Tree.TreeStyle> ss = skin.getAll(Tree.TreeStyle.class);
         if (ss == null || ss.size == 0) return;
         Map<String, Object> section = new LinkedHashMap<>();
         for (ObjectMap.Entry<String, Tree.TreeStyle> e : ss.entries()) {
+            if (!shouldExportStyle(e.key, effectiveSizes)) continue;
             Tree.TreeStyle s = e.value;
             Map<String, Object> v = new LinkedHashMap<>();
             // plus/minus 是树形展开收起图标，bs 主题没有专属资源 → 无 fallback，反查不到就跳过

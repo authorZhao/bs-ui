@@ -60,6 +60,8 @@ public class BsAffix extends Table {
     private float offset = 0;
     /** 监听的 ScrollPane（自动查找最近的祖先）。 */
     private com.badlogic.gdx.scenes.scene2d.ui.ScrollPane trackedPane;
+    /** act 复用：避免每帧 new Vector2（localToParentCoordinates 传参用）。 */
+    private final com.badlogic.gdx.math.Vector2 tmpVec = new com.badlogic.gdx.math.Vector2();
 
     public BsAffix(Skin skin, Actor inner, Placement placement) {
         this.inner = inner;
@@ -99,7 +101,7 @@ public class BsAffix extends Table {
             float viewH = trackedPane.getHeight();
             // 把自身 Y 转到 ScrollPane 坐标系
             float myYInScroll = localToParentCoordinates(
-                    new com.badlogic.gdx.math.Vector2(0, getY())).y;
+                    tmpVec.set(0, getY())).y;
             // 简化：当 inner 顶（或底）超出视口时，调整 inner 位置
             boolean shouldAffix;
             if (placement == Placement.TOP) {

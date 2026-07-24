@@ -22,7 +22,9 @@
 package com.git.bs.ui;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -67,23 +69,51 @@ public class BsProgress extends Table {
 
     /** 当前 fill 颜色对应的 drawable（来自 BsSkinFactory 注册的 bs-{color}-up）。 */
     private Drawable fillDrawable;
+    /** striped 模式下的斜纹纹理（striped=true 时由 setStriped 生成，remove 时 dispose）。 */
+    private Texture stripedTexture;
+    private TextureRegion stripedRegion;
 
     public BsProgress(Skin skin) {
         setBackground(skin.getDrawable("bs-progress-track"));  // 无边框淡灰圆角 track
-        // fill 用自绘 Actor（draw 内部贴 drawable），便于条纹动画偏移
+        // fill 用自绘 Actor（draw 内部贴 drawable / 斜纹纹理），便于条纹动画偏移
         fillActor = new Actor() {
             @Override
             public void draw(Batch batch, float parentAlpha) {
-                if (fillDrawable == null) return;
                 Color c = getColor();
-                batch.setColor(c.r, c.g, c.b, c.a * parentAlpha);
-                fillDrawable.draw(batch, getX(), getY(), getWidth(), getHeight());
-                batch.setColor(Color.WHITE);
+                float alpha = c.a * parentAlpha;
+                if (striped && stripedRegion != null) {
+                    // 条纹模式：用 TextureRegion 偏移实现流动动画（stripeOffset 驱动水平平移）
+                    // 按 fill 宽度循环贴 40px 宽的条纹纹理
+                    batch.setColor(c.r, c.g, c.b, alpha);
+                    float w = getWidth(), h = getHeight();
+                    // 用 batch.draw(texture, x, y, w, h, srcX, srcY, srcW, srcH, flip) 形式做纹理偏移：
+                    // 取 stripedRegion 整张，srcX = stripeOffset 实现平移，配合 Repeat wrap 循环
+                    Texture tex = stripedRegion.getTexture();
+                    int texW = tex.getWidth();
+                    // 把 fill 区域映射成"纹理坐标偏移 stripeOffset 后的子图"——
+                    // 用 scaled src 方式：srcX 随 stripeOffset 变化，srcW = texW，绘制时按 fill 宽度缩放
+                    // 简化：直接用 batch.draw 的 region 形式 + u/v 偏移（libgdx 用 setRegion 调整）
+                    // 最稳：临时改 region 的 x，draw 完恢复
+                    float oldX = stripedRegion.getRegionX();
+                    float oldW = stripedRegion.getRegionWidth();
+                    stripedRegion.setRegionX((int) (stripeOffset % texW));
+                    // region 宽度也要调整避免越界——用 Repeat wrap 已设，直接整宽
+                    stripedRegion.setRegionWidth(texW);
+                    batch.draw(stripedRegion, getX(), getY(), w, h);
+                    stripedRegion.setRegionX((int) oldX);
+                    stripedRegion.setRegionWidth((int) oldW);
+                    batch.setColor(Color.WHITE);
+                } else if (fillDrawable != null) {
+                    batch.setColor(c.r, c.g, c.b, alpha);
+                    fillDrawable.draw(batch, getX(), getY(), getWidth(), getHeight());
+                    batch.setColor(Color.WHITE);
+                }
             }
             @Override
             public void act(float delta) {
                 super.act(delta);
                 if (animated) {
+                    // 条纹流动：每秒移 40px（一个周期），% 40 循环
                     stripeOffset = (stripeOffset + delta * 40f) % 40f;
                 }
             }
@@ -117,13 +147,6 @@ public class BsProgress extends Table {
 
     public float getProgress() { return progress; }
 
-    public BsProgress setVariant(Variant v) {
-        this.variant = v;
-        String key = "bs-" + v.name().toLowerCase() + "-up";
-        fillDrawable = BsUI.getSkin().getDrawable(key);
-        return this;
-    }
-
     public Variant getVariant() { return variant; }
 
     /** 显示进度百分比文字（叠在 fill 上，白字）。 */
@@ -137,15 +160,14 @@ public class BsProgress extends Table {
     /** 条纹背景（45° 斜纹，CSS progress-bar-striped 效果）。 */
     public BsProgress setStriped(boolean striped) {
         this.striped = striped;
-        // 简化实现：striped 状态切换 fill drawable（条带版 vs 纯色版）
-        // 程序化条纹 drawable 一次性生成缓存，这里复用 roundRect 的色块 + alpha 网格
-        Skin skin = BsUI.getSkin();
+        // 生成/释放条纹纹理（真斜纹，variant 色 + 半透交替；动画用 stripeOffset 平移）
         if (striped) {
-            fillDrawable = skin.newDrawable("bs-" + variant.name().toLowerCase() + "-up",
-                    tint(variant, 0.85f));
-        } else {
-            fillDrawable = skin.getDrawable("bs-" + variant.name().toLowerCase() + "-up");
+            if (stripedTexture == null) {
+                stripedTexture = BsSkinFactory.stripedTexture(colorOf(variant));
+                stripedRegion = new TextureRegion(stripedTexture);
+            }
         }
+        // 非 striped 模式用纯色 fillDrawable（setVariant 已设），纹理保留到 remove 统一释放
         return this;
     }
 
@@ -155,10 +177,28 @@ public class BsProgress extends Table {
         return this;
     }
 
-    /** 给 variant 加深/调亮返回 Color（用于条纹视觉差异，简化版）。 */
-    private Color tint(Variant v, float factor) {
-        Color base = colorOf(v);
-        return new Color(base.r * factor, base.g * factor, base.b * factor, 1f);
+    /** 切换 variant 时重建条纹纹理（颜色变了，旧纹理失效）。 */
+    public BsProgress setVariant(Variant v) {
+        this.variant = v;
+        String key = "bs-" + v.name().toLowerCase() + "-up";
+        fillDrawable = BsUI.getSkin().getDrawable(key);
+        // striped 模式下纹理要按新色重建
+        if (stripedTexture != null) {
+            stripedTexture.dispose();
+            stripedTexture = BsSkinFactory.stripedTexture(colorOf(v));
+            stripedRegion = new TextureRegion(stripedTexture);
+        }
+        return this;
+    }
+
+    @Override
+    public boolean remove() {
+        if (stripedTexture != null) {
+            stripedTexture.dispose();
+            stripedTexture = null;
+            stripedRegion = null;
+        }
+        return super.remove();
     }
 
     private static Color colorOf(Variant v) {

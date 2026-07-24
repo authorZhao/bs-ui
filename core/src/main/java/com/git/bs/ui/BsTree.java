@@ -146,7 +146,7 @@ public class BsTree extends Table {
             for (int i = 0; i < depth; i++) {
                 // 用 1px 宽的灰色 drawable 作为竖线（在 INDENT_PER_DEPTH 宽度的 cell 内居中）
                 com.badlogic.gdx.scenes.scene2d.utils.Drawable vline =
-                        skin.newDrawable("white", BsTheme.bd());
+                        BsSkinFactory.drawableOf(BsTheme.bd());
                 com.badlogic.gdx.scenes.scene2d.ui.Container<Actor> vlineWrap =
                         new com.badlogic.gdx.scenes.scene2d.ui.Container<>();
                 com.badlogic.gdx.scenes.scene2d.ui.Image lineImg = new com.badlogic.gdx.scenes.scene2d.ui.Image(vline);

@@ -116,7 +116,7 @@ public class BsPlaceholder extends Table {
                 ? getSkin().newDrawable("bs-progress-track", col)
                 : null;
         if (d == null && getSkin() != null) {
-            d = getSkin().newDrawable("white", col);
+            d = BsSkinFactory.drawableOf(col);
         }
         if (d != null) c.setBackground(d);
         c.fill();

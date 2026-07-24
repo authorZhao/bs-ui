@@ -53,7 +53,7 @@ public class BsBlockquote extends Table {
         text = new BsText(content, large ? BsText.Size.LG : BsText.Size.DEFAULT, BsText.Variant.SECONDARY);
 
         // 左侧 4px primary 色条（白底染色，stretch 拉满 cell 高度 = 文字高度）
-        Image border = new Image(BsUI.getSkin().newDrawable("white", BsTheme.colorOf("primary")));
+        Image border = new Image(BsSkinFactory.drawableOf(BsTheme.colorOf("primary")));
         border.setScaling(Scaling.stretch);
         add(border).width(4f).fillY();
 

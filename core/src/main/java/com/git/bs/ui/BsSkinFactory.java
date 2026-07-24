@@ -132,8 +132,13 @@ public final class BsSkinFactory {
         }
 
         // ===== Step 2: 注册 white Drawable（用作 newDrawable 基础） =====
+        // 保留 NinePatchDrawable 类型（导出/派生路径依赖），但纹理从 2×2 改成 4×4：
+        // 原 2×2 + 切边1,1,1,1 时 middleWidth = 2-1-1 = 0，NinePatch 中段为空，draw 大尺寸只画四角。
+        // 改 4×4 后 middleWidth = 4-1-1 = 2 > 0，中段正常拉伸填满，任意尺寸都正确。
+        // 注：业务代码纯色背景应优先用 BsSkinFactory.drawableOf(color)（全局缓存、零 GC），
+        //    newDrawable("white", color) 仅留给 BsSkinFactory 内部派生具名 drawable（bs-split-handle 等）。
         if (!skin.has("white", com.badlogic.gdx.scenes.scene2d.utils.Drawable.class)) {
-            Pixmap whitePix = new Pixmap(2, 2, Pixmap.Format.RGBA8888);
+            Pixmap whitePix = new Pixmap(4, 4, Pixmap.Format.RGBA8888);
             whitePix.setColor(Color.WHITE);
             whitePix.fill();
             Texture whiteTex = new Texture(whitePix);
@@ -690,7 +695,8 @@ public final class BsSkinFactory {
         return new NinePatchDrawable(new NinePatch(new TextureRegion(tex), corner, corner, corner, corner));
     }
 
-    private static int colorToHex(Color c) {
+    /** 包级可见：供 BsSkinExporter 复用同一套 Color→hex 编码。 */
+    static int colorToHex(Color c) {
         int r = Math.round(c.r * 255) & 0xFF;
         int g = Math.round(c.g * 255) & 0xFF;
         int b = Math.round(c.b * 255) & 0xFF;
@@ -702,8 +708,10 @@ public final class BsSkinFactory {
      * <p>圆角 NinePatch 的透明像素默认 RGB=(0,0,0)，Linear 过滤时和边框/填充色混合
      * 会产生暗 fringe（圆角处看到的偏暗/偏暖"红边"）。把 RGB 填成最近的实色后，
      * Linear 混合是 实色→实色（仅 alpha 渐变），不再有 RGB 暗化。</p>
+     * <p>包级可见：{@link BsSkinExporter} 导出圆角 atlas 时复用同一算法，
+     * 保证"运行时生成"和"导出 atlas"视觉一致（否则导出的皮肤圆角会出现红边）。</p>
      */
-    private static void padTransparentRGB(Pixmap pix, int rgbHex) {
+    static void padTransparentRGB(Pixmap pix, int rgbHex) {
         int r = (rgbHex >> 16) & 0xFF;
         int g = (rgbHex >> 8) & 0xFF;
         int b = rgbHex & 0xFF;
@@ -767,7 +775,8 @@ public final class BsSkinFactory {
         return pix;
     }
 
-    private static com.badlogic.gdx.scenes.scene2d.utils.Drawable arrowDrawable(Color color, boolean pointRight) {
+    /** 包级可见：左右箭头 Drawable（实心三角形，24×24）。供 BsCarousel 等 fallback 用。 */
+    static com.badlogic.gdx.scenes.scene2d.utils.Drawable arrowDrawable(Color color, boolean pointRight) {
         return toDrawable(arrowPixmap(color, pointRight));
     }
 
@@ -950,6 +959,37 @@ public final class BsSkinFactory {
         return new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(new TextureRegion(tex));
     }
 
+    /**
+     * 生成 45° 斜纹纹理（供 BsProgress striped 模式用）。
+     * <p>纹理尺寸 40×40，variant 色 + 半透明交替的斜条带，周期 40px。
+     * 调用方用 TextureRegion 的 regionX 偏移实现"条纹流动"动画（{@code setAnimated(true}）。</p>
+     * <p><b>调用方自行 dispose 返回的 Texture</b>（每个 variant 一份，BsProgress remove 时释放）。</p>
+     * @param color 斜纹主色（另一条带 = 同色 0.5 alpha）
+     */
+    public static Texture stripedTexture(Color color) {
+        int size = 40;
+        Pixmap pix = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+        // 先填半透明底色（暗条带）
+        Color dark = new Color(color.r * 0.5f, color.g * 0.5f, color.b * 0.5f, 1f);
+        pix.setColor(dark);
+        pix.fill();
+        // 画 45° 斜条纹（亮条带，宽约 10px，周期 20px）
+        // 用 setPixel 逐点判断：满足 (x+y) % 20 < 10 画亮色
+        pix.setColor(color);
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                if (((x + y) % 20) < 10) {
+                    pix.drawPixel(x, y);
+                }
+            }
+        }
+        Texture tex = new Texture(pix);
+        tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        tex.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);  // Repeat 用于平移不越界
+        pix.dispose();
+        return tex;
+    }
+
     // =================== 头像裁剪工具（保留公用 API） ===================
 
     public static com.badlogic.gdx.scenes.scene2d.utils.Drawable makeRoundDrawable(
@@ -958,6 +998,16 @@ public final class BsSkinFactory {
         pix.setBlending(Blending.None);
         if (source instanceof com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable) {
             TextureRegion region = ((com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable) source).getRegion();
+            com.badlogic.gdx.graphics.TextureData td = region.getTexture().getTextureData();
+            if (!td.isPrepared()) td.prepare();
+            pix.drawPixmap(td.consumePixmap(),
+                    region.getRegionX(), region.getRegionY(), region.getRegionWidth(), region.getRegionHeight(),
+                    0, 0, size, size);
+        } else if (source instanceof com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable) {
+            // SpriteDrawable 不是 TextureRegionDrawable 子类，但 Sprite extends TextureRegion，
+            // 直接取 Sprite 当 region（改 "white" 为 TextureRegionDrawable 后，newDrawable 返回
+            // SpriteDrawable，走这里才能正确染色裁圆，否则会掉进 else 的灰色兜底）
+            TextureRegion region = ((com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable) source).getSprite();
             com.badlogic.gdx.graphics.TextureData td = region.getTexture().getTextureData();
             if (!td.isPrepared()) td.prepare();
             pix.drawPixmap(td.consumePixmap(),

@@ -209,7 +209,7 @@ public class BsProfilePanel extends Table {
     }
 
     private void setAvatarPlaceholder(Color c) {
-        Image img = new Image(BsUI.getSkin().newDrawable("white", c));
+        Image img = new Image(BsSkinFactory.drawableOf(c));
         img.setScaling(com.badlogic.gdx.utils.Scaling.fill);
         avatarWrap.setActor(img);
     }

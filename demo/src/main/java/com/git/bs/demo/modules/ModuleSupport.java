@@ -12,6 +12,7 @@ import com.git.bs.ui.BsAlert;
 import com.git.bs.ui.BsAvatar;
 import com.git.bs.ui.BsButton;
 import com.git.bs.ui.BsOffcanvas;
+import com.git.bs.ui.BsSkinFactory;
 import com.git.bs.ui.BsToast;
 import lombok.extern.slf4j.Slf4j;
 
@@ -173,7 +174,7 @@ public final class ModuleSupport {
     /** 轮播色块 slide（标题 + 副标题居中）。 */
     public static Actor makeColorSlide(Skin skin, String title, String subtitle, Color bg) {
         Table t = new Table(skin);
-        t.setBackground(skin.newDrawable("white", bg));
+        t.setBackground(BsSkinFactory.drawableOf(bg));
         t.center();
         Label.LabelStyle xl = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
         xl.font = skin.getFont("font-xl");
@@ -199,7 +200,7 @@ public final class ModuleSupport {
         Label tagLabel = new Label(tag, lg);
         tagLabel.setColor(Color.WHITE);
         Container<Label> tagWrap = new Container<>(tagLabel);
-        tagWrap.setBackground(skin.newDrawable("white", new Color(0, 0, 0, 0.5f)));
+        tagWrap.setBackground(BsSkinFactory.drawableOf(new Color(0, 0, 0, 0.5f)));
         tagWrap.pad(4, 10, 4, 10);
         t.add(tagWrap).pad(10).left();
         return t;

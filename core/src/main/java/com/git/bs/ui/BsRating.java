@@ -153,6 +153,13 @@ public class BsRating extends Table {
     /** 单个星星自绘 Actor。fill=0 描边，fill=1 填充，fill=0.5 半填充。 */
     private class StarActor extends Actor {
         float fill = 0f;
+        // drawStar 复用：避免每帧 new 6 个 float[10]（5 星 = 60 数组/帧）
+        private final float[] xs = new float[10];
+        private final float[] ys = new float[10];
+        private final float[] hx = new float[10];
+        private final float[] hy = new float[10];
+        private final float[] ix = new float[10];
+        private final float[] iy = new float[10];
 
         @Override
         public void draw(Batch batch, float parentAlpha) {
@@ -181,8 +188,6 @@ public class BsRating extends Table {
             float rInner = rOuter * 0.4f;
             // 自下而上画（libgdx Y 朝上）
             // 5 角星尖角朝上的标准起始角度 = 90°（顶部）
-            float[] xs = new float[10];
-            float[] ys = new float[10];
             for (int i = 0; i < 10; i++) {
                 float angle = (float) Math.toRadians(90 + i * 36);   // 每 36° 一个顶点
                 float r = (i % 2 == 0) ? rOuter : rInner;
@@ -201,8 +206,6 @@ public class BsRating extends Table {
                     // 半星：把星星按 x < cx 切，左半边填充
                     // 简化：用 clip 思路，只画 x ≤ cx 的三角形部分（用 cx 当分割）
                     // 实现：把所有顶点 cx 右侧的 clamp 到 cx
-                    float[] hx = new float[10];
-                    float[] hy = new float[10];
                     for (int i = 0; i < 10; i++) {
                         hx[i] = Math.min(xs[i], cx);
                         hy[i] = ys[i];
@@ -222,8 +225,6 @@ public class BsRating extends Table {
                 // 中间画一个小白星"挖空"
                 sr.setColor(1, 1, 1, alpha);
                 float scale = 0.7f;
-                float[] ix = new float[10];
-                float[] iy = new float[10];
                 for (int i = 0; i < 10; i++) {
                     float angle = (float) Math.toRadians(90 + i * 36);
                     float r = ((i % 2 == 0) ? rOuter : rInner) * scale;

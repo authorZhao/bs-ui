@@ -203,7 +203,7 @@ public class BsListGroup extends Table {
             // badge
             if (badge != null && !badge.isEmpty()) {
                 Container<Label> badgeWrap = new Container<>();
-                badgeWrap.setBackground(skin.newDrawable("white",
+                badgeWrap.setBackground(BsSkinFactory.drawableOf(
                         badgeColor != null ? badgeColor : BsPalette.DANGER.getMain()));
                 badgeWrap.pad(2, 8, 2, 8);
                 Label bl = new Label(badge, smStyle);

@@ -156,12 +156,12 @@ public class BsTimeline extends Table {
             dotLabel.setColor(toGdx(color));
             Container<com.badlogic.gdx.scenes.scene2d.ui.Label> dot = new Container<>(dotLabel);
             dot.size(dotSize);
-            dot.setBackground(skin.newDrawable("white", toGdx(color)));
+            dot.setBackground(BsSkinFactory.drawableOf(toGdx(color)));
             leftCol.add(dot).size(dotSize).padTop(2).row();
             // 竖线（灰色细条）
             if (!last) {
                 Container<?> line = new Container<>();
-                line.setBackground(skin.newDrawable("white", new com.badlogic.gdx.graphics.Color(0xDE / 255f, 0xE2 / 255f, 0xE6 / 255f, 1f)));
+                line.setBackground(BsSkinFactory.drawableOf(new com.badlogic.gdx.graphics.Color(0xDE / 255f, 0xE2 / 255f, 0xE6 / 255f, 1f)));
                 line.size(lineWidth, 30);
                 leftCol.add(line).size(lineWidth, 30).padTop(2);
             }

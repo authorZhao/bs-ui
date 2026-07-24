@@ -72,7 +72,10 @@ public abstract class BsAbstractTheme implements BsTheme {
             Color c;
             // 8 位 hex（含 alpha）：0xAARRGGBB
             // 6 位 hex（无 alpha）：0xRRGGBB → alpha=1
-            if (hex > 0xFFFFFF) {
+            // 注意：alpha ≥ 0x80 时 int 字面量为负数（如 0xB3000000 = -1291845632），
+            // 有符号比较 hex > 0xFFFFFF 会误判为 6 位（走 else 丢 alpha）。
+            // 用无符号比较：任何 8 位 ARGB 的无符号值都 > 0xFFFFFF。
+            if (Integer.compareUnsigned(hex, 0xFFFFFF) > 0) {
                 c = new Color(
                         ((hex >> 16) & 0xFF) / 255f,
                         ((hex >> 8) & 0xFF) / 255f,

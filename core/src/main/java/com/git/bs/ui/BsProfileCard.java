@@ -195,10 +195,12 @@ public class BsProfileCard extends Table {
     }
 
     private void setAvatarPlaceholder(Color c) {
-        Drawable ph = BsSkinFactory.makeRoundDrawable(
-                BsUI.getSkin().newDrawable("white", c), (int) avatarSize);
-        Image img = new Image(ph);
+        // 用白色圆 drawable + Image.setColor(c) 染色（白色 × c = c 色，顶点色染色）。
+        // 不走 makeRoundDrawable(newDrawable("white",c))——后者按纹理像素拷贝，纯色 drawable
+        // 的 tint 在顶点色不在像素里，会画出白色圆丢失 c 色。
+        Image img = new Image(BsSkinFactory.circleDrawable((int) avatarSize));
         img.setScaling(com.badlogic.gdx.utils.Scaling.fill);
+        img.setColor(c);
         avatarWrap.setActor(img);
     }
 }

@@ -65,6 +65,8 @@ public class BsTooltip extends Table {
     private float showDelay = DEFAULT_SHOW_DELAY;
     private float hoverTime;  // 鼠标 hover 累计时间，<0 表示未 hover
     private boolean showing;
+    /** 复用：onStageMouseMoved / positionNearTarget 里 localToStageCoordinates 传参用。 */
+    private final Vector2 tmpVec = new Vector2();
     // stage 级别 mouseMoved 监听（用于鼠标离开 target 时可靠 hide）
     private com.badlogic.gdx.scenes.scene2d.InputListener stageMouseTracker;
 
@@ -128,7 +130,7 @@ public class BsTooltip extends Table {
             hide();
             return;
         }
-        Vector2 tp = target.localToStageCoordinates(new Vector2(0, 0));
+        Vector2 tp = target.localToStageCoordinates(tmpVec.set(0, 0));
         boolean inside = stageX >= tp.x && stageX <= tp.x + target.getWidth()
                 && stageY >= tp.y && stageY <= tp.y + target.getHeight();
         if (!inside) {
@@ -182,7 +184,7 @@ public class BsTooltip extends Table {
 
     private void positionNearTarget() {
         if (target.getStage() == null) return;
-        Vector2 targetPos = target.localToStageCoordinates(new Vector2(0, 0));
+        Vector2 targetPos = target.localToStageCoordinates(tmpVec.set(0, 0));
         float tw = target.getWidth();
         float th = target.getHeight();
         float myW = getWidth();

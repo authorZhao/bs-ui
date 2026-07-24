@@ -212,6 +212,9 @@ public class BsSteps extends Table {
         private final float titleGap;
         private final float titleHeight;
         private final boolean hasRing;
+        // Label 复用：构造期 new 一次，draw 里只更新属性，避免每帧 new 4 个对象（2 LabelStyle + 2 Label）
+        private final Label circleText;
+        private final Label titleText;
 
         NodeActor(Skin skin, Color fillColor, Color ringColor, boolean outlined,
                   String circleLabel, String title, Color labelColor,
@@ -227,6 +230,17 @@ public class BsSteps extends Table {
             this.titleGap = titleGap;
             this.titleHeight = titleHeight;
             this.hasRing = hasRing;
+            // 预创建 Label + Style，draw 阶段只更新位置/颜色
+            Label.LabelStyle clStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            clStyle.font = skin.getFont("font-sm");
+            circleText = new Label(circleLabel, clStyle);
+            circleText.setAlignment(com.badlogic.gdx.utils.Align.center);
+            circleText.setSize(circleSize, circleSize);
+
+            Label.LabelStyle tlStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+            tlStyle.font = skin.getFont("font-sm");
+            titleText = new Label(title, tlStyle);
+            titleText.setAlignment(com.badlogic.gdx.utils.Align.center);
         }
 
         @Override
@@ -269,33 +283,22 @@ public class BsSteps extends Table {
                 batch.begin();
             }
 
-            // === batch 阶段：画数字/勾 + 标题 ===
-            // 直接用 Label.setBounds + setAlignment(center) 让 scene2d 自己处理居中
-
+            // === batch 阶段：画数字/勾 + 标题（复用预创建 Label） ===
             // 圆内的数字/勾
-            Label.LabelStyle clStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
-            clStyle.font = skin.getFont("font-sm");
-            Label cl = new Label(circleLabel, clStyle);
-            cl.setColor(outlined ? labelColor : Color.WHITE);
-            cl.setAlignment(com.badlogic.gdx.utils.Align.center);   // 文字在 Label 内部居中
-            cl.setSize(circleSize, circleSize);
-            cl.setBounds(getX() + cx - circleSize / 2f,
+            circleText.setColor(outlined ? labelColor : Color.WHITE);
+            circleText.setBounds(getX() + cx - circleSize / 2f,
                     getY() + cy - circleSize / 2f,
                     circleSize, circleSize);
-            cl.draw(batch, parentAlpha);
+            circleText.draw(batch, parentAlpha);
 
             // 圆下方的标题
-            Label.LabelStyle tlStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
-            tlStyle.font = skin.getFont("font-sm");
-            Label tl = new Label(title, tlStyle);
-            tl.setColor(labelColor);
-            tl.setAlignment(com.badlogic.gdx.utils.Align.center);
+            titleText.setColor(labelColor);
             float tWidth = circleSize + 30;
-            tl.setSize(tWidth, titleHeight);
-            tl.setBounds(getX() + cx - tWidth / 2f,
+            titleText.setSize(tWidth, titleHeight);
+            titleText.setBounds(getX() + cx - tWidth / 2f,
                     getY() + circleSize + titleGap,
                     tWidth, titleHeight);
-            tl.draw(batch, parentAlpha);
+            titleText.draw(batch, parentAlpha);
         }
     }
 

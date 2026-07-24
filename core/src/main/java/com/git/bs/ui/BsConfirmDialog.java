@@ -56,7 +56,7 @@ public class BsConfirmDialog extends BsModal {
 
         // 标题前问号图标（蓝色，象征询问）——优先用 atlas 图标，回退色块
         Drawable qIcon = BsIcon.get("question-circle", BsPalette.PRIMARY.getMain());
-        setTitleIcon(qIcon != null ? qIcon : BsUI.getSkin().newDrawable("white", BsPalette.PRIMARY.getMain()));
+        setTitleIcon(qIcon != null ? qIcon : BsSkinFactory.drawableOf(BsPalette.PRIMARY.getMain()));
 
         // 内容
         Label msg = new Label(message == null ? "" : message, skin);

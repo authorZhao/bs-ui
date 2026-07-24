@@ -6,14 +6,14 @@
 		font-md:{
 			file:"font-md.fnt"
 		},
+		default-font:{
+			file:"font-md.fnt"
+		},
 		font-lg:{
 			file:"font-lg.fnt"
 		},
 		font-xl:{
 			file:"font-xl.fnt"
-		},
-		default-font:{
-			file:"font-md.fnt"
 		}
 	},
 	com.badlogic.gdx.graphics.Color:{
@@ -123,7 +123,7 @@
 			r:0.0,
 			g:0.0,
 			b:0.0,
-			a:1.0
+			a:0.702
 		},
 		bs-text-disabled:{
 			r:0.2863,
@@ -135,7 +135,7 @@
 			r:0.2392,
 			g:0.5451,
 			b:0.9922,
-			a:1.0
+			a:0.502
 		},
 		bs-bg-elevated:{
 			r:0.2039,
@@ -189,7 +189,7 @@
 			r:0.0,
 			g:0.0,
 			b:0.0,
-			a:1.0
+			a:0.6
 		},
 		gray:{
 			r:0.5,
@@ -217,8 +217,8 @@
 		}
 	},
 	com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle:{
-		bs-btn-outline-success-lg:{
-			font:"font-lg",
+		bs-btn-outline-success-xl:{
+			font:"font-xl",
 			fontColor:"bs-success",
 			downFontColor:"bs-text-on-dark",
 			overFontColor:"bs-text-on-dark",
@@ -229,20 +229,8 @@
 			disabled:"bs-success-disabled",
 			checked:"bs-success-outline-active"
 		},
-		bs-btn-outline-dark-xl:{
-			font:"font-xl",
-			fontColor:"bs-dark",
-			downFontColor:"bs-text-on-dark",
-			overFontColor:"bs-text-on-dark",
-			disabledFontColor:"bs-border",
-			up:"bs-dark-outline-up",
-			down:"bs-dark-outline-active",
-			over:"bs-dark-outline-hover",
-			disabled:"bs-dark-disabled",
-			checked:"bs-dark-outline-active"
-		},
-		bs-btn-outline-success-xl:{
-			font:"font-xl",
+		bs-btn-outline-success-lg:{
+			font:"font-lg",
 			fontColor:"bs-success",
 			downFontColor:"bs-text-on-dark",
 			overFontColor:"bs-text-on-dark",
@@ -272,6 +260,17 @@
 			over:"bs-success-hover",
 			disabled:"bs-success-disabled",
 			checked:"bs-success-active"
+		},
+		bs-btn-ghost-info:{
+			font:"default-font",
+			fontColor:"bs-info",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-info-outline-active",
+			over:"bs-info-outline-hover",
+			disabled:"bs-info-disabled",
+			checked:"bs-info-outline-active"
 		},
 		bs-btn-dark:{
 			font:"default-font",
@@ -313,6 +312,17 @@
 			disabled:"bs-danger-disabled",
 			checked:"bs-danger-active"
 		},
+		bs-btn-ghost-success-lg:{
+			font:"font-lg",
+			fontColor:"bs-success",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-success-outline-active",
+			over:"bs-success-outline-hover",
+			disabled:"bs-success-disabled",
+			checked:"bs-success-outline-active"
+		},
 		bs-btn-danger-xl:{
 			font:"font-xl",
 			fontColor:"bs-text-on-dark",
@@ -322,6 +332,17 @@
 			over:"bs-danger-hover",
 			disabled:"bs-danger-disabled",
 			checked:"bs-danger-active"
+		},
+		bs-btn-ghost-success-xl:{
+			font:"font-xl",
+			fontColor:"bs-success",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-success-outline-active",
+			over:"bs-success-outline-hover",
+			disabled:"bs-success-disabled",
+			checked:"bs-success-outline-active"
 		},
 		bs-btn-outline-secondary-lg:{
 			font:"font-lg",
@@ -335,6 +356,30 @@
 			disabled:"bs-secondary-disabled",
 			checked:"bs-secondary-outline-active"
 		},
+		bs-btn-outline-secondary-xl:{
+			font:"font-xl",
+			fontColor:"bs-text-muted",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			up:"bs-secondary-outline-up",
+			down:"bs-secondary-outline-active",
+			over:"bs-secondary-outline-hover",
+			disabled:"bs-secondary-disabled",
+			checked:"bs-secondary-outline-active"
+		},
+		bs-btn-outline-primary-md:{
+			font:"font-md",
+			fontColor:"bs-primary",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			up:"bs-primary-outline-up",
+			down:"bs-primary-outline-active",
+			over:"bs-primary-outline-hover",
+			disabled:"bs-primary-disabled",
+			checked:"bs-primary-outline-active"
+		},
 		bs-btn-outline-info:{
 			font:"default-font",
 			fontColor:"bs-info",
@@ -347,29 +392,16 @@
 			disabled:"bs-info-disabled",
 			checked:"bs-info-outline-active"
 		},
-		bs-btn-outline-primary-md:{
-			font:"font-md",
-			fontColor:"bs-focus-ring",
+		bs-btn-ghost-dark:{
+			font:"default-font",
+			fontColor:"bs-dark",
 			downFontColor:"bs-text-on-dark",
 			overFontColor:"bs-text-on-dark",
 			disabledFontColor:"bs-border",
-			up:"bs-primary-outline-up",
-			down:"bs-primary-outline-active",
-			over:"bs-primary-outline-hover",
-			disabled:"bs-primary-disabled",
-			checked:"bs-primary-outline-active"
-		},
-		bs-btn-outline-secondary-xl:{
-			font:"font-xl",
-			fontColor:"bs-text-muted",
-			downFontColor:"bs-text-on-dark",
-			overFontColor:"bs-text-on-dark",
-			disabledFontColor:"bs-border",
-			up:"bs-secondary-outline-up",
-			down:"bs-secondary-outline-active",
-			over:"bs-secondary-outline-hover",
-			disabled:"bs-secondary-disabled",
-			checked:"bs-secondary-outline-active"
+			down:"bs-dark-outline-active",
+			over:"bs-dark-outline-hover",
+			disabled:"bs-dark-disabled",
+			checked:"bs-dark-outline-active"
 		},
 		bs-btn-light:{
 			font:"default-font",
@@ -415,6 +447,17 @@
 			disabled:"bs-danger-disabled",
 			checked:"bs-danger-outline-active"
 		},
+		bs-btn-ghost-primary-md:{
+			font:"font-md",
+			fontColor:"bs-primary",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-primary-outline-active",
+			over:"bs-primary-outline-hover",
+			disabled:"bs-primary-disabled",
+			checked:"bs-primary-outline-active"
+		},
 		bs-btn-outline-dark:{
 			font:"default-font",
 			fontColor:"bs-dark",
@@ -434,6 +477,28 @@
 			overFontColor:"bs-light",
 			disabledFontColor:"bs-border",
 			up:"bs-light-outline-up",
+			down:"bs-light-outline-active",
+			over:"bs-light-outline-hover",
+			disabled:"bs-light-disabled",
+			checked:"bs-light-outline-active"
+		},
+		bs-btn-ghost-dark-md:{
+			font:"font-md",
+			fontColor:"bs-dark",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-dark-outline-active",
+			over:"bs-dark-outline-hover",
+			disabled:"bs-dark-disabled",
+			checked:"bs-dark-outline-active"
+		},
+		bs-btn-ghost-light-sm:{
+			font:"font-sm",
+			fontColor:"bs-light",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
 			down:"bs-light-outline-active",
 			over:"bs-light-outline-hover",
 			disabled:"bs-light-disabled",
@@ -459,6 +524,17 @@
 			disabled:"bs-primary-disabled",
 			checked:"bs-primary-active"
 		},
+		bs-btn-ghost-warning-sm:{
+			font:"font-sm",
+			fontColor:"bs-warning",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-warning-outline-active",
+			over:"bs-warning-outline-hover",
+			disabled:"bs-warning-disabled",
+			checked:"bs-warning-outline-active"
+		},
 		bs-btn-success-md:{
 			font:"font-md",
 			fontColor:"bs-text-on-dark",
@@ -468,6 +544,17 @@
 			over:"bs-success-hover",
 			disabled:"bs-success-disabled",
 			checked:"bs-success-active"
+		},
+		bs-btn-ghost-info-sm:{
+			font:"font-sm",
+			fontColor:"bs-info",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-info-outline-active",
+			over:"bs-info-outline-hover",
+			disabled:"bs-info-disabled",
+			checked:"bs-info-outline-active"
 		},
 		bs-menu-item:{
 			font:"default-font",
@@ -479,6 +566,28 @@
 			down:"bs-menu-item-active",
 			over:"bs-menu-item-hover",
 			checked:"bs-menu-item-active"
+		},
+		bs-btn-ghost-light:{
+			font:"default-font",
+			fontColor:"bs-light",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-light-outline-active",
+			over:"bs-light-outline-hover",
+			disabled:"bs-light-disabled",
+			checked:"bs-light-outline-active"
+		},
+		bs-btn-ghost-secondary:{
+			font:"default-font",
+			fontColor:"bs-text-muted",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-secondary-outline-active",
+			over:"bs-secondary-outline-hover",
+			disabled:"bs-secondary-disabled",
+			checked:"bs-secondary-outline-active"
 		},
 		bs-btn-light-md:{
 			font:"font-md",
@@ -524,6 +633,16 @@
 			disabled:"bs-info-disabled",
 			checked:"bs-info-outline-active"
 		},
+		bs-btn-info-md:{
+			font:"font-md",
+			fontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			up:"bs-info-up",
+			down:"bs-info-active",
+			over:"bs-info-hover",
+			disabled:"bs-info-disabled",
+			checked:"bs-info-active"
+		},
 		bs-btn-outline-success-md:{
 			font:"font-md",
 			fontColor:"bs-success",
@@ -545,16 +664,6 @@
 			over:"bs-danger-hover",
 			disabled:"bs-danger-disabled",
 			checked:"bs-danger-active"
-		},
-		bs-btn-info-md:{
-			font:"font-md",
-			fontColor:"bs-light",
-			disabledFontColor:"bs-border",
-			up:"bs-info-up",
-			down:"bs-info-active",
-			over:"bs-info-hover",
-			disabled:"bs-info-disabled",
-			checked:"bs-info-active"
 		},
 		bs-btn-outline-warning-lg:{
 			font:"font-lg",
@@ -590,6 +699,17 @@
 			disabled:"bs-danger-disabled",
 			checked:"bs-danger-active"
 		},
+		bs-btn-ghost-success-md:{
+			font:"font-md",
+			fontColor:"bs-success",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-success-outline-active",
+			over:"bs-success-outline-hover",
+			disabled:"bs-success-disabled",
+			checked:"bs-success-outline-active"
+		},
 		bs-btn-outline-primary:{
 			font:"default-font",
 			fontColor:"bs-primary",
@@ -601,6 +721,17 @@
 			over:"bs-primary-outline-hover",
 			disabled:"bs-primary-disabled",
 			checked:"bs-primary-outline-active"
+		},
+		bs-btn-ghost-light-lg:{
+			font:"font-lg",
+			fontColor:"bs-light",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-light-outline-active",
+			over:"bs-light-outline-hover",
+			disabled:"bs-light-disabled",
+			checked:"bs-light-outline-active"
 		},
 		bs-btn-primary:{
 			font:"default-font",
@@ -623,6 +754,72 @@
 			over:"bs-secondary-outline-hover",
 			disabled:"bs-secondary-disabled",
 			checked:"bs-secondary-outline-active"
+		},
+		bs-btn-ghost-warning-lg:{
+			font:"font-lg",
+			fontColor:"bs-warning",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-warning-outline-active",
+			over:"bs-warning-outline-hover",
+			disabled:"bs-warning-disabled",
+			checked:"bs-warning-outline-active"
+		},
+		bs-btn-ghost-light-xl:{
+			font:"font-xl",
+			fontColor:"bs-light",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-light-outline-active",
+			over:"bs-light-outline-hover",
+			disabled:"bs-light-disabled",
+			checked:"bs-light-outline-active"
+		},
+		bs-btn-ghost-info-lg:{
+			font:"font-lg",
+			fontColor:"bs-info",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-info-outline-active",
+			over:"bs-info-outline-hover",
+			disabled:"bs-info-disabled",
+			checked:"bs-info-outline-active"
+		},
+		bs-btn-ghost-info-xl:{
+			font:"font-xl",
+			fontColor:"bs-info",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-info-outline-active",
+			over:"bs-info-outline-hover",
+			disabled:"bs-info-disabled",
+			checked:"bs-info-outline-active"
+		},
+		bs-btn-ghost-secondary-sm:{
+			font:"font-sm",
+			fontColor:"bs-text-muted",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-secondary-outline-active",
+			over:"bs-secondary-outline-hover",
+			disabled:"bs-secondary-disabled",
+			checked:"bs-secondary-outline-active"
+		},
+		bs-btn-ghost-warning-xl:{
+			font:"font-xl",
+			fontColor:"bs-warning",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-warning-outline-active",
+			over:"bs-warning-outline-hover",
+			disabled:"bs-warning-disabled",
+			checked:"bs-warning-outline-active"
 		},
 		bs-menu-title:{
 			font:"default-font",
@@ -656,6 +853,17 @@
 			over:"bs-secondary-outline-hover",
 			disabled:"bs-secondary-disabled",
 			checked:"bs-secondary-outline-active"
+		},
+		bs-btn-ghost-success:{
+			font:"default-font",
+			fontColor:"bs-success",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-success-outline-active",
+			over:"bs-success-outline-hover",
+			disabled:"bs-success-disabled",
+			checked:"bs-success-outline-active"
 		},
 		bs-btn-dark-xl:{
 			font:"font-xl",
@@ -701,6 +909,17 @@
 			disabled:"bs-info-disabled",
 			checked:"bs-info-outline-active"
 		},
+		bs-btn-ghost-danger-sm:{
+			font:"font-sm",
+			fontColor:"bs-danger",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-danger-outline-active",
+			over:"bs-danger-outline-hover",
+			disabled:"bs-danger-disabled",
+			checked:"bs-danger-outline-active"
+		},
 		bs-btn-outline-success:{
 			font:"default-font",
 			fontColor:"bs-success",
@@ -733,6 +952,39 @@
 			disabled:"bs-warning-disabled",
 			checked:"bs-warning-active"
 		},
+		bs-btn-ghost-warning:{
+			font:"default-font",
+			fontColor:"bs-warning",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-warning-outline-active",
+			over:"bs-warning-outline-hover",
+			disabled:"bs-warning-disabled",
+			checked:"bs-warning-outline-active"
+		},
+		bs-btn-ghost-secondary-xl:{
+			font:"font-xl",
+			fontColor:"bs-text-muted",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-secondary-outline-active",
+			over:"bs-secondary-outline-hover",
+			disabled:"bs-secondary-disabled",
+			checked:"bs-secondary-outline-active"
+		},
+		bs-btn-ghost-secondary-lg:{
+			font:"font-lg",
+			fontColor:"bs-text-muted",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-secondary-outline-active",
+			over:"bs-secondary-outline-hover",
+			disabled:"bs-secondary-disabled",
+			checked:"bs-secondary-outline-active"
+		},
 		bs-btn-secondary-lg:{
 			font:"font-lg",
 			fontColor:"bs-text-on-dark",
@@ -745,7 +997,7 @@
 		},
 		bs-btn-outline-primary-sm:{
 			font:"font-sm",
-			fontColor:"bs-focus-ring",
+			fontColor:"bs-primary",
 			downFontColor:"bs-text-on-dark",
 			overFontColor:"bs-text-on-dark",
 			disabledFontColor:"bs-border",
@@ -754,6 +1006,16 @@
 			over:"bs-primary-outline-hover",
 			disabled:"bs-primary-disabled",
 			checked:"bs-primary-outline-active"
+		},
+		bs-btn-secondary-xl:{
+			font:"font-xl",
+			fontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			up:"bs-secondary-up",
+			down:"bs-secondary-active",
+			over:"bs-secondary-hover",
+			disabled:"bs-secondary-disabled",
+			checked:"bs-secondary-active"
 		},
 		bs-btn-outline-warning-md:{
 			font:"font-md",
@@ -778,16 +1040,6 @@
 			over:"bs-warning-outline-hover",
 			disabled:"bs-warning-disabled",
 			checked:"bs-warning-outline-active"
-		},
-		bs-btn-secondary-xl:{
-			font:"font-xl",
-			fontColor:"bs-text-on-dark",
-			disabledFontColor:"bs-border",
-			up:"bs-secondary-up",
-			down:"bs-secondary-active",
-			over:"bs-secondary-hover",
-			disabled:"bs-secondary-disabled",
-			checked:"bs-secondary-active"
 		},
 		bs-btn-secondary:{
 			font:"default-font",
@@ -820,6 +1072,28 @@
 			down:"bs-transparent",
 			over:"bs-transparent"
 		},
+		bs-btn-ghost-danger-lg:{
+			font:"font-lg",
+			fontColor:"bs-danger",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-danger-outline-active",
+			over:"bs-danger-outline-hover",
+			disabled:"bs-danger-disabled",
+			checked:"bs-danger-outline-active"
+		},
+		bs-btn-ghost-danger-xl:{
+			font:"font-xl",
+			fontColor:"bs-danger",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-danger-outline-active",
+			over:"bs-danger-outline-hover",
+			disabled:"bs-danger-disabled",
+			checked:"bs-danger-outline-active"
+		},
 		bs-btn-outline-danger-sm:{
 			font:"font-sm",
 			fontColor:"bs-danger",
@@ -832,6 +1106,28 @@
 			disabled:"bs-danger-disabled",
 			checked:"bs-danger-outline-active"
 		},
+		bs-btn-ghost-light-md:{
+			font:"font-md",
+			fontColor:"bs-light",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-light-outline-active",
+			over:"bs-light-outline-hover",
+			disabled:"bs-light-disabled",
+			checked:"bs-light-outline-active"
+		},
+		bs-btn-ghost-primary-sm:{
+			font:"font-sm",
+			fontColor:"bs-primary",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-primary-outline-active",
+			over:"bs-primary-outline-hover",
+			disabled:"bs-primary-disabled",
+			checked:"bs-primary-outline-active"
+		},
 		bs-btn-outline-light-sm:{
 			font:"font-sm",
 			fontColor:"bs-light",
@@ -843,6 +1139,49 @@
 			over:"bs-light-outline-hover",
 			disabled:"bs-light-disabled",
 			checked:"bs-light-outline-active"
+		},
+		bs-btn-ghost-dark-sm:{
+			font:"font-sm",
+			fontColor:"bs-dark",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-dark-outline-active",
+			over:"bs-dark-outline-hover",
+			disabled:"bs-dark-disabled",
+			checked:"bs-dark-outline-active"
+		},
+		bs-btn-ghost-info-md:{
+			font:"font-md",
+			fontColor:"bs-info",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-info-outline-active",
+			over:"bs-info-outline-hover",
+			disabled:"bs-info-disabled",
+			checked:"bs-info-outline-active"
+		},
+		bs-btn-ghost-warning-md:{
+			font:"font-md",
+			fontColor:"bs-warning",
+			downFontColor:"bs-light",
+			overFontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			down:"bs-warning-outline-active",
+			over:"bs-warning-outline-hover",
+			disabled:"bs-warning-disabled",
+			checked:"bs-warning-outline-active"
+		},
+		bs-btn-primary-xl:{
+			font:"font-xl",
+			fontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			up:"bs-primary-up",
+			down:"bs-primary-active",
+			over:"bs-primary-hover",
+			disabled:"bs-primary-disabled",
+			checked:"bs-primary-active"
 		},
 		bs-btn-primary-lg:{
 			font:"font-lg",
@@ -874,6 +1213,17 @@
 			disabled:"bs-success-disabled",
 			checked:"bs-success-active"
 		},
+		bs-btn-ghost-danger:{
+			font:"default-font",
+			fontColor:"bs-danger",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-danger-outline-active",
+			over:"bs-danger-outline-hover",
+			disabled:"bs-danger-disabled",
+			checked:"bs-danger-outline-active"
+		},
 		bs-color-picker:{
 			font:"default-font",
 			fontColor:"bs-text-primary",
@@ -893,6 +1243,16 @@
 			disabled:"bs-dark-disabled",
 			checked:"bs-dark-outline-active"
 		},
+		bs-btn-dark-md:{
+			font:"font-md",
+			fontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			up:"bs-dark-up",
+			down:"bs-dark-active",
+			over:"bs-dark-hover",
+			disabled:"bs-dark-disabled",
+			checked:"bs-dark-active"
+		},
 		bs-btn-outline-danger:{
 			font:"default-font",
 			fontColor:"bs-danger",
@@ -904,16 +1264,6 @@
 			over:"bs-danger-outline-hover",
 			disabled:"bs-danger-disabled",
 			checked:"bs-danger-outline-active"
-		},
-		bs-btn-dark-md:{
-			font:"font-md",
-			fontColor:"bs-text-on-dark",
-			disabledFontColor:"bs-border",
-			up:"bs-dark-up",
-			down:"bs-dark-active",
-			over:"bs-dark-hover",
-			disabled:"bs-dark-disabled",
-			checked:"bs-dark-active"
 		},
 		bs-btn-outline-info-md:{
 			font:"font-md",
@@ -937,6 +1287,50 @@
 			disabled:"bs-warning-disabled",
 			checked:"bs-warning-active"
 		},
+		bs-btn-warning-xl:{
+			font:"font-xl",
+			fontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			up:"bs-warning-up",
+			down:"bs-warning-active",
+			over:"bs-warning-hover",
+			disabled:"bs-warning-disabled",
+			checked:"bs-warning-active"
+		},
+		bs-btn-outline-primary-lg:{
+			font:"font-lg",
+			fontColor:"bs-primary",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			up:"bs-primary-outline-up",
+			down:"bs-primary-outline-active",
+			over:"bs-primary-outline-hover",
+			disabled:"bs-primary-disabled",
+			checked:"bs-primary-outline-active"
+		},
+		bs-btn-outline-primary-xl:{
+			font:"font-xl",
+			fontColor:"bs-primary",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			up:"bs-primary-outline-up",
+			down:"bs-primary-outline-active",
+			over:"bs-primary-outline-hover",
+			disabled:"bs-primary-disabled",
+			checked:"bs-primary-outline-active"
+		},
+		bs-btn-info-sm:{
+			font:"font-sm",
+			fontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			up:"bs-info-up",
+			down:"bs-info-active",
+			over:"bs-info-hover",
+			disabled:"bs-info-disabled",
+			checked:"bs-info-active"
+		},
 		bs-btn-outline-success-sm:{
 			font:"font-sm",
 			fontColor:"bs-success",
@@ -949,59 +1343,16 @@
 			disabled:"bs-success-disabled",
 			checked:"bs-success-outline-active"
 		},
-		bs-btn-info-sm:{
-			font:"font-sm",
-			fontColor:"bs-light",
-			disabledFontColor:"bs-border",
-			up:"bs-info-up",
-			down:"bs-info-active",
-			over:"bs-info-hover",
-			disabled:"bs-info-disabled",
-			checked:"bs-info-active"
-		},
-		bs-btn-outline-primary-lg:{
-			font:"font-lg",
-			fontColor:"bs-focus-ring",
+		bs-btn-ghost-primary:{
+			font:"default-font",
+			fontColor:"bs-primary",
 			downFontColor:"bs-text-on-dark",
 			overFontColor:"bs-text-on-dark",
 			disabledFontColor:"bs-border",
-			up:"bs-primary-outline-up",
 			down:"bs-primary-outline-active",
 			over:"bs-primary-outline-hover",
 			disabled:"bs-primary-disabled",
 			checked:"bs-primary-outline-active"
-		},
-		bs-btn-warning-xl:{
-			font:"font-xl",
-			fontColor:"bs-light",
-			disabledFontColor:"bs-border",
-			up:"bs-warning-up",
-			down:"bs-warning-active",
-			over:"bs-warning-hover",
-			disabled:"bs-warning-disabled",
-			checked:"bs-warning-active"
-		},
-		bs-btn-outline-primary-xl:{
-			font:"font-xl",
-			fontColor:"bs-focus-ring",
-			downFontColor:"bs-text-on-dark",
-			overFontColor:"bs-text-on-dark",
-			disabledFontColor:"bs-border",
-			up:"bs-primary-outline-up",
-			down:"bs-primary-outline-active",
-			over:"bs-primary-outline-hover",
-			disabled:"bs-primary-disabled",
-			checked:"bs-primary-outline-active"
-		},
-		bs-btn-primary-xl:{
-			font:"font-xl",
-			fontColor:"bs-text-on-dark",
-			disabledFontColor:"bs-border",
-			up:"bs-primary-up",
-			down:"bs-primary-active",
-			over:"bs-primary-hover",
-			disabled:"bs-primary-disabled",
-			checked:"bs-primary-active"
 		},
 		bs-btn-outline-danger-lg:{
 			font:"font-lg",
@@ -1027,6 +1378,28 @@
 			disabled:"bs-danger-disabled",
 			checked:"bs-danger-outline-active"
 		},
+		bs-btn-ghost-primary-lg:{
+			font:"font-lg",
+			fontColor:"bs-primary",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-primary-outline-active",
+			over:"bs-primary-outline-hover",
+			disabled:"bs-primary-disabled",
+			checked:"bs-primary-outline-active"
+		},
+		bs-btn-ghost-primary-xl:{
+			font:"font-xl",
+			fontColor:"bs-primary",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-primary-outline-active",
+			over:"bs-primary-outline-hover",
+			disabled:"bs-primary-disabled",
+			checked:"bs-primary-outline-active"
+		},
 		bs-btn-danger-sm:{
 			font:"font-sm",
 			fontColor:"bs-text-on-dark",
@@ -1036,6 +1409,28 @@
 			over:"bs-danger-hover",
 			disabled:"bs-danger-disabled",
 			checked:"bs-danger-active"
+		},
+		bs-btn-ghost-success-sm:{
+			font:"font-sm",
+			fontColor:"bs-success",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-success-outline-active",
+			over:"bs-success-outline-hover",
+			disabled:"bs-success-disabled",
+			checked:"bs-success-outline-active"
+		},
+		bs-btn-ghost-dark-lg:{
+			font:"font-lg",
+			fontColor:"bs-dark",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-dark-outline-active",
+			over:"bs-dark-outline-hover",
+			disabled:"bs-dark-disabled",
+			checked:"bs-dark-outline-active"
 		},
 		bs-btn-outline-light-lg:{
 			font:"font-lg",
@@ -1048,6 +1443,28 @@
 			over:"bs-light-outline-hover",
 			disabled:"bs-light-disabled",
 			checked:"bs-light-outline-active"
+		},
+		bs-btn-ghost-dark-xl:{
+			font:"font-xl",
+			fontColor:"bs-dark",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-dark-outline-active",
+			over:"bs-dark-outline-hover",
+			disabled:"bs-dark-disabled",
+			checked:"bs-dark-outline-active"
+		},
+		bs-btn-ghost-secondary-md:{
+			font:"font-md",
+			fontColor:"bs-text-muted",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			down:"bs-secondary-outline-active",
+			over:"bs-secondary-outline-hover",
+			disabled:"bs-secondary-disabled",
+			checked:"bs-secondary-outline-active"
 		},
 		bs-btn-outline-light-xl:{
 			font:"font-xl",
@@ -1103,8 +1520,40 @@
 			disabled:"bs-light-disabled",
 			checked:"bs-light-active"
 		},
+		bs-btn-success-xl:{
+			font:"font-xl",
+			fontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			up:"bs-success-up",
+			down:"bs-success-active",
+			over:"bs-success-hover",
+			disabled:"bs-success-disabled",
+			checked:"bs-success-active"
+		},
 		bs-btn-outline-dark-lg:{
 			font:"font-lg",
+			fontColor:"bs-dark",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
+			disabledFontColor:"bs-border",
+			up:"bs-dark-outline-up",
+			down:"bs-dark-outline-active",
+			over:"bs-dark-outline-hover",
+			disabled:"bs-dark-disabled",
+			checked:"bs-dark-outline-active"
+		},
+		bs-btn-light-xl:{
+			font:"font-xl",
+			fontColor:"bs-light",
+			disabledFontColor:"bs-border",
+			up:"bs-light-up",
+			down:"bs-light-active",
+			over:"bs-light-hover",
+			disabled:"bs-light-disabled",
+			checked:"bs-light-active"
+		},
+		bs-btn-outline-dark-xl:{
+			font:"font-xl",
 			fontColor:"bs-dark",
 			downFontColor:"bs-text-on-dark",
 			overFontColor:"bs-text-on-dark",
@@ -1125,25 +1574,16 @@
 			disabled:"bs-info-disabled",
 			checked:"bs-info-active"
 		},
-		bs-btn-success-xl:{
-			font:"font-xl",
-			fontColor:"bs-text-on-dark",
+		bs-btn-ghost-danger-md:{
+			font:"font-md",
+			fontColor:"bs-danger",
+			downFontColor:"bs-text-on-dark",
+			overFontColor:"bs-text-on-dark",
 			disabledFontColor:"bs-border",
-			up:"bs-success-up",
-			down:"bs-success-active",
-			over:"bs-success-hover",
-			disabled:"bs-success-disabled",
-			checked:"bs-success-active"
-		},
-		bs-btn-light-xl:{
-			font:"font-xl",
-			fontColor:"bs-light",
-			disabledFontColor:"bs-border",
-			up:"bs-light-up",
-			down:"bs-light-active",
-			over:"bs-light-hover",
-			disabled:"bs-light-disabled",
-			checked:"bs-light-active"
+			down:"bs-danger-outline-active",
+			over:"bs-danger-outline-hover",
+			disabled:"bs-danger-disabled",
+			checked:"bs-danger-outline-active"
 		},
 		bs-btn-info-lg:{
 			font:"font-lg",

@@ -21,6 +21,7 @@ import com.git.bs.ui.BsLink;
 import com.git.bs.ui.BsModal;
 import com.git.bs.ui.BsPopover;
 import com.git.bs.ui.BsPromptDialog;
+import com.git.bs.ui.BsSkinFactory;
 import com.git.bs.ui.BsSpinner;
 import com.git.bs.ui.BsColorPicker;
 import com.git.bs.ui.BsDatePicker;
@@ -304,7 +305,7 @@ public class BsFormModules {
                 try {
                     banner = BsModal.drawableFromPath("bs/test/img/20251110013443.png");
                 } catch (Throwable t) {
-                    banner = skin.newDrawable("white", Color.valueOf("#FD7E14"));
+                    banner = BsSkinFactory.drawableOf(Color.valueOf("#FD7E14"));
                 }
                 Label content = new Label("标题行的背景图来自 assets/bs/test/img。\n可以用作产品宣传、品牌 banner 等。", skin);
                 content.setWrap(true);

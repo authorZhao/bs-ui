@@ -157,7 +157,7 @@ public class BsModal extends Table {
     /** 生成一条 1px 淡灰分隔线（用 white drawable 染色）。 */
     private Table makeSeparatorLine() {
         Table line = new Table();
-        line.background(BsUI.getSkin().newDrawable("white", BsTheme.bds()));
+        line.background(BsSkinFactory.drawableOf(BsTheme.bds()));
         line.setHeight(1f);
         return line;
     }
@@ -305,7 +305,7 @@ public class BsModal extends Table {
         // backdrop
         Skin skin = BsUI.getSkin();
         backdrop = new Table(skin);
-        backdrop.setBackground(skin.newDrawable("white", BsTheme.ov()));
+        backdrop.setBackground(BsSkinFactory.drawableOf(BsTheme.ov()));
         backdrop.setFillParent(true);
         backdrop.setTouchable(Touchable.enabled);
         backdrop.addListener(new ClickListener() {

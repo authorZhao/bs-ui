@@ -22,15 +22,14 @@
 package com.git.bs.ui;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 /// 环形进度（circular progress / ring）：determinate 百分比环 或 indeterminate 旋转弧。
 ///
@@ -49,13 +48,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 /// new BsCircularProgress(skin).setIndeterminate(true).setSize(48, 48);
 /// ```
 ///
-/// 实现：自定义 `Actor`，draw 用一个白色圆点沿圆周铺 SEGMENTS 个点，
-/// 按 percent 决定每点是 progress 色还是 track 色（纯 Batch，不依赖 ShapeRenderer）。
-/// **圆点优先取 skin 的 `bs-circle`**（由 `BsSkinFactory.circleDrawable` 统一生成、
-/// 可随 skin 导出/换主题）；skin 缺失时才用同一生成器兜底（兜底 Texture 由本组件 dispose）。
-///
-/// <p><b>扩展</b>：需要更平滑的圆环（大屏仪表盘等场景，离散圆点会"发虚"）用子类
-/// {@link BsRingProgress} —— 它用 ShapeRenderer 画三角形带连续环弧。本类保持默认行为不变。</p>
+/// 实现：自定义 `Actor`，draw 用 ShapeRenderer 三角形带画连续圆环弧（每 ~2° 一段，
+/// 无间隙，边缘靠 MSAA 平滑），track 整圈 + progress 弧从顶部(12 点)顺时针。
+/// <p>历史：早期版本用 48 颗位图圆点铺圆周（珠串），放大后有间隙/发虚，2026-07-24 改为
+/// ShapeRenderer 连续弧，与原 {@link BsRingProgress} 子类统一。BsRingProgress 现为兼容别名。</p>
 ///
 /// 字段/常量/method 多为 protected，便于子类（如 BsRingProgress）复用，对调用者无影响。
 /// @author authorZhao
@@ -64,7 +60,6 @@ public class BsCircularProgress extends Actor {
 
     public enum Variant { PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO }
 
-    private static final int SEGMENTS = 48;
     /** 供子类（BsRingProgress）复用。 */
     protected static final float INDET_SPEED_DEG = 270f;
     /** 供子类复用。 */
@@ -79,8 +74,18 @@ public class BsCircularProgress extends Actor {
     protected boolean showLabel = false;
     protected Variant variant = Variant.PRIMARY;
 
-    /// skin 无 `bs-circle` 时的兜底圆点（由本组件自管 dispose）。
-    private Drawable dotFallback;
+    /** 共享 ShapeRenderer（static 单例，所有环形进度共用，避免每实例泄漏 native 资源）。 */
+    private static ShapeRenderer sharedSR;
+    private static synchronized ShapeRenderer sr() {
+        if (sharedSR == null) sharedSR = new ShapeRenderer();
+        return sharedSR;
+    }
+    /** draw 复用：避免每帧 new 2 个 Color（track/progress 各拷贝一份仅为改 alpha）。 */
+    private final Color tmpTrack = new Color();
+    private final Color tmpProg = new Color();
+    /** label 文本缓存：只在 percent 变化时重算 String，避免每帧字符串拼接。 */
+    private float cachedPercent = -1f;
+    private String cachedLabel = "";
 
     public BsCircularProgress(Skin skin) {
         this(skin, Variant.PRIMARY);
@@ -126,12 +131,6 @@ public class BsCircularProgress extends Actor {
         }
     }
 
-    @Override
-    public boolean remove() {
-        disposeDotFallback();
-        return super.remove();
-    }
-
     // =================== 内部 ===================
 
     /** variant → 主色（protected 供子类复用）。 */
@@ -147,75 +146,69 @@ public class BsCircularProgress extends Actor {
         return BsPalette.PRIMARY.getMain();
     }
 
-    /// 圆点：优先 `skin.bs-circle`；缺失则用 `BsSkinFactory.circleDrawable` 统一生成的兜底。
-    private Drawable resolveDot(Skin skin) {
-        if (skin.has("bs-circle", Drawable.class)) return skin.getDrawable("bs-circle");
-        if (dotFallback == null) dotFallback = BsSkinFactory.circleDrawable(16);
-        return dotFallback;
-    }
-
-    private void disposeDotFallback() {
-        if (dotFallback instanceof TextureRegionDrawable) {
-            Texture t = ((TextureRegionDrawable) dotFallback).getRegion().getTexture();
-            if (t != null) {
-                try { t.dispose(); } catch (Throwable ignored) {}
-            }
-        }
-        dotFallback = null;
-    }
-
     @Override
     public void draw(Batch batch, float parentAlpha) {
         Skin skin = BsUI.getSkin();
-        Drawable dot = resolveDot(skin);
         Color trackColor = skin.get("bs-border", Color.class);
         Color progColor = progressColor();
         Color c = getColor();
         float alpha = c.a * parentAlpha;
 
-        float cx = getX() + getWidth() / 2f;
-        float cy = getY() + getHeight() / 2f;
+        float cx = getWidth() / 2f;
+        float cy = getHeight() / 2f;
         float size = Math.min(getWidth(), getHeight());
         float thickness = Math.max(4f, size * 0.1f);
-        float r = size / 2f - thickness / 2f;
-        float dotSize = thickness;
+        float r = size / 2f - thickness / 2f - 1f;
 
-        for (int i = 0; i < SEGMENTS; i++) {
-            float frac = i / (float) SEGMENTS;
-            boolean on;
-            if (indeterminate) {
-                float local = ((frac * 360f) - indetAngle + 360f) % 360f;
-                on = local < INDET_SWEEP_DEG;
-            } else {
-                on = frac <= percent;
+        // shape 阶段：三角形带画连续圆环弧（平滑无发虚），算法见 BsShapeDraw.drawRingArc
+        batch.end();
+        try {
+            ShapeRenderer s = sr();
+            s.setProjectionMatrix(batch.getProjectionMatrix());
+            s.setTransformMatrix(batch.getTransformMatrix());
+            s.setColor(1, 1, 1, 1);
+            s.begin(ShapeType.Filled);
+            try {
+                s.translate(getX(), getY(), 0);
+                tmpTrack.set(trackColor);
+                tmpTrack.a *= alpha;
+                // track 整圈（底色）
+                BsShapeDraw.drawRingArc(s, cx, cy, r, thickness, 90f, 360f, tmpTrack);
+                tmpProg.set(progColor);
+                tmpProg.a *= alpha;
+                if (indeterminate) {
+                    BsShapeDraw.drawRingArc(s, cx, cy, r, thickness, 90f - indetAngle, INDET_SWEEP_DEG, tmpProg);
+                } else if (percent > 0.001f) {
+                    BsShapeDraw.drawRingArc(s, cx, cy, r, thickness, 90f, 360f * percent, tmpProg);
+                }
+            } finally {
+                s.identity();
+                s.end();
             }
-            Color col = on ? progColor : trackColor;
-
-            float ang = frac * 360f - 90f;  // 从顶部开始
-            float rad = (float) Math.toRadians(ang);
-            float px = cx + (float) Math.cos(rad) * r;
-            float py = cy + (float) Math.sin(rad) * r;
-            batch.setColor(col.r, col.g, col.b, alpha);
-            dot.draw(batch, px - dotSize / 2f, py - dotSize / 2f, dotSize, dotSize);
+        } finally {
+            batch.begin();
         }
 
         if (showLabel && !indeterminate) {
-            drawCenterLabel(batch, alpha, skin, cx - getX(), cy - getY());
+            drawCenterLabel(batch, alpha, skin, cx, cy);
         }
-
         batch.setColor(Color.WHITE);
     }
 
     /** 中心百分比文字（actor 局部坐标 cx/cy）。protected 供子类复用。 */
     protected void drawCenterLabel(Batch batch, float alpha, Skin skin, float cx, float cy) {
-        String text = Math.round(percent * 100) + "%";
+        // 只在 percent 变化时重算文本（避免每帧字符串拼接 GC）
+        if (cachedPercent != percent) {
+            cachedPercent = percent;
+            cachedLabel = Math.round(percent * 100) + "%";
+        }
         BitmapFont font = skin.getFont("default");
         Color tp = skin.get("bs-text-primary", Color.class);
         Color oldFont = font.getColor();
-        glyph.setText(font, text);
+        glyph.setText(font, cachedLabel);
         font.setColor(tp.r, tp.g, tp.b, alpha);
         batch.setColor(Color.WHITE);
-        font.draw(batch, text, getX() + cx - glyph.width / 2f, getY() + cy + glyph.height / 2f);
+        font.draw(batch, cachedLabel, getX() + cx - glyph.width / 2f, getY() + cy + glyph.height / 2f);
         font.setColor(oldFont);
     }
 }

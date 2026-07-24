@@ -167,13 +167,13 @@ public class BsPopover {
         Label titleLabel = new Label(title, skin);
         titleLabel.setColor(headerTextColor(skin));
         Container<Label> headerWrap = new Container<>(titleLabel);
-        headerWrap.background(skin.newDrawable("white", headerColor(skin)));
+        headerWrap.background(BsSkinFactory.drawableOf(headerColor(skin)));
         headerWrap.pad(8, 12, 8, 12).fillX();
         table.add(headerWrap).growX().row();
 
         // 标题/内容之间的分隔线
         Container<Label> sep = new Container<>(new Label("", skin));
-        sep.background(skin.newDrawable("white", borderColor(skin)));
+        sep.background(BsSkinFactory.drawableOf(borderColor(skin)));
         sep.height(1f).fillX();
         table.add(sep).growX().row();
 

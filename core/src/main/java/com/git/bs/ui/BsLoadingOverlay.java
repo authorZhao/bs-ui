@@ -67,7 +67,7 @@ public class BsLoadingOverlay extends Table {
 
     public BsLoadingOverlay(Skin skin) {
         // 用 bs-overlay token（主题驱动，暗色主题下也是合适的半透明遮罩）
-        setBackground(skin.newDrawable("white", BsTheme.ov()));
+        setBackground(BsSkinFactory.drawableOf(BsTheme.ov()));
         setFillParent(true);
         setTouchable(Touchable.enabled);   // 拦截点击
         center();

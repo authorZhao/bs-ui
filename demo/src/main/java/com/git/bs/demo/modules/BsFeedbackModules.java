@@ -19,6 +19,7 @@ import com.git.bs.ui.BsLink;
 import com.git.bs.ui.BsMenuBar;
 import com.git.bs.ui.BsProgress;
 import com.git.bs.ui.BsScrollPane;
+import com.git.bs.ui.BsSkinFactory;
 import com.git.bs.ui.BsTextField;
 import com.git.bs.ui.BsToast;
 
@@ -225,7 +226,7 @@ public class BsFeedbackModules {
 
         int cols = 8;
         int col = 0;
-        Drawable cellBg = skin.newDrawable("white", new Color(
+        Drawable cellBg = BsSkinFactory.drawableOf(new Color(
                 0x2C / 255f, 0x3E / 255f, 0x50 / 255f, 1f));
         for (String name : filtered) {
             Drawable d = BsIcon.get(name);
@@ -386,11 +387,14 @@ public class BsFeedbackModules {
 
         // Alert 带标题
         c.add(new Label("Alert 带标题 + 富内容:", skin)).padTop(12).left().row();
+        // Alert 背景恒为浅色 soft-bg（与主题无关），富内容里的 Label 必须用深色文本，
+        // 否则 dark/admin 主题下拿到的是 bs-text-primary(浅色)，几乎看不到。
+        Color warnText = BsAlert.contentTextColor(BsAlert.Variant.WARNING);
         Table alertContent = new Table();
         alertContent.left().pad(0);
-        alertContent.add(new Label("• 影响范围: 3 个用户", skin)).left().row();
-        alertContent.add(new Label("• 操作可逆: 否", skin)).left().row();
-        alertContent.add(new Label("• 建议先备份", skin)).left().row();
+        alertContent.add(makeAlertContentLabel("• 影响范围: 3 个用户", warnText)).left().row();
+        alertContent.add(makeAlertContentLabel("• 操作可逆: 否", warnText)).left().row();
+        alertContent.add(makeAlertContentLabel("• 建议先备份", warnText)).left().row();
         BsAlert titled = new BsAlert(skin, "操作确认", null, BsAlert.Variant.WARNING);
         titled.setContentActor(alertContent);
         titled.setDismissible(false);
@@ -398,5 +402,12 @@ public class BsFeedbackModules {
 
         c.add(new Label("(Alert 是页面内静态横条，不阻断操作；区别于对话框模态遮罩)",
                 skin)).padTop(8).row();
+    }
+
+    /** 构造 Alert 富内容里的 Label：显式染深色，避免在浅色 soft-bg 上不可见。 */
+    private Label makeAlertContentLabel(String text, Color color) {
+        Label l = new Label(text, skin);
+        l.setColor(color);
+        return l;
     }
 }

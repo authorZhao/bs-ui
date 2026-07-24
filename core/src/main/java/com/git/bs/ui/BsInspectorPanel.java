@@ -146,7 +146,7 @@ public class BsInspectorPanel extends Table {
 
         // 分隔线
         Table sep = new Table();
-        sep.setBackground(skin.newDrawable("white", BsTheme.bds()));
+        sep.setBackground(BsSkinFactory.drawableOf(BsTheme.bds()));
         add(sep).height(1).growX().row();
 
         // 属性编辑器

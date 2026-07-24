@@ -229,7 +229,7 @@ public class BsTable extends Table {
             row();
             // 分隔线
             Container<Label> sep = new Container<>(new Label("", skin));
-            sep.background(skin.newDrawable("white", BsTheme.bds()));
+            sep.background(BsSkinFactory.drawableOf(BsTheme.bds()));
             sep.height(1f).fillX();
             add(sep).colspan(totalCols).growX().pad(0);
             row();
@@ -404,7 +404,7 @@ public class BsTable extends Table {
             }
             row();
             Container<Label> sep = new Container<>(new Label("", skin));
-            sep.background(skin.newDrawable("white", BsTheme.bds()));
+            sep.background(BsSkinFactory.drawableOf(BsTheme.bds()));
             sep.height(1f).fillX();
             add(sep).colspan(headers.size()).growX();
             row();

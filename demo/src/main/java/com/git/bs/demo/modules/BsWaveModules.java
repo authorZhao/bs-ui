@@ -1104,13 +1104,14 @@ public class BsWaveModules {
         // Comment
         c.add(new Label("② BsComment 评论 / 聊天气泡（对方/自己/评论流）：",
                 skin)).padTop(14).left().row();
-        Drawable avatar = skin.newDrawable("white", BsPalette.PRIMARY.getMain());
+        // 头像用首字母占位：avatar(null) + name() 自动生成"主题色圆 + 首字"头像
+        //（微信/钉钉同款 fallback，无需图片资源）
         BsComment msgOther = new BsComment(skin)
-                .avatar(avatar).name("张三").time("12:30").text("你好！今天天气不错。");
+                .name("张三").avatar(null).time("12:30").text("你好！今天天气不错。");
         BsComment msgSelf = new BsComment(skin)
-                .self(true).avatar(avatar).name("我").text("收到，下午见 👍").maxWidth(260);
+                .self(true).name("我").avatar(null).text("收到，下午见 👍").maxWidth(260);
         BsComment comment = new BsComment(skin)
-                .avatar(avatar).name("李四").time("昨天")
+                .name("李四").avatar(null).time("昨天")
                 .text("这条评论很有用，已点赞收藏。").bubble(false);
         c.add(msgOther).left().padTop(4).row();
         c.add(msgSelf).right().padTop(4).row();
