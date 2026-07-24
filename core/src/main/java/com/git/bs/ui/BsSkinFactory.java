@@ -662,6 +662,10 @@ public final class BsSkinFactory {
         } else {
             fillRoundRect(pix, fillHex, 0, 0, size, size, corner);
         }
+        // 修正透明像素的 RGB：圆角外的透明像素默认 RGB=(0,0,0)，Linear 过滤时和边框色混合
+        // 产生暗/偏暖 fringe（圆角处看到的"红边"）。把透明像素 RGB 填成最近的实色，alpha 保持 0。
+        int padHex = (borderPx > 0 && fillHex != borderHex) ? borderHex : fillHex;
+        padTransparentRGB(pix, padHex);
         Texture tex = new Texture(pix);
         tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         pix.dispose();
@@ -679,6 +683,7 @@ public final class BsSkinFactory {
             fillRoundRect(pix, Color.CLEAR, borderPx, borderPx,
                     size - 2 * borderPx, size - 2 * borderPx, Math.max(0, corner - borderPx));
         }
+        padTransparentRGB(pix, colorToHex(borderColor)); // 同 roundRect：修 fringe
         Texture tex = new Texture(pix);
         tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         pix.dispose();
@@ -690,6 +695,28 @@ public final class BsSkinFactory {
         int g = Math.round(c.g * 255) & 0xFF;
         int b = Math.round(c.b * 255) & 0xFF;
         return (r << 16) | (g << 8) | b;
+    }
+
+    /**
+     * 把 Pixmap 中透明像素（alpha=0）的 RGB 填成指定颜色，alpha 保持 0。
+     * <p>圆角 NinePatch 的透明像素默认 RGB=(0,0,0)，Linear 过滤时和边框/填充色混合
+     * 会产生暗 fringe（圆角处看到的偏暗/偏暖"红边"）。把 RGB 填成最近的实色后，
+     * Linear 混合是 实色→实色（仅 alpha 渐变），不再有 RGB 暗化。</p>
+     */
+    private static void padTransparentRGB(Pixmap pix, int rgbHex) {
+        int r = (rgbHex >> 16) & 0xFF;
+        int g = (rgbHex >> 8) & 0xFF;
+        int b = rgbHex & 0xFF;
+        int w = pix.getWidth();
+        int h = pix.getHeight();
+        int padRGBA = (r << 24) | (g << 16) | (b << 8) | 0; // RGB=pad 色, A=0
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                if ((pix.getPixel(x, y) & 0xFF) == 0) { // alpha == 0
+                    pix.drawPixel(x, y, padRGBA);
+                }
+            }
+        }
     }
 
     private static void fillRoundRect(Pixmap pix, int fillHex, int x, int y, int w, int h, int r) {
@@ -800,6 +827,8 @@ public final class BsSkinFactory {
             drawThickLine(pix, 6, 12, 10, 17, 3);
             drawThickLine(pix, 10, 17, 18, 6, 3);
         }
+        // 修透明像素 RGB（防 Linear 过滤暗 fringe），pad 色取最近实色边
+        padTransparentRGB(pix, checked ? colorToHex(primary) : colorToHex(border));
         return pix;
     }
 
@@ -823,19 +852,37 @@ public final class BsSkinFactory {
     /** RadioButton 图标：未选 = 圆环；选中 = 圆环 + 中心实心圆点。 */
     /** RadioButton Pixmap（24×24）。供 BsSkinExporter 复用同一算法。 */
     static Pixmap radioPixmap(boolean checked, Color border, Color surface, Color primary) {
-        Pixmap pix = new Pixmap(24, 24, Pixmap.Format.RGBA8888);
-        pix.setBlending(Blending.None);
-        int r = 11;
-        int cx = 12, cy = 12;
-        pix.setColor(surface);
-        pix.fillCircle(cx, cy, r);
-        pix.setColor(border);
-        pix.drawCircle(cx, cy, r);
-        pix.drawCircle(cx, cy, r - 1);
+        // 2× 超采样：在 48×48 上画圆（边缘锯齿少），再 box-filter 降回 24×24（抗锯齿）
+        int ss = 2;
+        int big = 24 * ss;
+        Pixmap hi = new Pixmap(big, big, Pixmap.Format.RGBA8888);
+        hi.setBlending(Blending.None);
+        int r = 11 * ss, cx = 12 * ss, cy = 12 * ss;
+        hi.setColor(border);
+        hi.fillCircle(cx, cy, r);
+        hi.setColor(surface);
+        hi.fillCircle(cx, cy, r - 2 * ss);
         if (checked) {
-            pix.setColor(primary);
-            pix.fillCircle(cx, cy, 6);
+            hi.setColor(primary);
+            hi.fillCircle(cx, cy, 5 * ss);
         }
+        // 2×2 box filter 降采样到 24×24
+        Pixmap pix = new Pixmap(24, 24, Pixmap.Format.RGBA8888);
+        for (int y = 0; y < 24; y++) {
+            for (int x = 0; x < 24; x++) {
+                int p00 = hi.getPixel(x * ss, y * ss);
+                int p10 = hi.getPixel(x * ss + 1, y * ss);
+                int p01 = hi.getPixel(x * ss, y * ss + 1);
+                int p11 = hi.getPixel(x * ss + 1, y * ss + 1);
+                int rr = ((p00 >>> 24 & 0xFF) + (p10 >>> 24 & 0xFF) + (p01 >>> 24 & 0xFF) + (p11 >>> 24 & 0xFF)) >> 2;
+                int gg = ((p00 >>> 16 & 0xFF) + (p10 >>> 16 & 0xFF) + (p01 >>> 16 & 0xFF) + (p11 >>> 16 & 0xFF)) >> 2;
+                int bb = ((p00 >>> 8 & 0xFF) + (p10 >>> 8 & 0xFF) + (p01 >>> 8 & 0xFF) + (p11 >>> 8 & 0xFF)) >> 2;
+                int aa = ((p00 & 0xFF) + (p10 & 0xFF) + (p01 & 0xFF) + (p11 & 0xFF)) >> 2;
+                pix.drawPixel(x, y, (rr << 24) | (gg << 16) | (bb << 8) | aa);
+            }
+        }
+        hi.dispose();
+        padTransparentRGB(pix, colorToHex(surface));
         return pix;
     }
 
