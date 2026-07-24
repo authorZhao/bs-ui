@@ -132,7 +132,9 @@ tasks.register("releasePak", JavaExec) {
 tasks.register('encryptWasm', JavaExec) {
   group = 'build'
   description = "加密 app.wasm + 注入 loader.js（releasePak -PwasmCrypt 后自动跑）"
-  classpath = project(':core').sourceSets.main.runtimeClasspath
+  dependsOn ':bs-res:classes'
+  // WasmEncrypter 在 :bs-res 模块（2026-07-24 从 :core 拆出），classpath 必须指向 :bs-res
+  classpath = project(':bs-res').sourceSets.main.runtimeClasspath
   mainClass = 'com.git.bs.res.WasmEncrypter'
   args = [file("${buildDir}/dist/webapp/app.wasm").absolutePath]
   doLast {

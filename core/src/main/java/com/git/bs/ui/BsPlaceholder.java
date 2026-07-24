@@ -66,6 +66,7 @@ public class BsPlaceholder extends Table {
     }
 
     public BsPlaceholder(Skin skin) {
+        super(skin);   // 必须 super(skin)，否则 Table.getSkin() 返回 null → makeBlock 拿不到 drawable → 块空白
         left().top();
         defaults().pad(4).left();
     }
@@ -108,17 +109,19 @@ public class BsPlaceholder extends Table {
         return this;
     }
 
-    /** 灰色圆角块（Container + 染色 drawable）。 */
+    /**
+     * 灰色块（Container + 染色 drawable）。
+     * <p>用 {@link BsSkinFactory#drawableOf(Color)}（纯色 TextureRegionDrawable，全局缓存），
+     * 不用 {@code skin.newDrawable("bs-progress-track", col)}——后者返回 NinePatchDrawable
+     * （bs-progress-track 是 6px 圆角 NinePatch），对高度 < 12px 的小块（如 10/12px 文字行骨架）
+     * 会出现 middleHeight=0 只画角像素的问题（和 "white" drawable 同类坑）。
+     * 纯色 TextureRegionDrawable 任意尺寸都正确填满。</p>
+     */
     private Container<?> makeBlock(float w, float h) {
         Container<?> c = new Container<>();
         Color col = baseColor(getSkin());
-        Drawable d = getSkin() != null
-                ? getSkin().newDrawable("bs-progress-track", col)
-                : null;
-        if (d == null && getSkin() != null) {
-            d = BsSkinFactory.drawableOf(col);
-        }
-        if (d != null) c.setBackground(d);
+        // 直接走 drawableOf（纯色，无 NinePatch 切边限制）
+        c.setBackground(BsSkinFactory.drawableOf(col));
         c.fill();
         c.size(w, h);
         return c;
