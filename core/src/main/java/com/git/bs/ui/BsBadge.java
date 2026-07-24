@@ -25,6 +25,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 /**
  * Bootstrap 风格 Badge 徽标：小圆角色块 + 数字/文字。
@@ -45,6 +46,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
  * @since 2026-07-16
  */
 public class BsBadge extends Table {
+
+    /** Badge 背景缓存：按颜色 int 值缓存 roundRect NinePatch（6 个 variant → 最多 6 个 Texture，不泄漏）。 */
+    private static final java.util.Map<Integer, Drawable> BG_CACHE = new java.util.HashMap<>();
 
     public enum Variant {
         PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO;
@@ -70,8 +74,12 @@ public class BsBadge extends Table {
     }
 
     public BsBadge(String text, Skin skin, Variant variant) {
-        // 圆角纯色背景（newDrawable("white", color) 让 1×1 white drawable 染色）
-        setBackground(skin.newDrawable("white", variant.palette().getMain()));
+        // 4px 圆角纯色 NinePatch（roundRect 生成，padTransparentRGB 防角部 fringe）
+        // 按颜色 int 缓存，避免每个 badge 都 new Texture
+        Color c = variant.palette().getMain();
+        Drawable bg = BG_CACHE.computeIfAbsent(c.toIntBits(),
+                k -> BsSkinFactory.roundRect(c, c, 4, 0));
+        setBackground(bg);
         pad(2, 6, 2, 6);
 
         // 独立 LabelStyle：白字 + 正常字号（确保数字清晰可读）
