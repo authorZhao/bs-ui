@@ -81,19 +81,20 @@ public class BsInputGroup extends Table {
     /** 重建布局（每次 addXxx 后调用）。 */
     private void relayout() {
         clearChildren();
+        // 用 field 的 prefHeight 而非硬编码，确保 addon 和输入框等高
+        float h = (field != null) ? field.getPrefHeight() : addonHeight;
         if (prefixWrap.getChildren().size > 0) {
-            add(prefixWrap).height(addonHeight).padRight(-1);
+            add(prefixWrap).height(h).padRight(-1);
         }
         if (field != null) {
-            // 若没有前/后缀，普通 add；否则 padLeft/Right 设 -1 让边框贴合
             if (prefixWrap.getChildren().size > 0) {
-                add(field).height(addonHeight).padLeft(-1).padRight(-1);
+                add(field).height(h).padLeft(-1).padRight(-1);
             } else {
-                add(field).height(addonHeight).padRight(suffixWrap.getChildren().size > 0 ? -1 : 0);
+                add(field).height(h).padRight(suffixWrap.getChildren().size > 0 ? -1 : 0);
             }
         }
         if (suffixWrap.getChildren().size > 0) {
-            add(suffixWrap).height(addonHeight);
+            add(suffixWrap).height(h);
         }
     }
 
