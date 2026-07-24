@@ -64,6 +64,9 @@ import java.util.List;
 @Slf4j
 public class BsToast extends Table {
 
+    /** 色条背景缓存：按颜色 int 值缓存 roundRect（6 variant → 6 个 Texture）。 */
+    private static final java.util.Map<Integer, Drawable> STRIPE_CACHE = new java.util.HashMap<>();
+
     public enum Variant { PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO }
     public enum Placement { TOP_RIGHT, TOP_LEFT, BOTTOM_RIGHT, BOTTOM_LEFT, TOP_CENTER }
 
@@ -122,14 +125,17 @@ public class BsToast extends Table {
         add(body).width(toastWidth - 20).padLeft(8).padRight(8).grow();
     }
 
-    /** 生成色条 actor（用 white drawable 染 accent 饱和色）。 */
+    /** 生成色条 actor（roundRect 3px 圆角，按色缓存避免 Texture 泄漏）。 */
     private Actor colorStripe(Variant v) {
         Skin skin = BsUI.getSkin();
-        Container<Actor> c = new Container<>();
-        Drawable d = skin.newDrawable("white", colorOf(skin, v));
-        c.setBackground(d);
-        c.fill();
-        return c;
+        Color c = colorOf(skin, v);
+        Container<Actor> cont = new Container<>();
+        // 不用 white 1×1（角部透明像素 → fringe 红点）；用 roundRect 3px 圆角
+        Drawable d = STRIPE_CACHE.computeIfAbsent(c.toIntBits(),
+                k -> BsSkinFactory.roundRect(c, c, 3, 0));
+        cont.setBackground(d);
+        cont.fill();
+        return cont;
     }
 
     /** 基色与白色混合（factor 越大越白）。 */
