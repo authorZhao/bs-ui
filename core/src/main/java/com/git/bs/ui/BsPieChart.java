@@ -191,10 +191,33 @@ public class BsPieChart extends BsChart {
         return Math.max(40, Math.min(wAvail, hAvail) - 8);
     }
 
+    /** RIGHT 图例时图例的起始 x（drawChart 阶段计算，drawLegend 阶段消费）。-1 = 未设置。 */
+    private float legendStartXComputed = -1;
+
     private float computePieCx(float size) {
-        if (legendPlacement == LegendPlacement.RIGHT) return size / 2f + 8;
+        if (legendPlacement == LegendPlacement.RIGHT) {
+            float legendW = measureLegendColWidth();
+            float gap = 12f;
+            // 饼图水平居中，图例紧贴右侧
+            float cx = getWidth() / 2f;
+            legendStartXComputed = cx + size / 2f + gap;
+            // 图例溢出右边界时，退回饼图+图例整体居中
+            if (legendStartXComputed + legendW > getWidth() - 4) {
+                float groupW = size + gap + legendW;
+                float startX = Math.max(4, (getWidth() - groupW) / 2f);
+                legendStartXComputed = startX + size + gap;
+                return startX + size / 2f;
+            }
+            return cx;
+        }
         if (legendPlacement == LegendPlacement.LEFT) return size / 2f + measureLegendColWidth() + 12;
+        legendStartXComputed = -1;
         return getWidth() / 2f;
+    }
+
+    @Override
+    protected float legendVerticalStartX() {
+        return legendStartXComputed;
     }
 
     private float computePieCy() {
