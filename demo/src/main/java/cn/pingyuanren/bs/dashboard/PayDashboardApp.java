@@ -1,4 +1,4 @@
-package com.git.bs.dashboard;
+package cn.pingyuanren.bs.dashboard;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.git.bs.ui.BsDarkTheme;
-import com.git.bs.ui.BsUI;
+import cn.pingyuanren.bs.ui.BsDarkTheme;
+import cn.pingyuanren.bs.ui.BsUI;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;

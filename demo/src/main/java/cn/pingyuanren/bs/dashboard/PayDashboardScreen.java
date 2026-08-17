@@ -1,4 +1,4 @@
-package com.git.bs.dashboard;
+package cn.pingyuanren.bs.dashboard;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -13,14 +13,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.git.bs.ui.BsBarChart;
-import com.git.bs.ui.BsChart;
-import com.git.bs.ui.BsLineChart;
-import com.git.bs.ui.BsPieChart;
-import com.git.bs.ui.BsScrollPane;
-import com.git.bs.ui.BsText;
-import com.git.bs.ui.BsTheme;
-import com.git.bs.ui.BsUI;
+import cn.pingyuanren.bs.ui.BsBarChart;
+import cn.pingyuanren.bs.ui.BsChart;
+import cn.pingyuanren.bs.ui.BsLineChart;
+import cn.pingyuanren.bs.ui.BsPieChart;
+import cn.pingyuanren.bs.ui.BsScrollPane;
+import cn.pingyuanren.bs.ui.BsText;
+import cn.pingyuanren.bs.ui.BsTheme;
+import cn.pingyuanren.bs.ui.BsUI;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
