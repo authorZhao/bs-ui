@@ -11,7 +11,7 @@ plugins {
 
 sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
 
-def mainClassName = project.findProperty('mainClass')?.toString() ?: 'com.git.bs.test.BsControlsLauncher'
+def mainClassName = project.findProperty('mainClass')?.toString() ?: 'cn.pingyuanren.bs.test.BsControlsLauncher'
 application.setMainClass(mainClassName)
 eclipse.project.name = appName + '-lwjgl3'
 java.sourceCompatibility = JavaVersion.VERSION_25
@@ -75,21 +75,21 @@ run {
 // 放消费模块而非 core：避免 core 的 processResources↔packResources↔classes 循环依赖。
 def pakDir = file('build/pak')
 def pakFile = file("${pakDir}/assets.pak")
-def skinDir = project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin')
-def emojiDir = project(':assets-emoji').file('src/main/resources/com/git/bs/ui/emoji')
-def iconsDir = project(':assets-icons').file('src/main/resources/com/git/bs/ui/icons')
-def demoI18nDir = project(':demo').file('src/main/resources/com/git/bs/demo/i18n')
+def skinDir = project(':assets-skin').file('src/main/resources/cn/pingyuanren/bs/ui/skin')
+def emojiDir = project(':assets-emoji').file('src/main/resources/cn/pingyuanren/bs/ui/emoji')
+def iconsDir = project(':assets-icons').file('src/main/resources/cn/pingyuanren/bs/ui/icons')
+def demoI18nDir = project(':demo').file('src/main/resources/cn/pingyuanren/bs/demo/i18n')
 tasks.register('packResources', JavaExec) {
   group = 'build'
   description = '打包 skin/emoji/icons/demo-i18n 为 assets.pak'
   dependsOn ':bs-res:classes'
   classpath = project(':bs-res').sourceSets.main.runtimeClasspath
-  mainClass = 'com.git.bs.res.PakPacker'
+  mainClass = 'cn.pingyuanren.bs.res.PakPacker'
   args = [pakFile.absolutePath,
-          skinDir.absolutePath, 'com/git/bs/ui/skin',
-          emojiDir.absolutePath, 'com/git/bs/ui/emoji',
-          iconsDir.absolutePath, 'com/git/bs/ui/icons',
-          demoI18nDir.absolutePath, 'com/git/bs/demo/i18n']
+          skinDir.absolutePath, 'cn/pingyuanren/bs/ui/skin',
+          emojiDir.absolutePath, 'cn/pingyuanren/bs/ui/emoji',
+          iconsDir.absolutePath, 'cn/pingyuanren/bs/ui/icons',
+          demoI18nDir.absolutePath, 'cn/pingyuanren/bs/demo/i18n']
   inputs.dir skinDir
   inputs.dir emojiDir
   inputs.dir iconsDir
@@ -113,10 +113,10 @@ tasks.register('distWinSettings', Jar) {
   duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
   from sourceSets.main.output
   from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-  exclude('com/git/bs/ui/skin/**', 'com/git/bs/ui/emoji/**', 'com/git/bs/ui/icons/**',
-          'com/git/bs/demo/i18n/**')
+  exclude('cn/pingyuanren/bs/ui/skin/**', 'cn/pingyuanren/bs/ui/emoji/**', 'cn/pingyuanren/bs/ui/icons/**',
+          'cn/pingyuanren/bs/demo/i18n/**')
   exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/maven/**')
-  manifest { attributes 'Main-Class': 'com.git.bs.test.WinSettingsLauncher' }
+  manifest { attributes 'Main-Class': 'cn.pingyuanren.bs.test.WinSettingsLauncher' }
 }
 
 // distBsSkin：BsSkinLauncher 的加密 pak 可执行 jar（同 distWinSettings，只换 Main-Class / 输出目录）。
@@ -130,10 +130,10 @@ tasks.register('distBsSkin', Jar) {
   duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
   from sourceSets.main.output
   from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-  exclude('com/git/bs/ui/skin/**', 'com/git/bs/ui/emoji/**', 'com/git/bs/ui/icons/**',
-          'com/git/bs/demo/i18n/**')
+  exclude('cn/pingyuanren/bs/ui/skin/**', 'cn/pingyuanren/bs/ui/emoji/**', 'cn/pingyuanren/bs/ui/icons/**',
+          'cn/pingyuanren/bs/demo/i18n/**')
   exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/maven/**')
-  manifest { attributes 'Main-Class': 'com.git.bs.test.BsSkinLauncher' }
+  manifest { attributes 'Main-Class': 'cn.pingyuanren.bs.test.BsSkinLauncher' }
 }
 
 // ---- 平台裁剪 dist（仿 jarWin/jarMac，只留单平台 native）----
@@ -166,10 +166,10 @@ tasks.register('distWinSettingsPlatform', Jar) {
   duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
   from sourceSets.main.output
   from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-  exclude('com/git/bs/ui/skin/**', 'com/git/bs/ui/emoji/**', 'com/git/bs/ui/icons/**', 'com/git/bs/demo/i18n/**')
+  exclude('cn/pingyuanren/bs/ui/skin/**', 'cn/pingyuanren/bs/ui/emoji/**', 'cn/pingyuanren/bs/ui/icons/**', 'cn/pingyuanren/bs/demo/i18n/**')
   distPlatformExcludes.each { exclude it }
   exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/maven/**')
-  manifest { attributes 'Main-Class': 'com.git.bs.test.WinSettingsLauncher' }
+  manifest { attributes 'Main-Class': 'cn.pingyuanren.bs.test.WinSettingsLauncher' }
 }
 tasks.register('distBsSkinPlatform', Jar) {
   group = 'distribution'
@@ -180,10 +180,10 @@ tasks.register('distBsSkinPlatform', Jar) {
   duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
   from sourceSets.main.output
   from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-  exclude('com/git/bs/ui/skin/**', 'com/git/bs/ui/emoji/**', 'com/git/bs/ui/icons/**', 'com/git/bs/demo/i18n/**')
+  exclude('cn/pingyuanren/bs/ui/skin/**', 'cn/pingyuanren/bs/ui/emoji/**', 'cn/pingyuanren/bs/ui/icons/**', 'cn/pingyuanren/bs/demo/i18n/**')
   distPlatformExcludes.each { exclude it }
   exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/maven/**')
-  manifest { attributes 'Main-Class': 'com.git.bs.test.BsSkinLauncher' }
+  manifest { attributes 'Main-Class': 'cn.pingyuanren.bs.test.BsSkinLauncher' }
 }
 
 jar {
@@ -262,7 +262,7 @@ construo {
       architecture.set(io.github.fourlastor.construo.Target.Architecture.AARCH64)
       jdkUrl.set("https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.12_7.tar.gz")
       // macOS needs an identifier
-      identifier.set("com.git.bs.test." + appName)
+      identifier.set("cn.pingyuanren.bs.test." + appName)
       // Optional: icon for macOS
       macIcon.set(project.file("icons/logo.icns"))
     }
@@ -270,7 +270,7 @@ construo {
       architecture.set(io.github.fourlastor.construo.Target.Architecture.X86_64)
       jdkUrl.set("https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jdk_x64_mac_hotspot_17.0.12_7.tar.gz")
       // macOS needs an identifier
-      identifier.set("com.git.bs.test." + appName)
+      identifier.set("cn.pingyuanren.bs.test." + appName)
       // Optional: icon for macOS
       macIcon.set(project.file("icons/logo.icns"))
     }

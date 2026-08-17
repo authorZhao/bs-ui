@@ -2,8 +2,8 @@
 
 一套 vue-admin 风格的管理后台模板，作为 bs-ui 库能力的"应用级"展示。
 
-- **入口启动类**：`com.git.bs.test.AdminLauncher`（窗口标题 "bs-ui 管理后台模板"）
-- **核心代码位置**：`demo/src/main/java/com/git/bs/admin/`（teavm/lwjgl3 只负责启动类）
+- **入口启动类**：`cn.pingyuanren.bs.test.AdminLauncher`（窗口标题 "bs-ui 管理后台模板"）
+- **核心代码位置**：`demo/src/main/java/cn/pingyuanren/bs/admin/`（teavm/lwjgl3 只负责启动类）
 - **复用**：完全复用 core 的 bs-ui 组件（BsLayoutAdmin / BsBreadcrumb / BsForm / BsDataTable / BsModal / BsCard …），不修改 core。
 - **登录态**：内存态（`AdminContext`），演示账号 `admin / 123456`，进程退出失效。
 
@@ -14,7 +14,7 @@
 ./gradlew :demo:compileJava :lwjgl3:compileJava
 
 # 运行
-./gradlew :lwjgl3:run -PmainClass=com.git.bs.test.AdminLauncher
+./gradlew :lwjgl3:run -PmainClass=cn.pingyuanren.bs.test.AdminLauncher
 # 或 IDEA 直接 Run AdminLauncher
 ```
 
@@ -34,7 +34,7 @@
 ### 包结构
 
 ```
-demo/src/main/java/com/git/bs/
+demo/src/main/java/cn/pingyuanren/bs/
 ├── game/AdminApp.java              # 入口 App（镜像 BsSkinApp，进入 AdminLoginScreen）
 └── admin/
     ├── AdminModule.java            # 模块接口（getPath / buildView / getTitle）
@@ -92,7 +92,7 @@ register(new BusinessDemoModule());
 - 启动加载 light skin + 字体池（default 同步，sm/md/lg/xl 分帧）
 - 监听 `BsUI.addOnThemeChangeListener` → `applyTheme(theme)`
 - `applyTheme` 根据登录态重建 screen（已登录 → `BsAdminShell`，未登录 → `AdminLoginScreen`），释放旧 screen。
-- skin 资源路径：`com/git/bs/ui/skin/{light|dark}.json`（与 BsSkinApp 共用）
+- skin 资源路径：`cn/pingyuanren/bs/ui/skin/{light|dark}.json`（与 BsSkinApp 共用）
 
 ## 新增模块指南
 
@@ -101,16 +101,16 @@ register(new BusinessDemoModule());
 1. 实现 `AdminModule`：
 
 ```java
-package com.git.bs.admin.modules;
+package cn.pingyuanren.bs.admin.modules;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.git.bs.admin.AdminModule;
-import com.git.bs.admin.BsAdminShell;
-import com.git.bs.ui.BsTheme;
-import com.git.bs.ui.BsUI;
+import cn.pingyuanren.bs.admin.AdminModule;
+import cn.pingyuanren.bs.admin.BsAdminShell;
+import cn.pingyuanren.bs.ui.BsTheme;
+import cn.pingyuanren.bs.ui.BsUI;
 
 public class MyModule implements AdminModule {
     public static final String PATH = "我的模块/子页";

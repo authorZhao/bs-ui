@@ -14,7 +14,7 @@ project(":lwjgl3") {
 //  INCLUDE=%WK10_INCLUDE%\ucrt;%WK10_INCLUDE%\um;%WK10_INCLUDE%\shared;%MSVC%\include
 //  LIB=%WK10_LIB%\um\x64;%WK10_LIB%\ucrt\x64;%MSVC%\lib\x64
 
-  def mainClassName = 'com.git.test.Main'
+  def mainClassName = 'cn.pingyuanren.bs.test.WinSettingsLauncher'
   graalvmNative {
 
 

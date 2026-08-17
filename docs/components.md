@@ -2,7 +2,7 @@
 
 > bs-ui 把 Web 前端 Bootstrap 的设计语言与组件形态搬进了 libGDX 的 Scene2D 体系，**130+ 组件**覆盖现代 UI 库的全谱。本文按类别介绍主要组件，并标注它相对 libGDX 自带组件的增强点。
 >
-> 包路径：`core/src/main/java/com/git/bs/ui/`（主体）、`.../ext/`（数据网格/拖拽/校验）、`.../layout/`（栅格布局）。
+> 包路径：`core/src/main/java/cn/pingyuanren/bs/ui/`（主体）、`.../ext/`（数据网格/拖拽/校验）、`.../layout/`（栅格布局）。
 
 ---
 
@@ -88,7 +88,7 @@ btn.setIcon(BsIcon.get("gear"));     // 文字前加图标
 | **BsConfirmDialog** | `BsModal` | 确认对话框 | 是/否按钮，回调 `Consumer<Boolean>` |
 | **BsPromptDialog** | `BsModal` | 输入对话框 | |
 | **BsChoiceDialog** | `BsModal` | 选择对话框 | |
-| **BsAboutDialog** | `BsModal` | 关于对话框 | 满足 License 附加条件，预填版权/作者/链接 |
+| **BsAboutDialog** | `BsModal` | 关于对话框 | 一行代码致谢（可选），预填版权/作者/链接 |
 
 > **libGDX 原生只有 `Window` 和 `Dialog`**，没有 Card / Drawer / Offcanvas / Accordion / Collapse / Tabs / 各类业务对话框。bs-ui 这一块增量最大。
 
@@ -183,7 +183,7 @@ btn.setIcon(BsIcon.get("gear"));     // 文字前加图标
 
 ---
 
-## 九、布局栅格（`com.git.bs.ui.layout` 包）
+## 九、布局栅格（`cn.pingyuanren.bs.ui.layout` 包）
 
 | 组件 | 继承 | 职责 | 增强点 |
 |---|---|---|---|
@@ -196,7 +196,7 @@ btn.setIcon(BsIcon.get("gear"));     // 文字前加图标
 
 ---
 
-## 十、扩展（`com.git.bs.ui.ext` 包）
+## 十、扩展（`cn.pingyuanren.bs.ui.ext` 包）
 
 | 组件 | 职责 |
 |---|---|

@@ -1,0 +1,61 @@
+/*
+ * bs-ui — Bootstrap 风格的 libGDX Scene2D UI 组件库
+ * Copyright (c) 2026 bs-ui contributors
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * Project home: https://github.com/authorZhao/bs-ui
+ */
+
+package cn.pingyuanren.bs.admin;
+
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * Admin 模板的登录态/当前用户上下文。
+ *
+ * <p><b>内存态</b>：不写 Preferences，进程退出即失效。
+ * 演示账号 admin / 123456。</p>
+ * @author authorZhao
+ * @since 2026-07-16
+ */
+public class AdminContext {
+
+    public static final String DEMO_USER = "admin";
+    public static final String DEMO_PWD = "123456";
+
+    @Getter
+    @Setter
+    private String currentUser;
+
+    private static final AdminContext INSTANCE = new AdminContext();
+
+    public static AdminContext get() {
+        return INSTANCE;
+    }
+
+    private AdminContext() {
+    }
+
+    /** 登录校验（与演示账号比对）。 */
+    public boolean check(String user, String pwd) {
+        return DEMO_USER.equals(user) && DEMO_PWD.equals(pwd);
+    }
+
+    /** 登录成功后调用。 */
+    public void login(String userName) {
+        this.currentUser = userName;
+    }
+
+    /** 退出登录。 */
+    public void logout() {
+        this.currentUser = null;
+    }
+
+    public boolean isLogged() {
+        return currentUser != null;
+    }
+}

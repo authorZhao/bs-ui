@@ -3,7 +3,7 @@ plugins {
 }
 
 sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
-project.ext.mainClassName = "com.git.teavm.TeaVMBuilder"
+project.ext.mainClassName = "cn.pingyuanren.teavm.TeaVMBuilder"
 eclipse.project.name = appName + "-teavm"
 
 // This must be at least 11, and no higher than the JDK version this project is built with.
@@ -89,18 +89,18 @@ tasks.register("packResources", JavaExec) {
   description = '打包 skin/emoji/icons/core-i18n/demo-i18n 为 assets.pak（web：core i18n 也进 pak）'
   dependsOn ':bs-res:classes'
   classpath = project(':bs-res').sourceSets.main.runtimeClasspath
-  mainClass = 'com.git.bs.res.PakPacker'
+  mainClass = 'cn.pingyuanren.bs.res.PakPacker'
   args = [pakFile.absolutePath,
-          project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin').absolutePath, 'com/git/bs/ui/skin',
-          project(':assets-emoji').file('src/main/resources/com/git/bs/ui/emoji').absolutePath, 'com/git/bs/ui/emoji',
-          project(':assets-icons').file('src/main/resources/com/git/bs/ui/icons').absolutePath, 'com/git/bs/ui/icons',
-          project(':core').file('src/main/resources/com/git/bs/i18n').absolutePath, 'com/git/bs/i18n',
-          project(':demo').file('src/main/resources/com/git/bs/demo/i18n').absolutePath, 'com/git/bs/demo/i18n']
-  inputs.dir project(':assets-skin').file('src/main/resources/com/git/bs/ui/skin')
-  inputs.dir project(':assets-emoji').file('src/main/resources/com/git/bs/ui/emoji')
-  inputs.dir project(':assets-icons').file('src/main/resources/com/git/bs/ui/icons')
-  inputs.dir project(':core').file('src/main/resources/com/git/bs/i18n')
-  inputs.dir project(':demo').file('src/main/resources/com/git/bs/demo/i18n')
+          project(':assets-skin').file('src/main/resources/cn/pingyuanren/bs/ui/skin').absolutePath, 'cn/pingyuanren/bs/ui/skin',
+          project(':assets-emoji').file('src/main/resources/cn/pingyuanren/bs/ui/emoji').absolutePath, 'cn/pingyuanren/bs/ui/emoji',
+          project(':assets-icons').file('src/main/resources/cn/pingyuanren/bs/ui/icons').absolutePath, 'cn/pingyuanren/bs/ui/icons',
+          project(':core').file('src/main/resources/cn/pingyuanren/bs/i18n').absolutePath, 'cn/pingyuanren/bs/i18n',
+          project(':demo').file('src/main/resources/cn/pingyuanren/bs/demo/i18n').absolutePath, 'cn/pingyuanren/bs/demo/i18n']
+  inputs.dir project(':assets-skin').file('src/main/resources/cn/pingyuanren/bs/ui/skin')
+  inputs.dir project(':assets-emoji').file('src/main/resources/cn/pingyuanren/bs/ui/emoji')
+  inputs.dir project(':assets-icons').file('src/main/resources/cn/pingyuanren/bs/ui/icons')
+  inputs.dir project(':core').file('src/main/resources/cn/pingyuanren/bs/i18n')
+  inputs.dir project(':demo').file('src/main/resources/cn/pingyuanren/bs/demo/i18n')
   outputs.file pakFile
   doFirst { pakFile.getParentFile().mkdirs() }
 }
@@ -135,7 +135,7 @@ tasks.register('encryptWasm', JavaExec) {
   dependsOn ':bs-res:classes'
   // WasmEncrypter 在 :bs-res 模块（2026-07-24 从 :core 拆出），classpath 必须指向 :bs-res
   classpath = project(':bs-res').sourceSets.main.runtimeClasspath
-  mainClass = 'com.git.bs.res.WasmEncrypter'
+  mainClass = 'cn.pingyuanren.bs.res.WasmEncrypter'
   args = [file("${buildDir}/dist/webapp/app.wasm").absolutePath]
   doLast {
     def webapp = file("${buildDir}/dist/webapp")

@@ -3,7 +3,7 @@ plugins {
   id 'maven-publish'
 }
 
-group = 'com.git.bs'
+group = 'cn.pingyuanren'
 
 eclipse.project.name = appName + '-core'
 

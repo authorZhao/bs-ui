@@ -1,7 +1,7 @@
 bs-ui
 Copyright (c) 2026 bs-ui contributors
 
-本项目（bs-ui）基于 Apache License 2.0 开源，详见 LICENSE。
+本项目（bs-ui）基于 Mozilla Public License 2.0 开源，详见 LICENSE。
 本 NOTICE 文件列出随本项目分发的第三方素材、拷贝进源码的第三方代码（vendored）
 以及引用的开源依赖，供下游使用者合规参考。本文件内容仅供参考，不修改 LICENSE。
 
@@ -9,15 +9,15 @@ Copyright (c) 2026 bs-ui contributors
 一、随本项目分发的第三方资源（字体 / 图集）
 ================================================================================
 
-这些第三方资源由各自原作者保留版权，遵循其原始开源协议，**不在本项目 Apache
-License 2.0 之范围内**。如再分发，请遵守对应协议（多数为 SIL Open Font License，
+这些第三方资源由各自原作者保留版权，遵循其原始开源协议，**不在本项目 Mozilla
+Public License 2.0 之范围内**。如再分发，请遵守对应协议（多数为 SIL Open Font License，
 要求保留许可全文且不可单独售卖字体本身）。
 
 1. 霞鹜文楷 LXGW WenKai（含 LXGW WenKai Screen / Mono Lite 变体）
    - 用途：内置中文字体
    - 来源：https://github.com/lxgw/LxgwWenKai
    - 协议：SIL Open Font License 1.1 (OFL)
-   - 文件：assets/com/git/bs/ui/skin/LXGWWenKai*.ttf
+   - 文件：assets/cn/pingyuanren/bs/ui/skin/LXGWWenKai*.ttf
    - 声明：Copyright (c) 霞鹜文楷作者（lxgw）。字体受 OFL 约束，"LXGW WenKai"
      为保留名称。
 
@@ -25,14 +25,14 @@ License 2.0 之范围内**。如再分发，请遵守对应协议（多数为 SI
    - 用途：彩色 emoji 字体
    - 来源：https://github.com/googlefonts/noto-emoji
    - 协议：SIL Open Font License 1.1 (OFL)
-   - 文件：assets/com/git/bs/ui/skin/NotoColorEmoji.ttf
+   - 文件：assets/cn/pingyuanren/bs/ui/skin/NotoColorEmoji.ttf
 
 3. Noto Emoji 图集（PNG atlas）
    - 用途：emoji 纹理图集
    - 来源：https://github.com/googlefonts/noto-emoji
    - 加工方式：从上游仓库下载 SVG 源文件，本项目自行转换为 PNG，再打包成 TextureAtlas
    - 协议：Apache License 2.0（部分图形资产亦提供 OFL）
-   - 文件：core/src/main/resources/com/git/bs/ui/emoji/*.png, *.atlas
+   - 文件：core/src/main/resources/cn/pingyuanren/bs/ui/emoji/*.png, *.atlas
 
 4. Bootstrap Icons 图集（PNG atlas）
    - 用途：图标纹理图集
@@ -40,7 +40,7 @@ License 2.0 之范围内**。如再分发，请遵守对应协议（多数为 SI
    - 加工方式：从上游仓库下载 SVG 源文件，本项目自行用 Apache Batik 转换为 PNG，
      再打包成 TextureAtlas（加工产物随项目分发）
    - 协议：MIT License（图标本身为 Apache 2.0 / MIT 双协议）
-   - 文件：core/src/main/resources/com/git/bs/ui/icons/*.png, *.atlas
+   - 文件：core/src/main/resources/cn/pingyuanren/bs/ui/icons/*.png, *.atlas
 
 ================================================================================
 二、通用免责声明（第三方示例素材）
@@ -49,7 +49,7 @@ License 2.0 之范围内**。如再分发，请遵守对应协议（多数为 SI
 本仓库中可能包含的其他第三方示例素材（包括但不限于 J2ME 模拟器游戏截图、
 演示用图片、第三方 Logo / 商标等）：
 
-  - 这些素材的版权归原作者所有，**不在本项目 Apache License 2.0 协议范围内**；
+  - 这些素材的版权归原作者所有，**不在本项目 Mozilla Public License 2.0 协议范围内**；
   - 它们仅用于功能演示，不构成对本项目的贡献；
   - 本项目不对这些素材的版权归属做任何主张；
   - 若您是某素材的版权方且认为本仓库的使用超出了合理范围，请与作者联系，
@@ -68,13 +68,13 @@ License 2.0 之范围内**。如再分发，请遵守对应协议（多数为 SI
 1. BitmapFontWriter
    - 来源：libGDX gdx-tools（com.badlogic.gdx.tools.bmfont.BitmapFontWriter）
    - 协议：Apache License 2.0
-   - 文件：core/src/main/java/com/git/bs/ui/bmfont/BitmapFontWriter.java
+   - 文件：core/src/main/java/cn/pingyuanren/bs/ui/bmfont/BitmapFontWriter.java
    - 说明：仅依赖 libGDX 核心（无 AWT / LWJGL），可安全编入 TeaVM；实现未改动。
 
 2. SLF4J java.util.logging (jul) 绑定的最小实现
    - 来源：SLF4J（org.slf4j）
    - 协议：MIT 相容（SLF4J 为 MIT）
-   - 文件：lwjgl3 模块 com/git/log/jul/* 等
+   - 文件：lwjgl3 模块 cn/pingyuanren/log/jul/* 等
    - 说明：用于桌面端将 java.util.logging 桥接到 SLF4J。
 
 3. libGDX LWJGL3 后端片段
@@ -94,7 +94,7 @@ License 2.0 之范围内**。如再分发，请遵守对应协议（多数为 SI
     （batik-all，iconpkg 工具用于 SVG→PNG/atlas）
   - Lombok 1.18.42                     https://projectlombok.org/                          MIT
   - SLF4J 2.0.16                       http://www.slf4j.org/                               MIT
-  - Fastjson2 2.0.58                   https://github.com/alibaba/fastjson2                Apache 2.0
+  - Fastjson2 2.0.64                   https://github.com/alibaba/fastjson2                Apache 2.0
 
 设计参考（非运行时依赖）：
   - VISUI  https://github.com/kotcrab/vis-ui  —— 仅 API 设计灵感（全局 Skin 门面风格），未引入为依赖

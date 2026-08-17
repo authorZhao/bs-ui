@@ -26,7 +26,7 @@ public class MyApp extends Game {
 }
 ```
 
-`BsUI.init()` 内部会调 `BsSkinLoader.loadAllThemes()`，把 `core/src/main/resources/com/git/bs/ui/skin/` 下自带的三套皮肤（`bs-light` / `bs-dark` / `bs-admin`，含字体、配色、drawable）自动加载并注册。之后任意位置都能用：
+`BsUI.init()` 内部会调 `BsSkinLoader.loadAllThemes()`，把 `core/src/main/resources/cn/pingyuanren/bs/ui/skin/` 下自带的三套皮肤（`bs-light` / `bs-dark` / `bs-admin`，含字体、配色、drawable）自动加载并注册。之后任意位置都能用：
 
 ```java
 Skin skin = BsUI.getSkin();                 // 取当前主题的 skin
@@ -56,7 +56,7 @@ public static void main(String[] args) {
 
 ```java
 // skinCp 是皮肤资源的 classpath 路径（指向 .json 文件）
-String skinCp = "com/git/bs/ui/skin";                       // bs-ui 自带皮肤目录
+String skinCp = "cn/pingyuanren/bs/ui/skin";                       // bs-ui 自带皮肤目录
 FileHandle jsonFile = Gdx.files.internal(skinCp + "/bs-light.json");
 BsTheme bsTheme = BsLightTheme.INSTANCE;
 
@@ -93,9 +93,9 @@ com.badlogic.gdx.graphics.g2d.BitmapFont: {
 ```json
 com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator: {
     my-font: {
-        font: "com/git/bs/ui/skin/MyFont.ttf",
+        font: "cn/pingyuanren/bs/ui/skin/MyFont.ttf",
         size: 18,
-        characters: "com/git/bs/ui/skin/chinese.txt"
+        characters: "cn/pingyuanren/bs/ui/skin/chinese.txt"
     }
 }
 ```
@@ -179,7 +179,7 @@ public class MyApp extends Game {
     @Override
     public void create() {
         // 1. 国际化（addBundle 必须在 init 前，core 翻译 + 你的业务翻译，后者覆盖前者）
-        BsI18n.addBundle("com/git/bs/myapp/i18n/");
+        BsI18n.addBundle("cn/pingyuanren/bs/myapp/i18n/");
         BsI18n.init();                        // 默认 zh_cn；init("en_us") 切英文
 
         // 2. Skin 初始化（推荐三步法，这里直接用 BsUI.init() 的封装）
@@ -247,7 +247,7 @@ BsUI.get().addOnThemeChangeListener(theme -> {
 ## 六、国际化（BsI18n）
 
 ```java
-BsI18n.addBundle("com/git/bs/myapp/i18n/");   // 注册你的业务翻译目录（init 前调）
+BsI18n.addBundle("cn/pingyuanren/bs/myapp/i18n/");   // 注册你的业务翻译目录（init 前调）
 BsI18n.init();                                // 默认 zh_cn
 BsI18n.init("en_us");                         // 或直接指定 locale
 

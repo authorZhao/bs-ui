@@ -260,7 +260,7 @@
       ]
     },
     {
-      "type": "com.git.bs.test.WinSettingsLauncher",
+      "type": "cn.pingyuanren.bs.test.WinSettingsLauncher",
       "jniAccessible": true,
       "methods": [
         {
@@ -272,7 +272,7 @@
       ]
     },
     {
-      "type": "com.git.log.jul.JULServiceProvider"
+      "type": "cn.pingyuanren.log.jul.JULServiceProvider"
     },
     {
       "type": "java.lang.Boolean",
@@ -1499,7 +1499,7 @@
       "glob": "assets.pak"
     },
     {
-      "glob": "com/git/bs/i18n/zh_cn.properties"
+      "glob": "cn/pingyuanren/bs/i18n/zh_cn.properties"
     },
     {
       "glob": "gdx64.dll"

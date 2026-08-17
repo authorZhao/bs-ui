@@ -125,18 +125,16 @@ BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);        // ③ 注册�
 
 ## License（中文）
 
-本项目基于 **Apache License 2.0**，允许商业使用、修改、分发、私用。
+本项目基于 **Mozilla Public License 2.0（MPL 2.0）**，允许商业使用、修改、分发，
+并允许与私有 / 闭源代码组合（MPL 为文件级弱 copyleft，义务仅覆盖 bs-ui 自己的源文件）。
 
-**附加条件（Attribution Condition）**：任何把 bs-ui 直接使用或修改后使用、并分发给最终用户的产品，**必须在程序内的 About / 关于 / Credits 页面清晰标注**：
+**唯一核心义务**：如果你**修改了 bs-ui 的源文件**并对外分发（无论以源码还是可执行形式），
+这些被修改的文件必须以 MPL 2.0 提供源码。未修改的文件无任何开源义务。完整条款见 [LICENSE](./LICENSE)。
 
-1. 库名 `bs-ui`
-2. 声明本产品使用了 bs-ui
-3. 声明是否修改过（如 "Uses bs-ui (unmodified)" 或 "Uses a modified version of bs-ui"）
-4. 上游项目链接，或版权行 `Copyright (c) 2026 bs-ui contributors`
+**致谢不强制**：MPL 2.0 不要求在程序内展示 About / 致谢页面；如果你愿意致谢，
+在 README 或 About 页面提一句 `bs-ui` 与上游链接即可。
 
-仅在源码注释、README、LICENSE 文件里提到 **不算** 满足条件——必须出现在最终用户能通过 UI 看到的 About 页面。完整条款见 [LICENSE](./LICENSE)。
-
-**一行代码合规**：库自带 `BsAboutDialog`，使用方调一行即可弹出满足上述要求的 About 弹窗：
+**一行代码致谢**：库自带 `BsAboutDialog`，使用方调一行即可弹出 bs-ui 致谢信息（可选）：
 
 ```java
 // modified=true 表示你改过 bs-ui 源码；false 表示未改
@@ -272,26 +270,22 @@ This project stands on the shoulders of these excellent open-source projects; wi
 
 ## License (English)
 
-This project is licensed under the **Apache License 2.0**, which permits
-commercial use, modification, distribution, and private use.
+This project is licensed under the **Mozilla Public License 2.0 (MPL 2.0)**,
+which permits commercial use, modification, and distribution, and allows
+combining bs-ui with private / closed-source code (MPL is a file-level weak
+copyleft; its obligations cover only bs-ui's own source files).
 
-**Additional Attribution Condition**: Any Product that uses bs-ui (whether
-verbatim or modified) and is distributed to end-users **MUST display a clear,
-discoverable "About" / "Credits" screen in the UI** stating:
+**The one core obligation**: if you **modify bs-ui source files** and
+distribute them (in source or executable form), those modified files must be
+made available under MPL 2.0. Unmodified files carry no open-source
+obligation. Full text in [LICENSE](./LICENSE).
 
-1. The library name `bs-ui`
-2. That the Product uses bs-ui
-3. Whether bs-ui has been modified (e.g. "Uses bs-ui (unmodified)" or
-   "Uses a modified version of bs-ui")
-4. The upstream project link, or the copyright line
-   `Copyright (c) 2026 bs-ui contributors`
+**Attribution is not required**: MPL 2.0 does not mandate an in-app About /
+credits screen; if you wish to give credit, mentioning `bs-ui` and the
+upstream link in your README or About page is enough.
 
-Mentioning bs-ui only in source comments, READMEs, or LICENSE files does
-**not** satisfy this condition — it must appear in an About screen that
-end-users can reach through the UI. Full text in [LICENSE](./LICENSE).
-
-**One-line compliance**: the library ships a `BsAboutDialog` so users can pop
-up a compliant About dialog in a single call:
+**One-line credit (optional)**: the library ships a `BsAboutDialog` so users
+can pop up a bs-ui credits dialog in a single call:
 
 ```java
 // modified=true if you modified the bs-ui source; false otherwise

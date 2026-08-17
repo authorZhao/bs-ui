@@ -1,6 +1,6 @@
 plugins { id 'java-library' }
 
-group = 'com.git.bs'
+group = 'cn.pingyuanren'
 
 eclipse.project.name = appName + '-demo'
 

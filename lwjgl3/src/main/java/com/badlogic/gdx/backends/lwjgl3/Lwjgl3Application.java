@@ -24,7 +24,7 @@ import com.badlogic.gdx.backends.lwjgl3.audio.mock.MockAudio;
 import com.badlogic.gdx.graphics.glutils.GLVersion;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.utils.*;
-import com.git.log.GdxSlf4jALogger;
+import cn.pingyuanren.log.GdxSlf4jALogger;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.*;

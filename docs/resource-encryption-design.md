@@ -125,7 +125,7 @@ Service Worker 解密会把**明文喂回页面**，DevTools Network 能看到�
      u32   entryCount
      重复 entryCount 次：
        u16   pathLen ; pathLen 字节 UTF-8 逻辑路径
-              （例：com/git/bs/ui/skin/bs-dark.json）
+              （例：cn/pingyuanren/bs/ui/skin/bs-dark.json）
        u8    eflags   bit0: 条目已压缩（DEFLATE）
        u32   blobOff  相对 blobArea 起始的偏移
        u32   cipherLen 该条目密文长度
@@ -207,7 +207,7 @@ public final class PakBootstrap {
 
 **新 gradle 子模块 `:bs-packer`**（Java main），或并入 `bs-skin-export`。
 
-- 输入：资源根目录列表（`core/src/main/resources/com/git/bs/ui/**`、`.../i18n/**`、外部 `assets/`）+ include/exclude glob + 密钥。
+- 输入：资源根目录列表（`core/src/main/resources/cn/pingyuanren/bs/ui/**`、`.../i18n/**`、外部 `assets/`）+ include/exclude glob + 密钥。
 - 输出：`assets.pak`。
 - **gradle 任务 `packResources`**：处理完资源后产出 `assets.pak` 到约定目录。
 

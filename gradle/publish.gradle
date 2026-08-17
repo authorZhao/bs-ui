@@ -12,7 +12,7 @@
 //   ext.publishDescription   = 'bs-ui core library'
 //   apply from: "$rootDir/gradle/publish.gradle"
 //
-// 坐标：group = 项目 group（com.git.bs），version = 项目 version（0.1.0）
+// 坐标：group = 项目 group（cn.pingyuanren），version = 项目 version（0.3.0）
 // 产物：主 jar + sources jar + javadoc jar
 // 仓库：mavenLocal（默认启用）；远程仓库见下方注释段
 // ============================================================================
@@ -62,14 +62,8 @@ publishing {
 
                 licenses {
                     license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
-                        // 关键：在 POM 元数据里也声明附加条款，
-                        // 使用方看依赖元数据就能知道义务（不必打开 LICENSE 文件）。
-                        comments = 'Additional Attribution Condition applies: any product ' +
-                                '(verbatim or modified) distributed to end-users MUST display ' +
-                                'an About/Credits screen crediting "bs-ui" and stating whether ' +
-                                'it was modified. See project LICENSE for full text.'
+                        name = 'Mozilla Public License 2.0'
+                        url = 'https://mozilla.org/MPL/2.0/'
                     }
                 }
 
@@ -91,7 +85,7 @@ publishing {
 
     repositories {
         // 本地：发布到 ~/.m2/repository
-        // 其他项目可直接 implementation 'com.git.bs:bs-ui-core:0.1.0' 引用
+        // 其他项目可直接 implementation 'cn.pingyuanren:bs-ui-core:0.3.0' 引用
         mavenLocal()
 
         // ============================================================
@@ -122,7 +116,7 @@ publishing {
 // Maven Central 发布（默认【关】）：gradle <task> -PcentralRelease=true 启用
 // 前置（详见 docs/publish-maven-central.md）：
 //   - ~/.gradle/gradle.properties 配 centralUser / centralToken / signingKey / signingPassword
-//   - group 必须是 Central 可验证 namespace（com.git.bs 不可验证，见文档 §0）
+//   - group 必须是 Central 可验证 namespace（cn.pingyuanren，经 pingyuanren.cn DNS TXT 验证，见文档 §0）
 // ============================================================================
 if (project.hasProperty('centralRelease')) {
     apply plugin: 'signing'

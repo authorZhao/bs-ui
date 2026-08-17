@@ -2,19 +2,24 @@
 
 ## 1. bs-ui 自身
 
-bs-ui 基于 **Apache License 2.0**，可商用、修改、再分发。
+bs-ui 基于 **Mozilla Public License 2.0（MPL 2.0）**，可商用、修改、再分发，
+并可与私有 / 闭源代码组合（MPL 是文件级弱 copyleft，义务只覆盖 bs-ui 自己的源文件）。
 
-**附加归属条件**（在标准 Apache 2.0 基础上）：任何使用 bs-ui、分发到终端用户的产品，**必须在「关于 / Credits」界面标注本项目**，并注明是否做过修改。
+**唯一核心义务**：如果你**修改了 bs-ui 的源文件**并对外分发（源码或可执行形式），
+这些被修改的文件必须以 MPL 2.0 提供源码；未修改的文件无开源义务。
 
 ### 怎么合规
 
-在 app 的「关于」界面加一行（示例）：
+- 只**原样使用**（未改源码）：无任何开源义务，宽松程度等同 MIT/Apache 场景。
+- **改过 bs-ui 源文件**并分发：把你改动的那些文件以 MPL 2.0 公开源码即可（其余代码仍可闭源）。
 
-> Powered by **bs-ui** (Apache-2.0) — https://github.com/authorZhao/bs-ui
+### 致谢（可选，不强制）
 
-如果改过 bs-ui 源码，额外注明「(modified)」。文字可自定义，但要让终端用户能看到 bs-ui 的署名与许可。
+MPL 2.0 不要求在程序内展示致谢。如果你愿意致谢，在 README 或 app 的「关于」界面加一行即可（示例）：
 
-> 这是项目作者维护 bs-ui 的唯一"回报"条件。开发期不强制；**分发/上线时必须满足**。
+> Powered by **bs-ui** (MPL-2.0) — https://github.com/authorZhao/bs-ui
+
+如果改过 bs-ui 源码，额外注明「(modified)」。库自带 `BsAboutDialog`，一行代码即可弹出预填好的致谢弹窗。
 
 ## 2. 第三方依赖
 
@@ -42,10 +47,10 @@ bs-ui 基于 **Apache License 2.0**，可商用、修改、再分发。
 
 ## 3. LICENSE / NOTICE 文件
 
-- `LICENSE`：bs-ui 的 Apache 2.0 全文（含附加归属条款说明）。
+- `LICENSE`：bs-ui 的 MPL 2.0 全文。
 - `NOTICE`：bs-ui 的归属声明 + 主要第三方一览。
-- 分发你自己的 app 时：保留 bs-ui 的 LICENSE/NOTICE，并按需附上所依赖库的许可。
+- 分发你自己的 app 时：保留 bs-ui 的 LICENSE/NOTICE；若修改过 bs-ui 源文件并分发，按 MPL 2.0 公开这些文件的源码，并按需附上所依赖库的许可。
 
 ## 4. 反过来：贡献回 bs-ui
 
-提 PR 即视为你同意以 Apache 2.0 许可贡献代码（与项目一致）。重大改动请在 PR 里说明。
+提 PR 即视为你同意以 MPL 2.0 许可贡献代码（与项目一致）。重大改动请在 PR 里说明。

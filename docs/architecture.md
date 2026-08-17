@@ -356,24 +356,24 @@ demo 的 Game/Screen ────┤
 | 代码 | 来源 | 协议 | 文件 |
 |---|---|---|---|
 | `BitmapFontWriter` | libGDX gdx-tools | Apache 2.0 | `core/.../bmfont/BitmapFontWriter.java` |
-| SLF4J jul 绑定 | SLF4J | MIT | `lwjgl3/.../com/git/log/jul/*` |
+| SLF4J jul 绑定 | SLF4J | MIT | `lwjgl3/.../cn/pingyuanren/log/jul/*` |
 | libGDX LWJGL3 后端片段 | libGDX | Apache 2.0 | `lwjgl3` 模块内 vendored 后端类 |
 
 详见 [NOTICE](../NOTICE) 和 [README](../README.md) 的致谢段。
 
 ---
 
-## 九、License 合规：About 界面
+## 九、License 与 About 界面
 
-bs-ui 基于 Apache License 2.0，但有一个**附加署名条件**：任何把 bs-ui 直接或修改后使用、并分发给最终用户的产品，**必须在程序内的 About/Credits 页面标注** bs-ui。
+bs-ui 基于 **Mozilla Public License 2.0（MPL 2.0）**：允许商用、修改、分发以及与私有代码组合；唯一核心义务是**修改 bs-ui 源文件并对外分发时，这些文件须以 MPL 2.0 提供源码**。在程序内展示 About / 致谢页面**不是强制要求**。
 
-库自带 `BsAboutDialog`，一行代码合规：
+库自带 `BsAboutDialog`，一行代码即可弹出预填好的致谢弹窗（可选）：
 
 ```java
 BsAboutDialog.show(stage, skin, "我的应用", false);   // false=未改源码
 ```
 
-详见 [LICENSE](../LICENSE) 的「ADDITIONAL ATTRIBUTION CONDITION」段。
+详见 [LICENSE](../LICENSE) 与 [attribution-and-licenses.md](./attribution-and-licenses.md)。
 
 ---
 

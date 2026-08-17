@@ -1,0 +1,132 @@
+/*
+ * bs-ui — Bootstrap 风格的 libGDX Scene2D UI 组件库
+ * Copyright (c) 2026 bs-ui contributors
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * Project home: https://github.com/authorZhao/bs-ui
+ */
+
+package cn.pingyuanren.bs.common.impl;
+
+
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
+import cn.pingyuanren.bs.common.Platform;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author authorZhao
+ * @since 2025-08-12
+ */
+public class DeskPlatform implements Platform {
+
+    public static final ScheduledExecutorService single_t_scheduler = Executors.newScheduledThreadPool(1);
+    private static final List<ScheduledFuture<?>> FUTURE_LIST = new ArrayList<>();
+
+    static {
+//        if (UIUtils.isWindows) {
+//            String s = FileUtil.tmpPath("lib/TaskbarIcon.dll");
+//            if (s != null) {
+//                System.load(s);
+//            }
+//        }
+    }
+
+    @Override
+    public String getPlatformName() {
+        return "Desktop-lwjgl3";
+    }
+
+    @Override
+    public void exit() {
+        System.exit(0);
+    }
+
+    @Override
+    public boolean setWindowIcons(String windowTitle, String iconPath) {
+        try {
+//            if (UIUtils.isWindows) {
+//                String s = FileUtil.tmpPath(iconPath);
+//                var result = TaskbarIconJNI.setTaskbarIconByTitle(windowTitle, s);
+//                return result > 1;
+//            }
+        } catch (Exception e) {
+
+        }
+        return false;
+
+
+    }
+
+    @Override
+    public String chooseJarFile() {
+        return "";
+    }
+
+    @Override
+    public void scheduleOne(Runnable runnable, long delay, TimeUnit unit) {
+        ScheduledFuture<?> schedule = single_t_scheduler.schedule(runnable, delay, unit);
+        FUTURE_LIST.add(schedule);
+    }
+
+    @Override
+    public void schedule(Runnable runnable, long delay, long period, TimeUnit unit) {
+        ScheduledFuture<?> schedule = single_t_scheduler.scheduleWithFixedDelay(runnable, delay, period,unit);
+        FUTURE_LIST.add(schedule);
+    }
+
+    @Override
+    public void cancelAll() {
+        for (var scheduledFuture : FUTURE_LIST) {
+            scheduledFuture.cancel(false);
+        }
+    }
+
+    @Override
+    public Map<String, String> getenv() {
+        return System.getenv();
+    }
+
+    /**
+     * 桌面端系统 dark mode 检测：用 AWT Swing 的 Panel.background 亮度判断。
+     * <p>macOS/Windows 都生效（系统主题切换时 Swing 会自动更新 LookAndFeel 的 UIManager 颜色）。
+     * Linux 取决于 GTK 主题是否被 Swing 正确识别。</p>
+     * <p>headless 环境会抛 HeadlessException，捕获后返回 false。</p>
+     */
+    @Override
+    public boolean isSystemDarkMode() {
+        try {
+            //java.awt.Color bg = javax.swing.UIManager.getColor("Panel.background");
+            //if (bg != null) {
+            //    // 用 ITU-R BT.601 luma 公式算亮度，<0.5 视为暗色主题
+            //    float brightness = (bg.getRed() * 0.299f
+            //            + bg.getGreen() * 0.587f
+            //            + bg.getBlue() * 0.114f) / 255f;
+            //    return brightness < 0.5f;
+            //}
+        } catch (Throwable ignored) {
+            // headless 或非 desktop 环境，回退 false
+        }
+        return false;
+    }
+
+    @Override
+    public String toJson(Object object) {
+        return JSON.toJSONString(object, JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.UnquoteFieldName);
+    }
+
+    @Override
+    public <T> T fromJson(String json, Class<T> type) {
+        return JSON.parseObject(json, type);
+    }
+}

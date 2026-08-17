@@ -26,7 +26,7 @@ public class MyApp extends Game {
 }
 ```
 
-Internally `BsUI.init()` calls `BsSkinLoader.loadAllThemes()`, which loads and registers the three bundled skins (`bs-light` / `bs-dark` / `bs-admin`, including fonts, colors, drawables) from `core/src/main/resources/com/git/bs/ui/skin/`. After that you can use anywhere:
+Internally `BsUI.init()` calls `BsSkinLoader.loadAllThemes()`, which loads and registers the three bundled skins (`bs-light` / `bs-dark` / `bs-admin`, including fonts, colors, drawables) from `core/src/main/resources/cn/pingyuanren/bs/ui/skin/`. After that you can use anywhere:
 
 ```java
 Skin skin = BsUI.getSkin();                 // get the current theme's skin
@@ -56,7 +56,7 @@ public static void main(String[] args) {
 
 ```java
 // skinCp is the classpath path of the skin resources (pointing to the .json file)
-String skinCp = "com/git/bs/ui/skin";                       // bs-ui's bundled skin directory
+String skinCp = "cn/pingyuanren/bs/ui/skin";                       // bs-ui's bundled skin directory
 FileHandle jsonFile = Gdx.files.internal(skinCp + "/bs-light.json");
 BsTheme bsTheme = BsLightTheme.INSTANCE;
 
@@ -93,9 +93,9 @@ Or generate at runtime via FreeType (from `.ttf` + charset file — no pre-bakin
 ```json
 com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator: {
     my-font: {
-        font: "com/git/bs/ui/skin/MyFont.ttf",
+        font: "cn/pingyuanren/bs/ui/skin/MyFont.ttf",
         size: 18,
-        characters: "com/git/bs/ui/skin/chinese.txt"
+        characters: "cn/pingyuanren/bs/ui/skin/chinese.txt"
     }
 }
 ```
@@ -179,7 +179,7 @@ public class MyApp extends Game {
     @Override
     public void create() {
         // 1. i18n (addBundle must come before init; core translations + your business translations, the latter overrides the former)
-        BsI18n.addBundle("com/git/bs/myapp/i18n/");
+        BsI18n.addBundle("cn/pingyuanren/bs/myapp/i18n/");
         BsI18n.init();                        // defaults to zh_cn; init("en_us") for English
 
         // 2. Skin init (recommended 3-step flow; here we use the BsUI.init() wrapper directly)
@@ -248,7 +248,7 @@ BsUI.get().addOnThemeChangeListener(theme -> {
 ## 6. Internationalization (BsI18n)
 
 ```java
-BsI18n.addBundle("com/git/bs/myapp/i18n/");   // register your business translation directory (call before init)
+BsI18n.addBundle("cn/pingyuanren/bs/myapp/i18n/");   // register your business translation directory (call before init)
 BsI18n.init();                                // defaults to zh_cn
 BsI18n.init("en_us");                         // or specify a locale directly
 

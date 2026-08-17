@@ -1,20 +1,17 @@
 # 发布到 Maven Central（操作手册）
 
-> 目标：让别人 `implementation 'com.git.bs:bs-ui-core:0.1.x'` 就能用（其实是 group 改后，见下）。
+> 目标：让别人 `implementation 'cn.pingyuanren:bs-ui-core:0.3.0'` 就能用。
 > 状态：gradle 配置已就绪、**默认关**（`-PcentralRelease=true` 才启用）。下面是你要准备的东西 + 流程。
 
-## 0. 当前最大 blocker：namespace 不可验证
+## 0. namespace：已选定 `cn.pingyuanren`
 
-Maven Central 要求发布坐标的 group（namespace）**必须能验证归属**。当前各模块 `group = 'com.git.bs'`，反向域名是 `bs.git.com`——**这个域名不属于本项目**，Central 验不了。
+Maven Central 要求发布坐标的 group（namespace）**必须能验证归属**。本项目各模块 `group = 'cn.pingyuanren'`，对应自有域名 `pingyuanren.cn`（反向），通过 **DNS TXT 记录**验证：
 
-两个可行改法（二选一，**改完所有模块的 `group` 同步**）：
+1. 在 Central Portal → Namespaces → Add Namespace，输入 `cn.pingyuanren`；
+2. Portal 会给出一条 TXT 记录（形如 `central-verify=<uuid>`），到 `pingyuanren.cn` 的 DNS 控制台加一条 **主机记录 `@`、类型 TXT**；
+3. 回 Portal 点 Verify，DNS 生效后即通过。
 
-| 方案 | group 改成 | 验证方式 | 前提 |
-|------|-----------|---------|------|
-| GitHub 流 | `com.github.authorZhao` | Central Portal GitHub 授权 / 建一个约定 repo | 你有 `github.com/authorZhao`（LICENSE 里就是这个） |
-| 自有域名 | `cn.pingyuanren` | DNS TXT 记录 | 你拥有 `pingyuanren.cn`（部署文档里那个域名） |
-
-> 推荐 `io.github.authorZhao` 或 `com.github.authorZhao`（GitHub 流，无需域名/备案）。改 group 后，`publish.gradle` 里 POM 的 `scm.url` 也同步（目前写的是 `github.com/authorZhao/bs-ui`，group 改成 `com.github.authorZhao` 正好对上）。
+> 备选方案是 GitHub 流（group = `io.github.authorZhao`，Portal GitHub 授权验证，无需域名）；本项目已选自有域名方案，发布前只需完成上述 TXT 验证一次。
 
 ## 1. 你要准备的东西（checklist，我没法替你做）
 
@@ -45,7 +42,7 @@ signingPassword=<gpg 密钥的 passphrase>
 ## 3. 发布步骤
 
 ```bash
-# 1. group 改成可验证 namespace（§0），同步 POM scm/url
+# 1. 在 Portal 完成 cn.pingyuanren 的 namespace 验证（§0，一次性）
 # 2. 本地 gradle.properties 配好 4 项（§1）
 # 3. 构建 + 签名 + 上传（每个要发布的模块都跑；或写个聚合任务）
 ./gradlew clean build publishToMavenLocal                       # 先本地验证产物 OK
@@ -58,9 +55,9 @@ signingPassword=<gpg 密钥的 passphrase>
 
 > 发布端点 URL 偶有变动，以 Central Portal 官方「Publishing via Gradle」文档为准（publish.gradle 里写的是常用值，需时核对）。
 
-## 4. POM 元数据（已配，改 group 后检查）
+## 4. POM 元数据（已配）
 
-`publish.gradle` 的 POM 已含 `name/description/url/licenses/developers/scm`（Apache 2.0 + 附加归属条款）。改 group 时确认 `scm.url`、`url` 还指向正确的 GitHub 仓库即可。sources jar + javadoc jar 也已配（Central 强制）。
+`publish.gradle` 的 POM 已含 `name/description/url/licenses/developers/scm`（license = Mozilla Public License 2.0）。`scm.url`、`url` 均指向 `github.com/authorZhao/bs-ui`。sources jar + javadoc jar 也已配（Central 强制）。
 
 ## 5. 还差什么（一句话）
 

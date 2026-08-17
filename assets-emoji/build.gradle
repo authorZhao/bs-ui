@@ -3,11 +3,11 @@ plugins {
   id 'maven-publish'
 }
 
-group = 'com.git.bs'
+group = 'cn.pingyuanren'
 
 eclipse.project.name = appName + '-assets-emoji'
 
-// 纯资源模块：彩色 emoji + 头像图集，classpath 路径 com/git/bs/ui/emoji/**。
+// 纯资源模块：彩色 emoji + 头像图集，classpath 路径 cn/pingyuanren/bs/ui/emoji/**。
 ext.publishArtifactId  = 'bs-assets-emoji'
 ext.publishDescription = 'bs-ui: emoji + head avatar atlases'
 apply from: "$rootDir/gradle/publish.gradle"
