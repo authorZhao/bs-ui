@@ -460,9 +460,15 @@ public abstract class BsChart extends Actor {
 
         boolean horizontal = (legendPlacement == LegendPlacement.TOP || legendPlacement == LegendPlacement.BOTTOM);
         float cx = getWidth() / 2f;
-        // 横向：起始 x 居中；纵向：起始 x 靠边
-        float startX = horizontal ? cx - totalW / 2f
-                : (legendPlacement == LegendPlacement.LEFT ? 6 : getWidth() - measureLegendColWidth() - 6);
+        // 横向：起始 x 居中；纵向：起始 x 靠边（子类可通过 legendVerticalStartX 自定义）
+        float startX;
+        if (horizontal) {
+            startX = cx - totalW / 2f;
+        } else {
+            float customX = legendVerticalStartX();
+            startX = customX >= 0 ? customX
+                    : (legendPlacement == LegendPlacement.LEFT ? 6 : getWidth() - measureLegendColWidth() - 6);
+        }
         // 横向：固定 y 顶部/底部；纵向：从顶到底每行 18px
         float startY = (legendPlacement == LegendPlacement.TOP) ? getHeight() - 8
                 : (legendPlacement == LegendPlacement.BOTTOM) ? 12
@@ -512,6 +518,12 @@ public abstract class BsChart extends Actor {
         glyphLayout.setText(font, "■");
         return glyphLayout.width;
     }
+
+    /**
+     * 纵向（LEFT/RIGHT）图例的自定义起始 x。
+     * 返回 &lt; 0 表示用默认靠边定位；子类（如饼图居中布局）可覆盖以贴近图表主体。
+     */
+    protected float legendVerticalStartX() { return -1; }
 
     /** 纵向布局（LEFT/RIGHT）时图例列的宽度估算（最长标签 + block）。 */
     protected float measureLegendColWidth() {
