@@ -101,6 +101,17 @@ BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);        // ③ 注册�
 ./gradlew :lwjgl3:run     # Desktop
 ```
 
+## 直接下载可运行版（GitHub Releases）
+
+[Releases](https://github.com/authorZhao/bs-ui/releases) 页面提供开箱即用的演示 jar（含全部资源，`java -jar` 即可运行）：
+
+- `bs-ui-winsettings-<版本>.jar` —— Win11 设置界面复刻演示
+- `bs-ui-bsskin-<版本>.jar` —— 皮肤/主题演示
+
+> **平台说明**：bs-ui 库本身支持 Windows / Linux（macOS 理论可用未验证）；当前 Releases 里的可运行 jar 因开发时间所限**只在 Windows 上打包测试过**，Linux 用户请自行 clone 源码 `./gradlew :lwjgl3:run` 运行——gradle 一条命令即可。
+
+> **Web 版提示**：Web（TeaVM）版启动需要**下载约 20MB 的资源包 + wasm**，网速慢时首屏可能要等较长时间（白屏/加载页属于正常现象），请耐心等待或优先体验桌面版。
+
 > 完整入门（Skin 初始化、字体全局共享、生命周期范式、用自己的资源替换自带皮肤/图标/emoji、常见错误）见 [docs/getting-started.md](./docs/getting-started.md)。
 
 ## 特性
