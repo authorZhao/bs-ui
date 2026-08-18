@@ -41,19 +41,32 @@ signingPassword=<gpg 密钥的 passphrase>
 
 ## 3. 发布步骤
 
+**推荐：一键脚本**（Windows `deploy\publish-all.bat central`；Linux/Git Bash `./deploy/publish-all.sh central`），
+自动完成：签名上传全部模块 → POST `/manual/upload/defaultRepository/cn.pingyuanren` 把 staging 转成
+Portal Deployment → drop 已转移的 staging 仓库。之后到 Portal 点 Publish 即可。
+
+**手动流程**：
+
 ```bash
 # 1. 在 Portal 完成 cn.pingyuanren 的 namespace 验证（§0，一次性）
-# 2. 本地 gradle.properties 配好 4 项（§1）
-# 3. 构建 + 签名 + 上传（每个要发布的模块都跑；或写个聚合任务）
-./gradlew clean build publishToMavenLocal                       # 先本地验证产物 OK
-./gradlew :core:publishAllPublicationsToCentralPortal -PcentralRelease=true
-./gradlew :common:publishAllPublicationsToCentralPortal -PcentralRelease=true
-# ... 对 assets-skin / assets-emoji / assets-icons / core-all 同理
+# 2. %GRADLE_USER_HOME%\gradle.properties 配好 4 项（§1）
+#    ⚠ 注意 GRADLE_USER_HOME：本机为 E:\maven\m1，properties 必须放该目录下
+# 3. 上传（PUT 到 OSSRH Staging API；maven-publish 不支持 -P 时可用环境变量
+#    ORG_GRADLE_PROJECT_centralRelease=true 代替）
+./gradlew publish -PcentralRelease=true
+# 4. 转成 Portal Deployment（Bearer = base64(user:token)；按 key 转移，不受出口 IP 变化影响）
+#    GET /manual/search/repositories?ip=any&profile_id=cn.pingyuanren 拿 key，再
+#    POST /manual/upload/repository/<key URL编码>
+# 5. drop 已转移的 staging 仓库（不清理会阻塞下次发布，报 "must be dropped"）
+#    GET /manual/search/repositories?ip=any&profile_id=cn.pingyuanren 拿 key，再
+#    DELETE /manual/drop/repository/<key>
+# 6. 到 central.sonatype.com/publishing/deployments 校验通过后点 Publish
 ```
 
-上传后在 `central.sonatype.com` 看 Deployment 状态：**新流程自动校验 + 发布**（无需手动 release）。校验失败会在 Portal 报错（最常见：签名缺失、POM 元数据不全、javadoc/sources jar 缺失——这些 publish.gradle 都已配，group 改对就行）。
-
-> 发布端点 URL 偶有变动，以 Central Portal 官方「Publishing via Gradle」文档为准（publish.gradle 里写的是常用值，需时核对）。
+> 端点说明（2026-08 核对官方文档）：`central.sonatype.com/repository/maven-central/` 是**只读下载仓库**，
+> PUT 会 404；Gradle maven-publish 需走 OSSRH Staging API
+> `https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/`，
+> 且 PUT 后**不会自动出现在 Portal**，必须再调第 4 步的手动端点。
 
 ## 4. POM 元数据（已配）
 

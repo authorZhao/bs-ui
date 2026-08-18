@@ -279,4 +279,107 @@ BsI18n.setLocale("ja_jp");                    // 运行时切语言，重载并�
 - **组件总览与 libGDX 原生对比**：见 [components.md](./components.md)
 - **主题系统、Skin 加载器、架构细节**：见 [architecture.md](./architecture.md)
 - **自定义皮肤导出**：见 [bs-custom-style-export.md](./bs-custom-style-export.md)
+- **资源加密（pak）**：把素材打成加密 `assets.pak` 分发，见 [pak-consumer-guide.md](./pak-consumer-guide.md)
 - **运行 demo**：`./gradlew :lwjgl3:run`（桌面端，含 90+ 组件演示）
+- **English version**: [getting-started-en.md](./getting-started-en.md)
+
+---
+
+## 九、真实项目用法：不引入 bs-assets-*，用自己的资源
+
+**依赖只有 `bs-ui-core`**（它不依赖任何 `bs-assets-*` 资源模块）：
+
+```groovy
+dependencies {
+    implementation 'cn.pingyuanren:bs-ui-core:0.3.2'
+}
+```
+
+`bs-assets-skin` / `bs-assets-icons` / `bs-assets-emoji` 是三个**纯资源 jar**（本项目自用的皮肤、图标、emoji 烘焙产物）。真实项目通常**体积敏感、品牌定制**，自带资源才是常态。`core` 本身内置了三套默认皮肤（light/dark/admin），所以只引 core 也能直接 `BsUI.init()` 跑起来；下面讲怎么把默认资源整体换成你自己的。
+
+### 1. 用自己的皮肤 + 字体（替代 bs-assets-skin）
+
+用第二节的「三步法」，把 json 指向你自己的皮肤文件即可（json + atlas + png 放你自己项目的 assets）：
+
+```java
+public class MyApp extends Game {
+    @Override
+    public void create() {
+        // 用自己的皮肤注册主题（而不是 BsUI.init() 的默认三件套）
+        registerTheme("light", BsLightTheme.INSTANCE,  "skins/my-light.json");
+        registerTheme("dark",  BsDarkTheme.INSTANCE,   "skins/my-dark.json");
+        // 不注册的主题就不存在，用户切不过去——只发你要的
+        setScreen(new MainScreen());
+    }
+
+    private void registerTheme(String name, BsTheme theme, String jsonPath) {
+        Skin skin = new BsSkin(Gdx.files.internal(jsonPath));   // ① 你的 json + atlas + 字体
+        BsSkinFactory.augmentWithBsStyles(skin, theme);         // ② 叠加 bs-ui 全套组件样式
+        BsUI.registerTheme(name, theme, skin);                  // ③ 注册（首次注册自动激活）
+    }
+}
+```
+
+你的皮肤 json 里声明自己的字体（FreeType 从 `.ttf` 运行时生成，不必预先烘焙）：
+
+```json
+com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator: {
+    lxgw: {
+        font: "fonts/MyFont.ttf",
+        size: 18,
+        characters: "fonts/chinese.txt"
+    }
+}
+```
+
+> **技巧**：字体在 JSON 里命名为 `lxgw`，`augmentWithBsStyles` 会自动把它选作 bs-ui 的默认字体，所有组件直接用你的字。其余 key（drawable、颜色）同理由你的 JSON 优先，bs-ui 只补缺失项。
+>
+> **皮肤 json 怎么来**：可以复制 bs-ui 自带的 `bs-light.json` 改颜色/字体；也可以用 `BsSkinExporter` 从运行时导出后二次编辑（见 [bs-custom-style-export.md](./bs-custom-style-export.md)）。
+>
+> **注意**：多主题共享的字体要用 FreeType 生成的或独立 `.png` 的 `.fnt`，**不要把字体图塞进 atlas**（第三节的重要例外）。
+
+### 2. 用自己的图标集（替代 bs-assets-icons）
+
+图标体系与皮肤无关，走 `BsIcon` 的独立 atlas：
+
+```java
+// 启动时加载一次（你自己的 atlas + png，任意路径）
+BsIcon.load("icons/my-icons.atlas");
+
+// 按名字取（命名就是 atlas 里的 region 名，你自己定）
+Image icon = new Image(BsIcon.get("house"));
+btn.getTitleTable().add(icon).padRight(4);
+
+// 退出时释放
+BsIcon.dispose();
+```
+
+图标 atlas 怎么生成：
+
+- **SVG 素材**：用本项目 desktop 端的 `BootstrapIconPackager`（Batik 渲染，支持按颜色烘焙、多尺寸）；
+- **PNG 素材**：libGDX 的 `TexturePacker` 打成 atlas 即可，region 名对上你代码里 `BsIcon.get(...)` 的名字就行。
+
+> 图标默认按白色烘焙，放进浅色容器记得 `Image.setColor(...)` 染色（见组件文档）。
+
+### 3. 用自己的 emoji（替代 bs-assets-emoji）
+
+彩色 emoji 走的是**字体合并**路线：皮肤导出时把 emoji TTF 的字形烘焙进主位图字体的 atlas（`BsSkinExporter` 的 `emojiTtf + emojiCharsFile` 参数；运行时由 App 实现 `emojiTtfPath()` / `emojiCharsPath()` 返回你自己的文件）。
+
+```java
+// App 里返回你自己的 emoji 字体与字符集（文件不存在返回 null 即关闭该能力）
+@Override public String emojiTtfPath()   { return "fonts/NotoColorEmoji.ttf"; }
+@Override public String emojiCharsPath() { return "fonts/emoji.txt"; }
+```
+
+两个限制要知道：
+
+- libGDX 位图字体只能索引 BMP（U+0000–U+FFFF），**非 BMP emoji（U+1F300+ 的 surrogate pair）无法渲染**，烘焙时会被跳过——只用 BMP 内的 emoji（如 ☀ ☁ ☂ ❤ ✈）或接受降级；
+- 不需要 emoji 就什么都不配（返回 null），文本照常渲染，零开销。
+
+### 4. 什么都不想换？
+
+那就 `BsUI.init()` + 三资源包聚合依赖一步到位（等同本项目 demo 的用法）：
+
+```groovy
+implementation 'cn.pingyuanren:bs-ui-core-all:0.3.2'   // core + skin + icons + emoji
+```

@@ -1,79 +1,148 @@
-# bs-ui 依赖方式与 pak 资源加密用法（给使用者）
+# bs-ui pak 资源加密使用指南（给使用者）
 
-> 状态：P2 阶段（pak 为明文 identity、无压缩；加密/压缩在 P3）。本文给出依赖选型与 pak 接入流程。
+> 状态：P3/P4 已完成——ChaCha20 加密 + DEFLATE 压缩实装，桌面（lwjgl3）与 Web（TeaVM）两端可用。
+> 设计细节见 [resource-encryption-design.md](./resource-encryption-design.md)（格式 BPK1、威胁模型、阶段记录）。
 
-## 一、两个 core 变体
+---
+
+## 一、它解决什么问题
+
+把 skin / 字体 / icons / emoji / i18n 等运行时资源打进**单个加密容器 `assets.pak`**：
+
+- **产物里没有明文资源**（桌面 jar 内、Web 的 HTTP 传输中都只见密文 pak）；
+- **对上层完全透明**：`PakBootstrap.init()` 之后，libGDX 一切 `Gdx.files.internal(...)`、`Gdx.files.getFileHandle(..., Internal)` 命中 pak 路径的自动解密解压，Skin / TextureAtlas / BitmapFont 加载代码**一行不改**；
+- **加密为纯 Java ChaCha20**（不依赖 `javax.crypto`），JVM 与 TeaVM wasm-gc 通用。
+
+> 定位是**提高门槛**（混淆级）：密钥编译在客户端，能挡"直接从产物目录/抓包拿资源"，挡不住逆向调试与 GPU 抓帧。
+
+## 二、依赖选型
 
 | 坐标 | 内容 | 适用 |
 |------|------|------|
-| `cn.pingyuanren:bs-ui-core` | 核心 Java 代码 + i18n 资源；**不含** skin/icon/emoji 素材 | 想自己提供素材、或想用 pak 加密打包的使用者 |
-| `cn.pingyuanren:bs-ui-core-all` | 聚合：`bs-ui-core` + `bs-assets-skin` + `bs-assets-emoji` + `bs-assets-icons`（传递依赖） | 想**开箱即用**、直接拿默认全套素材的使用者 |
+| `cn.pingyuanren:bs-ui-core:0.3.2` | 组件库本体 + core i18n（**不含** skin/icons/emoji 素材） | 所有使用者 |
+| `cn.pingyuanren:bs-ui-res:0.3.2` | **pak 工具箱**：`PakBootstrap` / `PakPacker` / ChaCha20 等 | 要用 pak 加密的使用者 |
+| `cn.pingyuanren:bs-ui-core-all:0.3.2` | 聚合：core + 三个素材包（jar 内**明文**素材） | 开箱即用，**不能**再 pak 加密 |
 
-单独的素材模块（`bs-ui-core-all` 已自动带上，也可单独引用）：
-- `cn.pingyuanren:bs-assets-skin` —— 烘焙皮肤（atlas/png/json + 位图字体）
-- `cn.pingyuanren:bs-assets-emoji` —— emoji + 头像图集
-- `cn.pingyuanren:bs-assets-icons` —— bootstrap-icons 图标集
-
-素材的 classpath 路径固定为 `cn/pingyuanren/bs/ui/{skin,emoji,icons}/**`，无论来自 `bs-assets-*` 还是使用者自带，加载代码（`Gdx.files.internal("cn/pingyuanren/bs/ui/skin/...")`）都一样。
-
-## 二、`bs-ui-core-all`：开箱即用
+用 pak 的组合就是前两个：
 
 ```groovy
-implementation 'cn.pingyuanren:bs-ui-core-all:0.3.0'
+repositories { mavenCentral() }
+
+dependencies {
+    implementation 'cn.pingyuanren:bs-ui-core:0.3.2'
+    implementation 'cn.pingyuanren:bs-ui-res:0.3.2'
+}
 ```
 
-素材在 jar 里，`Gdx.files.internal(...)` 直接能读，无需额外配置。**不能**用 pak 加密（素材是 jar 里的明文）。
+素材（skin/icons/emoji/i18n）由你自己提供——classpath 路径要对应，如 skin 放 `<dir>/cn/pingyuanren/bs/ui/skin/**`。可以自己制作，也可以从 `bs-assets-*` jar 解出来改。
 
-## 三、`bs-ui-core` + pak：自带素材 + 加密打包
+## 三、接入三步
 
-适合：想用自己的素材、或想把素材加密成单个 `assets.pak` 再分发。
+### 1. 打包：`PakPacker`（构建期）
 
-### 流程
+`PakPacker` 的用法（`bs-ui-res` 内置的 main）：
 
-1. **准备素材目录**（classpath 路径要对应，如 skin 放在 `<dir>/cn/pingyuanren/bs/ui/skin/**`）。素材可以是自己做的，也可以从 `bs-assets-skin` 等 jar 里解出来改。
+```
+PakPacker <outputFile> <dir1> <prefix1> [<dir2> <prefix2> ...]
+```
 
-2. **打包**：跑 `cn.pingyuanren.bs.res.PakPacker`（在 `bs-ui-core` 里），参数 `<资源目录> <classpath前缀> <输出pak>`：
-   ```groovy
-   // 你 app 的 build.gradle 里（任务必须放消费模块，不能放 core——见 resource-encryption-design.md P2 坑）
-   def pakFile = file("${buildDir}/pak/assets.pak")
-   tasks.register('packResources', JavaExec) {
-     dependsOn ':bs-ui-core:classes'   // 或你引用 core 的工程名
-     classpath = configurations.runtimeClasspath
-     mainClass = 'cn.pingyuanren.bs.res.PakPacker'
-     args = [file('src/main/resources/cn/pingyuanren/bs/ui/skin').absolutePath,
-             'cn/pingyuanren/bs/ui/skin',
-             pakFile.absolutePath]
-     inputs.dir file('src/main/resources/cn/pingyuanren/bs/ui/skin')
-     outputs.file pakFile
-   }
-   sourceSets.main.resources.srcDir(file("${buildDir}/pak"))
-   processResources.dependsOn('packResources')
-   ```
-   产出 `assets.pak`（P2 明文；P3 加密+压缩后同一接口）。
+- `<dirN> <prefixN>` 成对出现：把 `dirN` 目录下的文件（**扁平扫描、不递归**，跳过 `.ttf`）按 `prefixN/文件名` 收进 pak；
+- 多组可一次打完；文本类（`.json/.atlas/.fnt/.properties/.txt` 等）自动 **DEFLATE 压缩后再加密**，PNG 等已压缩文件原样加密；
+- 每次构建随机 salt，密文随构建变化。
 
-3. **启动时加载 pak**：在你 app 的 `create()` 最早期（早于 `BsUI.init()` 等任何 `Gdx.files.internal`）调一次：
-   ```java
-   cn.pingyuanren.bs.res.PakBootstrap.init();
-   ```
-   它会从 classpath 读 `assets.pak`，用 `FileResourcePack` 解析，包装 `Gdx.files`。之后所有命中 pak 的 `internal(...)` 透明走 pak。
+在你 app 的 build.gradle 里加（**任务必须放消费模块**，不能放库模块——pak 要进 classpath 被 `processResources` 消费，放库模块会循环依赖，见设计文档 P2 坑）：
 
-### 加密
+```groovy
+def pakFile = file("${buildDir}/pak/assets.pak")
+tasks.register('packResources', JavaExec) {
+    dependsOn ':bs-res:classes'                     // 或你工程里 bs-ui-res 的模块名
+    classpath = configurations.runtimeClasspath
+    mainClass = 'cn.pingyuanren.bs.res.PakPacker'
+    args = [pakFile.absolutePath,
+            file('src/main/resources/cn/pingyuanren/bs/ui/skin').absolutePath,
+            'cn/pingyuanren/bs/ui/skin']
+    inputs.dir file('src/main/resources/cn/pingyuanren/bs/ui/skin')
+    outputs.file pakFile
+}
+sourceSets.main.resources.srcDir(file("${buildDir}/pak"))   // pak 进 jar classpath
+processResources.dependsOn('packResources')
+```
 
-- **cipher = ChaCha20**（P3 已接入）：pak 索引和条目经 ChaCha20 加密（密钥 `PakKeys.KEY`，4-long XOR 混淆存 core），运行时 `FileResourcePack` 透明解密。**纯 Java、零依赖**，JVM 和 TeaVM wasm-gdc 通用，**无需按平台抽象**（javax.crypto 在 wasm-gc 不可用，故自写 ChaCha20）。
-- **`PakBootstrap.init()` 正式行为**：classpath 有 `assets.pak` 就加载包装，没有就跳过。**无需任何 -D 开关**。
-- **没做压缩**（保持简单；BPK1 格式 eflags 已支持，后续可开 DEFLATE）。
+### 2. 启动：`PakBootstrap.init()`（运行期，一行）
 
-**模式**：开发（`buildRelease` / lwjgl3 `gradle run`）= 散列明文资源、不打包；发布（桌面 `distWinSettings` / web `releasePak`）= 打**加密** pak。
+在你 App 的 `create()` **最早期**（早于 `BsUI.init()` / `BsI18n.init()` 等任何资源加载）调一次：
 
-**换 key**：改 `cn.pingyuanren.bs.res.PakKeys` 的 PARTS/MASK 常量（建议随机值），打包器和读取器都引用 `PakKeys.KEY`，自动一致。
+```java
+import cn.pingyuanren.bs.res.PakBootstrap;
 
-### 可执行 jar 打包示例（lwjgl3 桌面端）
+@Override
+public void create() {
+    PakBootstrap.init();      // classpath 有 assets.pak 就加载并包装 Gdx.files；没有则跳过（明文回退）
+    BsUI.init();
+    BsI18n.init();
+    setScreen(new MainScreen());
+}
+```
 
-参考 `lwjgl3/build.gradle` 的 `distWinSettings` 任务：fat jar 把代码 + core i18n + `assets.pak` 全打进一个可执行 jar，**排除明文** skin/emoji/icons/demo-i18n（它们只在 pak 里）。关键点：
-- `from sourceSets.main.output` + `from { configurations.runtimeClasspath.collect { zipTree(it) } }`；
-- `dependsOn classes, configurations.runtimeClasspath`（**必须**，否则依赖 jar 没构建好/陈旧）；
-- `exclude('cn/pingyuanren/bs/ui/{skin,emoji,icons}/**', 'cn/pingyuanren/bs/demo/i18n/**')`；
-- `manifest { attributes 'Main-Class': '...' }`。
-- `assets.pak` 由 `packResources`（多根：skin/emoji/icons/demo-i18n）产出，经 `sourceSets.main.resources.srcDir` 进 jar。
+行为细节：
 
-运行：`java -jar app.jar`（自包含，无需外部文件；pak 在 jar 内）。
+- pak 不存在时打 warn 日志直接跳过，资源照常从磁盘明文读——**开发期天然回退，无需任何开关**；
+- 内部：读 `assets.pak` 字节 → `FileResourcePack.open(bytes)` 解密索引 → `Gdx.files = new PakFiles(原实现, pack)`；
+- 拦截 `internal()` / `getFileHandle(Internal)` / `classpath()` 三条路径（BitmapFont 加载字体页走的是 `getFileHandle`，必须拦——设计文档 P1 关键发现），其余委派平台原生实现；
+- 无参数、无系统属性、幂等回退。
+
+### 3. 分发：产物里只剩密文
+
+桌面端打可执行 jar 时**排除明文素材**（否则加密白做）：
+
+```groovy
+tasks.register('distApp', Jar) {
+    dependsOn classes, configurations.runtimeClasspath
+    from sourceSets.main.output
+    from { configurations.runtimeClasspath.collect { zipTree(it) } }
+    exclude('cn/pingyuanren/bs/ui/{skin,emoji,icons}/**', 'cn/pingyuanren/bs/demo/i18n/**')  // 明文素材出局
+    manifest { attributes 'Main-Class': 'com.example.Main' }
+}
+```
+
+运行 `java -jar app.jar`：pak 在 jar 内，自包含。
+
+本项目可跑的参考任务：
+
+| 平台 | 命令 | 说明 |
+|------|------|------|
+| 桌面 | `./gradlew :lwjgl3:distWinSettings` | fat jar：代码 + core i18n + assets.pak，明文素材 exclude |
+| 桌面 | `./gradlew :lwjgl3:distBsSkin` | 同上，换 Main-Class |
+| Web | `./gradlew :teavm:releasePak` | `getAssetFileHandles` 只列 `assets.pak`，HTTP 只传一个密文 pak |
+| Web | `./gradlew :teavm:releasePak -PwasmCrypt=true` | 追加加密 `app.wasm` + 注入 `loader.js`（**浏览器端运行时解密需实测**，谨慎启用） |
+| 开发 | `./gradlew :lwjgl3:run` / `:teavm:buildRelease` | 不打包或明文散列资源，迭代不受影响 |
+
+## 四、换密钥（建议发布前做）
+
+密钥 `PakKeys.KEY`（32 字节）以 4×long PARTS XOR MASK 的拆分形式存于 `bs-ui-res` 源码，打包器与运行时引用同一常量，改一处两端自动一致。
+
+1. 生成新 key：`./gradlew :bs-res:pakKeyGen`（随机生成 PARTS/MASK 并打印）；
+2. 把打印的常量粘贴进 `cn.pingyuanren.bs.res.PakKeys`；
+3. **重新打包所有 pak**——换 key 后旧 pak 全部失效（解不开索引即拒载）。
+
+> 注意：`bs-ui-res` 是发布到 Maven Central 的公共构件，**默认 key 是公开的**。真要保护自己的素材，必须 fork/复制 `bs-res` 相关类到你的工程里换私有 key，而不是依赖公共构件的默认 key。
+
+## 五、验证工具（bs-res 自带）
+
+| 任务 | 内容 |
+|------|------|
+| `./gradlew :bs-res:pakFormatCheck` | BPK1 round-trip：写 pak → 读回 → 逐条字节一致 |
+| `./gradlew :bs-res:pakSurfaceCheck` | `PakFileHandle` 表面检查（不依赖 GL） |
+| `./gradlew :bs-res:pakKeyGen` | 生成新密钥常量 |
+
+## 六、限制与注意
+
+- **`PakPacker` 扁平扫描不递归**、跳过 `.ttf`（ttf 应在构建期烘焙成 `.fnt` + PNG 页再进 pak）；
+- pak 内资源**只读**（`PakFileHandle` 是内存/文件只读视图）；
+- 加密强度为**混淆级**：密钥在客户端代码里，防"5 秒扒素材"，不防逆向；
+- `wasmCrypt`（app.wasm 加密）为实验特性，浏览器端解密未充分实测；
+- Web 端启动会一次性拉全量 pak（本项目 ~19MB），首屏带宽要留意。
+
+---
+
+**相关文档**：[getting-started.md](./getting-started.md) 第九节（自带素材替换默认资源） | [resource-encryption-design.md](./resource-encryption-design.md)（设计与格式） | **English**: 本文档暂只有中文版

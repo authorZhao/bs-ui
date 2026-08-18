@@ -130,10 +130,13 @@ if (project.hasProperty('centralRelease')) {
         repositories {
             maven {
                 name = 'centralPortal'
-                // Central Portal 发布端点；URL 偶有变动，发布前以官方文档为准
+                // 发布端点（以 central.sonatype.org 官方文档为准）：
+                //   release  → OSSRH Staging API（Central Portal 对 Gradle maven-publish 的
+                //              官方兼容端点；maven-central/ 是只读下载仓库，PUT 会 404）
+                //   snapshot → Central Portal snapshot 仓库（可直接 PUT）
                 url = version.toString().endsWith('SNAPSHOT')
                         ? uri('https://central.sonatype.com/repository/maven-snapshots/')
-                        : uri('https://central.sonatype.com/repository/maven-central/')
+                        : uri('https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/')
                 credentials {
                     username = findProperty('centralUser') as String
                     password = findProperty('centralToken') as String

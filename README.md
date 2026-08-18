@@ -1,14 +1,16 @@
 # bs-ui
 
-> Bootstrap-style UI components for libGDX — bridging the gap between a game engine and a traditional GUI framework.
+**[English](./README.en.md)** | 中文
 
-GitHub: <https://github.com/authorZhao/bs-ui>
+> Bootstrap 风格的 libGDX UI 组件库 —— 打通游戏引擎与传统 GUI 框架的壁垒。
+
+- 项目主页：<https://www.pingyuanren.cn>
+- GitHub：<https://github.com/authorZhao/bs-ui>
+- Maven Central：`cn.pingyuanren:bs-ui-core`（namespace 对应域名 `pingyuanren.cn`）
 
 ---
 
-## 中文
-
-### 这是什么
+## 这是什么
 
 `bs-ui` 是一套跑在 **libGDX** 之上的 UI 组件库，把 Web 前端里 **Bootstrap** 的设计语言与组件形态（按钮、表单、表格、对话框、导航栏、卡片、图表……）搬进了游戏引擎的 Scene2D 体系。
 
@@ -16,13 +18,13 @@ GitHub: <https://github.com/authorZhao/bs-ui>
 
 游戏引擎擅长渲染、动画、批绘制，但自带的 UI 控件粗糙、丑陋、缺组件；传统 GUI 框架（Swing / JavaFX / Web）控件丰富却进不了游戏的渲染管线。`bs-ui` 让你能在同一套 Scene2D Stage 里，既享受到 Bootstrap 那种"开箱即用、视觉统一"的控件生态，又不脱离 libGDX 的渲染、输入、资源管线——做工具链、编辑器、游戏内 UI、数据看板都顺手。
 
-### 当前状态
+## 当前状态
 
 **不是最终版，但已经能用了。**
 
 核心组件（90+）、双主题（Light / Dark）、FreeType 中文字体、Skin 加载/导出、跨平台启动器均已落地，可以拿来构建真实界面。仍有打磨空间（性能、字符集瘦身、Web 端适配、文档），欢迎试用与反馈。
 
-### 效果展示
+## 效果展示
 
 数据看板（图表 / 统计卡 / 表格）：
 
@@ -32,28 +34,30 @@ GitHub: <https://github.com/authorZhao/bs-ui>
 
 ![win-settings](docs/img/win—setting-home.png)
 
-### 特性
+## 引入（Maven Central）
 
-- **90+ Bootstrap 风格组件**：Button / Form / InputGroup / SelectBox / Table / DataTable / Pagination / Navbar / MenuBar / Breadcrumb / Card / Modal / Window / Toast / Alert / Dialog / Tooltip / Popover / Tabs / Accordion / Collapse / Offcanvas / Drawer / Carousel / Slider / Progress / Spinner / Badge / Tag / Avatar / Tree / Steps / Timeline / Transfer / ColorPicker / DatePicker / FileItem …
-- **9 种图表**：Line / Bar / Area / Pie / Doughnut / Scatter / Spline / Radar（基于 Scene2D 自绘，无第三方图表库）
-- **4 种对话框**：Alert / Confirm / Prompt / Choice
-- **Light / Dark 双主题**：纯代码生成主题色 + Drawable，可运行时切换；支持自定义主题
-- **VISUI 风格的全局 API**：`BsUI.getSkin()` / `BsTheme.tp()`，组件无需自己持有 Skin
-- **FreeType 中文字体**：开箱即用，支持分帧预热、字号分级
-- **Skin 工具链**：`BsSkinLoader`（json + atlas + FreeType 加载）、`BsSkinExporter`（导出供 Skin Composer 二次编辑）、`BsIconPackager`（SVG → atlas，desktop 端）
-- **跨平台**：LWJGL3（Desktop）+ TeaVM（Web）启动器；demo 模块（Game / Screen）平台无关，两端复用
+```groovy
+repositories { mavenCentral() }
 
-### 模块结构
+dependencies {
+    // 只想要组件库（皮肤/字体/图标全部自己提供）——最常见
+    implementation 'cn.pingyuanren:bs-ui-core:0.3.2'
 
-| 模块 | 职责 |
-|------|------|
-| `common` | 平台无关接口（`Platform`、文件选择器签名等） |
-| `core` | **bs-ui 库本体**：所有 `Bs*` 组件、主题、Skin 工厂/加载器、图表 |
-| `demo` | 平台无关的演示（`Game` + `Screen`），展示 bs-ui 全部能力 |
-| `lwjgl3` | Desktop 启动器 + 平台实现 + iconpkg 打包工具（依赖 Batik） |
-| `teavm` | Web 启动器 |
+    // 想直接用自带皮肤/图标/emoji 资源，再按需加（纯资源 jar，无代码）
+    implementation 'cn.pingyuanren:bs-assets-skin:0.3.2'
+    implementation 'cn.pingyuanren:bs-assets-icons:0.3.2'
+    implementation 'cn.pingyuanren:bs-assets-emoji:0.3.2'
+    // 或聚合包（= core + 三个资源包）
+    implementation 'cn.pingyuanren:bs-ui-core-all:0.3.2'
+}
+```
 
-### 快速上手
+> `bs-ui-core` 不依赖任何 `bs-assets-*`：真实项目里通常**用自己的皮肤/字体/图标**，参见
+> [docs/getting-started.md](./docs/getting-started.md) 第九节「真实项目用法」；
+> 需要把素材加密成单个 `assets.pak` 分发的，加 `cn.pingyuanren:bs-ui-res`，用法见
+> [docs/pak-consumer-guide.md](./docs/pak-consumer-guide.md)。
+
+## 快速上手
 
 最简启动（`BsUI.init()` 自动注册内置三主题 + 字体）：
 
@@ -97,9 +101,36 @@ BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);        // ③ 注册�
 ./gradlew :lwjgl3:run     # Desktop
 ```
 
-> 完整入门（Skin 初始化、字体全局共享、生命周期范式、常见错误）见 [docs/getting-started.md](./docs/getting-started.md)。
+> 完整入门（Skin 初始化、字体全局共享、生命周期范式、用自己的资源替换自带皮肤/图标/emoji、常见错误）见 [docs/getting-started.md](./docs/getting-started.md)。
 
-### 致谢
+## 特性
+
+- **90+ Bootstrap 风格组件**：Button / Form / InputGroup / SelectBox / Table / DataTable / Pagination / Navbar / MenuBar / Breadcrumb / Card / Modal / Window / Toast / Alert / Dialog / Tooltip / Popover / Tabs / Accordion / Collapse / Offcanvas / Drawer / Carousel / Slider / Progress / Spinner / Badge / Tag / Avatar / Tree / Steps / Timeline / Transfer / ColorPicker / DatePicker / FileItem …
+- **9 种图表**：Line / Bar / Area / Pie / Doughnut / Scatter / Spline / Radar（基于 Scene2D 自绘，无第三方图表库）
+- **4 种对话框**：Alert / Confirm / Prompt / Choice
+- **Light / Dark 双主题**：纯代码生成主题色 + Drawable，可运行时切换；支持自定义主题
+- **VISUI 风格的全局 API**：`BsUI.getSkin()` / `BsTheme.tp()`，组件无需自己持有 Skin
+- **FreeType 中文字体**：开箱即用，支持分帧预热、字号分级
+- **Skin 工具链**：`BsSkinLoader`（json + atlas + FreeType 加载）、`BsSkinExporter`（导出供 Skin Composer 二次编辑）、`BsIconPackager`（SVG → atlas，desktop 端）
+- **国际化**：`BsI18n`，zh_cn / en_us / ja_jp，properties 翻译包，core 与业务翻译分层
+- **跨平台**：LWJGL3（Desktop）+ TeaVM（Web）启动器；demo 模块（Game / Screen）平台无关，两端复用
+
+## 模块结构
+
+| 模块 | 坐标 | 职责 |
+|------|------|------|
+| `common` | `bs-ui-common` | 平台无关接口（`Platform`、文件选择器签名等） |
+| `core` | `bs-ui-core` | **bs-ui 库本体**：所有 `Bs*` 组件、主题、Skin 工厂/加载器、图表 |
+| `bs-res` | `bs-ui-res` | pak 资源加密工具箱（BPK1 容器、ChaCha20、`PakBootstrap`，见 [docs/pak-consumer-guide.md](./docs/pak-consumer-guide.md)） |
+| `assets-skin` | `bs-assets-skin` | 纯资源：烘焙好的皮肤（atlas / png / json / 位图字体） |
+| `assets-icons` | `bs-assets-icons` | 纯资源：bootstrap-icons 图标集 |
+| `assets-emoji` | `bs-assets-emoji` | 纯资源：彩色 emoji + 头像图集 |
+| `core-all` | `bs-ui-core-all` | 聚合包：core + 三个资源包 |
+| `demo` | — | 平台无关的演示（`Game` + `Screen`），展示 bs-ui 全部能力 |
+| `lwjgl3` | — | Desktop 启动器 + 平台实现 + iconpkg 打包工具（依赖 Batik） |
+| `teavm` | — | Web 启动器 |
+
+## 致谢
 
 本项目站在以下优秀开源项目的肩膀上，没有它们就没有 `bs-ui`：
 
@@ -121,9 +152,7 @@ BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);        // ③ 注册�
 
 > 若您认为某个致谢遗漏或标注不当，欢迎指出。
 
----
-
-## License（中文）
+## License
 
 本项目基于 **Mozilla Public License 2.0（MPL 2.0）**，允许商业使用、修改、分发，
 并允许与私有 / 闭源代码组合（MPL 为文件级弱 copyleft，义务仅覆盖 bs-ui 自己的源文件）。
@@ -145,157 +174,6 @@ new BsAboutDialog(skin)
     .product("我的应用", "1.0.0")
     .modified(false)
     .appendSection("开源依赖",
-        "libGDX (Apache-2.0)", "VISUI (Apache-2.0)", "Bootstrap (MIT)")
-    .showModal(stage);
-```
-
----
-
-## English
-
-### What is this
-
-`bs-ui` is a UI component library that runs on top of **libGDX**, bringing the design language and component patterns of **Bootstrap** from the Web front-end into the Scene2D world of a game engine.
-
-Its intent is straightforward: **to bridge the gap between a game engine and a traditional GUI framework.**
-
-Game engines excel at rendering, animation, and batch drawing, yet their built-in UI widgets tend to be crude, ugly, and few. Traditional GUI frameworks (Swing / JavaFX / Web) offer rich widgets but cannot enter a game's render pipeline. `bs-ui` lets you enjoy Bootstrap's "uniform, ready-to-use" component ecosystem inside the very same Scene2D Stage — without stepping outside libGDX's rendering, input, or asset pipelines. It is equally handy for toolchains, in-house editors, in-game UI, and data dashboards.
-
-### Current status
-
-**Not the final release, but already usable.**
-
-Core components (90+), Light/Dark themes, FreeType CJK fonts, Skin load/export, and cross-platform launchers are all in place and can be used to build real interfaces. There is still room for polish (performance, charset trimming, web adaptation, docs). Feedback is welcome.
-
-### Screenshots
-
-Data dashboard (charts / stat cards / table):
-
-![dashboard](docs/img/dashboard.png)
-
-Win11 Settings clone (navigation / cards / form controls):
-
-![win-settings](docs/img/win-setting-home-en.png)
-
-### Features
-
-- **90+ Bootstrap-style components**: Button / Form / InputGroup / SelectBox / Table / DataTable / Pagination / Navbar / MenuBar / Breadcrumb / Card / Modal / Window / Toast / Alert / Dialog / Tooltip / Popover / Tabs / Accordion / Collapse / Offcanvas / Drawer / Carousel / Slider / Progress / Spinner / Badge / Tag / Avatar / Tree / Steps / Timeline / Transfer / ColorPicker / DatePicker / FileItem …
-- **9 chart types**: Line / Bar / Area / Pie / Doughnut / Scatter / Spline / Radar (hand-drawn on Scene2D, no third-party chart lib)
-- **4 dialogs**: Alert / Confirm / Prompt / Choice
-- **Light / Dark themes**: theme colors and drawables generated purely in code, switchable at runtime; custom themes supported
-- **VISUI-style global API**: `BsUI.getSkin()` / `BsTheme.tp()`, components hold no Skin reference of their own
-- **FreeType CJK fonts**: works out of the box, with frame-spread preheating and multi-size scaling
-- **Skin toolchain**: `BsSkinLoader` (json + atlas + FreeType), `BsSkinExporter` (export for Skin Composer re-editing), `BsIconPackager` (SVG → atlas, desktop)
-- **Cross-platform**: LWJGL3 (Desktop) + TeaVM (Web) launchers; the demo module (Game + Screen) is platform-agnostic and reused by both
-
-### Module layout
-
-| Module | Responsibility |
-|--------|----------------|
-| `common` | Platform-agnostic interfaces (`Platform`, file-chooser signatures, etc.) |
-| `core` | **The bs-ui library itself**: every `Bs*` component, themes, Skin factory/loader, charts |
-| `demo` | Platform-agnostic demo (`Game` + `Screen`) showcasing all bs-ui capabilities |
-| `lwjgl3` | Desktop launcher + platform impl + iconpkg packaging tool (depends on Batik) |
-| `teavm` | Web launcher |
-
-### Quick start
-
-Minimal bootstrap (`BsUI.init()` auto-registers the built-in themes + fonts):
-
-```java
-public class MyApp extends Game {
-    @Override
-    public void create() {
-        BsUI.init();              // registers dark/admin/light themes + bundled fonts
-        BsI18n.init();            // i18n (defaults to zh_cn)
-        setScreen(new MainScreen());
-    }
-
-    @Override
-    public void dispose() {
-        BsUI.disposeAllSkins();   // release globally-shared fonts + skins
-        BsUI.dispose();
-    }
-}
-
-// Anywhere (components hold no Skin; global access)
-Skin skin = BsUI.getSkin();
-BsButton btn = new BsButton("OK", skin,
-        BsButton.Variant.PRIMARY, BsButton.Style.SOLID, BsButton.Size.MD);
-BsUI.setTheme("dark");            // switch theme; rebuild UI in the listener
-```
-
-Inject a custom font (recommended 3-step flow):
-
-```java
-FileHandle json = Gdx.files.internal("skins/bs-light.json");
-Skin skin = new BsSkin(json);                                  // 1. load (font enters global cache)
-BsSkinFactory.augmentWithBsStyles(skin, BsLightTheme.INSTANCE); // 2. overlay bs styles
-BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);      // 3. register globally
-```
-
-> **Globally shared fonts**: multiple themes share the same font instances; disposing a single skin does NOT release the fonts — call `BsUI.disposeAllSkins()` on exit. See [docs/getting-started-en.md](./docs/getting-started-en.md).
-
-Run the demo:
-
-```bash
-./gradlew :lwjgl3:run     # Desktop
-```
-
-> Full guide (Skin init, global font sharing, lifecycle patterns, common pitfalls) in [docs/getting-started-en.md](./docs/getting-started-en.md).
-
-### Acknowledgements
-
-This project stands on the shoulders of these excellent open-source projects; without them, `bs-ui` would not exist:
-
-- **[libGDX](https://libgdx.com/)** — the cross-platform game engine, the foundation of bs-ui
-- **[VISUI](https://github.com/kotcrab/vis-ui)** — the gold standard of Scene2D UI libraries; bs-ui's global API is directly inspired by it
-- **[Bootstrap](https://getbootstrap.com/)** — the source of the design language and component patterns
-- **[Bootstrap Icons](https://icons.getbootstrap.com/)** — the icon system
-- **[LXGW WenKai / 霞鹜文楷](https://github.com/lxgw/LxgwWenKai)** — the built-in CJK font, clean and readable
-- **[noto-emoji/](https://github.com/googlefonts/noto-emoji.git)** emoji
-- **[gdx-liftoff](https://github.com/libgdx/gdx-liftoff)** — project scaffolding generator
-- **[gdx-teavm](https://github.com/xpenatan/gdx-teavm)** — TeaVM/Web backend for libGDX
-- **[Apache Batik](https://xmlgraphics.apache.org/batik/)** — used by the iconpkg tool for SVG → PNG/atlas conversion
-- **[Lombok](https://projectlombok.org/) / [SLF4J](http://www.slf4j.org/) / [Fastjson2](https://github.com/alibaba/fastjson2) / (...other)** — development infrastructure
-
-**Vendored third-party source**: To keep the TeaVM/Web build self-contained and dependency-light, a small amount of third-party source is copied directly into this repository (distributed under its original license):
-
-- `core/.../bmfont/BitmapFontWriter.java` — from **libGDX gdx-tools** (Apache License 2.0); source attribution retained, implementation unchanged.
-- A minimal **SLF4J java.util.logging (jul) binding** — from **SLF4J** (MIT-compatible); used for desktop log bridging.
-
-> If any credit is missing or mis-attributed, please let us know.
-
----
-
-## License (English)
-
-This project is licensed under the **Mozilla Public License 2.0 (MPL 2.0)**,
-which permits commercial use, modification, and distribution, and allows
-combining bs-ui with private / closed-source code (MPL is a file-level weak
-copyleft; its obligations cover only bs-ui's own source files).
-
-**The one core obligation**: if you **modify bs-ui source files** and
-distribute them (in source or executable form), those modified files must be
-made available under MPL 2.0. Unmodified files carry no open-source
-obligation. Full text in [LICENSE](./LICENSE).
-
-**Attribution is not required**: MPL 2.0 does not mandate an in-app About /
-credits screen; if you wish to give credit, mentioning `bs-ui` and the
-upstream link in your README or About page is enough.
-
-**One-line credit (optional)**: the library ships a `BsAboutDialog` so users
-can pop up a bs-ui credits dialog in a single call:
-
-```java
-// modified=true if you modified the bs-ui source; false otherwise
-BsAboutDialog.show(stage, skin, "My App", false);
-
-// or fully customized: product name + version + your own / other-dep credits
-new BsAboutDialog(skin)
-    .product("My App", "1.0.0")
-    .modified(false)
-    .appendSection("Open-source dependencies",
         "libGDX (Apache-2.0)", "VISUI (Apache-2.0)", "Bootstrap (MIT)")
     .showModal(stage);
 ```

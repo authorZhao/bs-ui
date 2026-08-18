@@ -283,3 +283,104 @@ BsI18n.setLocale("ja_jp");                    // switch language at runtime; rel
 - **Custom skin export**: see [bs-custom-style-export.md](./bs-custom-style-export.md)
 - **Run the demo**: `./gradlew :lwjgl3:run` (desktop, with 90+ component demos)
 - **中文版**: [getting-started.md](./getting-started.md)
+
+---
+
+## 9. Real-world usage: skip the bs-assets-* modules, ship your own resources
+
+**Your only dependency is `bs-ui-core`** (it does not depend on any `bs-assets-*` resource module):
+
+```groovy
+dependencies {
+    implementation 'cn.pingyuanren:bs-ui-core:0.3.2'
+}
+```
+
+`bs-assets-skin` / `bs-assets-icons` / `bs-assets-emoji` are three **pure resource jars** (this project's own baked skin, icons, and emoji). Real projects are usually size-sensitive and brand-customized — your own resources are the norm. `core` itself bundles the three default themes (light/dark/admin), so with core alone `BsUI.init()` already works; this section shows how to replace the bundled resources with your own.
+
+### 1. Your own skin + fonts (instead of bs-assets-skin)
+
+Use the 3-step flow from section 2, pointing the json at your own skin files (json + atlas + png live in your project's assets):
+
+```java
+public class MyApp extends Game {
+    @Override
+    public void create() {
+        // register themes with your own skins (instead of BsUI.init()'s defaults)
+        registerTheme("light", BsLightTheme.INSTANCE,  "skins/my-light.json");
+        registerTheme("dark",  BsDarkTheme.INSTANCE,   "skins/my-dark.json");
+        // themes you don't register don't exist — users can't switch to them
+        setScreen(new MainScreen());
+    }
+
+    private void registerTheme(String name, BsTheme theme, String jsonPath) {
+        Skin skin = new BsSkin(Gdx.files.internal(jsonPath));   // 1. your json + atlas + fonts
+        BsSkinFactory.augmentWithBsStyles(skin, theme);         // 2. overlay all bs-ui styles
+        BsUI.registerTheme(name, theme, skin);                  // 3. register (first one auto-activates)
+    }
+}
+```
+
+Declare your own font in the skin json (FreeType generates it at runtime from `.ttf`; no pre-baking needed):
+
+```json
+com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator: {
+    lxgw: {
+        font: "fonts/MyFont.ttf",
+        size: 18,
+        characters: "fonts/chinese.txt"
+    }
+}
+```
+
+> **Tip**: name the font `lxgw` in the JSON and `augmentWithBsStyles` automatically picks it as the bs-ui default font — every component uses your font. Other keys (drawables, colors) from your JSON take precedence too; bs-ui only fills in what's missing.
+>
+> **Where does the skin json come from?** Copy the bundled `bs-light.json` and tweak colors/fonts, or export a running skin with `BsSkinExporter` and re-edit it (see [bs-custom-style-export.md](./bs-custom-style-export.md)).
+>
+> **Caution**: fonts shared across themes must be FreeType-generated or standalone-`.png` `.fnt` files — **never put font pages inside the atlas** (the important exception in section 3).
+
+### 2. Your own icon set (instead of bs-assets-icons)
+
+Icons are independent of the skin system; they go through `BsIcon`'s own atlas:
+
+```java
+// once at startup (your own atlas + png, any path)
+BsIcon.load("icons/my-icons.atlas");
+
+// fetch by name (the name is just the region name inside your atlas)
+Image icon = new Image(BsIcon.get("house"));
+btn.getTitleTable().add(icon).padRight(4);
+
+// release on exit
+BsIcon.dispose();
+```
+
+How to produce the atlas:
+
+- **SVG sources**: use this project's desktop `BootstrapIconPackager` (Batik-based, bakes by color, multi-size);
+- **PNG sources**: pack them with libGDX's `TexturePacker` — just make the region names match what you pass to `BsIcon.get(...)`.
+
+> Icons are baked white by default; remember `Image.setColor(...)` when placing them on light containers (see the component docs).
+
+### 3. Your own emoji (instead of bs-assets-emoji)
+
+Color emoji use the **font-merge** route: at skin-export time, glyphs from an emoji TTF are baked into the main bitmap font's atlas (`BsSkinExporter`'s `emojiTtf + emojiCharsFile` arguments; at runtime your App implements `emojiTtfPath()` / `emojiCharsPath()` returning your own files).
+
+```java
+// return your own emoji font and charset in your App (return null to disable)
+@Override public String emojiTtfPath()   { return "fonts/NotoColorEmoji.ttf"; }
+@Override public String emojiCharsPath() { return "fonts/emoji.txt"; }
+```
+
+Two limitations to know:
+
+- libGDX bitmap fonts can only index the BMP (U+0000–U+FFFF); **non-BMP emoji (U+1F300+ surrogate pairs) cannot be rendered** and are skipped during baking — stick to BMP emoji (e.g. ☀ ☁ ☂ ❤ ✈) or accept the degradation;
+- don't need emoji? Configure nothing (return null); text renders normally with zero overhead.
+
+### 4. Don't want to replace anything?
+
+Then `BsUI.init()` plus the aggregate dependency gives you everything at once (same as this project's demo):
+
+```groovy
+implementation 'cn.pingyuanren:bs-ui-core-all:0.3.2'   // core + skin + icons + emoji
+```
