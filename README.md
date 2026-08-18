@@ -95,22 +95,34 @@ BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);        // ③ 注册�
 
 > **字体全局共享**：多主题共用同一组字体实例，单个 skin 的 dispose 不会释放字体，退出时统一调 `BsUI.disposeAllSkins()`。详见 [docs/getting-started.md](./docs/getting-started.md)。
 
-运行 demo：
+## 运行 demo
+
+**方式一：gradle 命令（源码运行，Windows / Linux）**
 
 ```bash
+git clone https://github.com/authorZhao/bs-ui.git
+cd bs-ui
 ./gradlew :lwjgl3:run     # Desktop
 ```
 
-## 直接下载可运行版（GitHub Releases）
+**方式二：直接下载打好的包（GitHub Releases）**
 
-[Releases](https://github.com/authorZhao/bs-ui/releases) 页面提供开箱即用的演示 jar（含全部资源，`java -jar` 即可运行）：
+[Releases](https://github.com/authorZhao/bs-ui/releases) 页面提供开箱即用的产物：
 
-- `bs-ui-winsettings-<版本>.jar` —— Win11 设置界面复刻演示
-- `bs-ui-bsskin-<版本>.jar` —— 皮肤/主题演示
+- **桌面**（含全部资源，装了 Java 直接 `java -jar` 运行）：
+  - `bs-ui-winsettings-<版本>.jar` —— Win11 设置界面复刻演示
+  - `bs-ui-bsskin-<版本>.jar` —— 皮肤/主题演示
+- **Web（TeaVM）**：`dist.zip` —— 解压后在解压目录跑 JDK 自带的静态服务器：
 
-> **平台说明**：bs-ui 库本身支持 Windows / Linux（macOS 理论可用未验证）；当前 Releases 里的可运行 jar 因开发时间所限**只在 Windows 上打包测试过**，Linux 用户请自行 clone 源码 `./gradlew :lwjgl3:run` 运行——gradle 一条命令即可。
+  ```bash
+  unzip dist.zip -d web && cd web
+  jwebserver -d ./        # JDK 18+ 自带；或 python -m http.server
+  # 浏览器访问 http://127.0.0.1:8000
+  ```
 
-> **Web 版提示**：Web（TeaVM）版启动需要**下载约 20MB 的资源包 + wasm**，网速慢时首屏可能要等较长时间（白屏/加载页属于正常现象），请耐心等待或优先体验桌面版。
+> **平台说明**：bs-ui 支持 Windows / Linux / Web（TeaVM，已基本测试通过；macOS 理论可用未验证）。Releases 里的桌面 jar 目前只在 Windows 上打包测试，Linux 用户可源码运行或自行 `./gradlew :lwjgl3:distWinSettings` 打包。
+>
+> **Web 版提示**：首次打开需**下载约 20MB 的资源包 + wasm**，网速慢时首屏可能要等较长时间（白屏/加载页属于正常现象），请耐心等待或优先体验桌面版。
 
 > 完整入门（Skin 初始化、字体全局共享、生命周期范式、用自己的资源替换自带皮肤/图标/emoji、常见错误）见 [docs/getting-started.md](./docs/getting-started.md)。
 

@@ -95,22 +95,34 @@ BsUI.registerTheme("light", BsLightTheme.INSTANCE, skin);      // 3. register gl
 
 > **Globally shared fonts**: multiple themes share the same font instances; disposing a single skin does NOT release the fonts — call `BsUI.disposeAllSkins()` on exit. See [docs/getting-started-en.md](./docs/getting-started-en.md).
 
-Run the demo:
+## Run the demo
+
+**Option 1: gradle from source (Windows / Linux)**
 
 ```bash
+git clone https://github.com/authorZhao/bs-ui.git
+cd bs-ui
 ./gradlew :lwjgl3:run     # Desktop
 ```
 
-## Download a runnable build (GitHub Releases)
+**Option 2: download a prebuilt package (GitHub Releases)**
 
-The [Releases](https://github.com/authorZhao/bs-ui/releases) page provides ready-to-run demo jars (all assets bundled; just `java -jar`):
+The [Releases](https://github.com/authorZhao/bs-ui/releases) page provides ready-to-run artifacts:
 
-- `bs-ui-winsettings-<version>.jar` — the Win11 Settings clone demo
-- `bs-ui-bsskin-<version>.jar` — the skin/theme demo
+- **Desktop** (all assets bundled; with Java installed just run `java -jar`):
+  - `bs-ui-winsettings-<version>.jar` — the Win11 Settings clone demo
+  - `bs-ui-bsskin-<version>.jar` — the skin/theme demo
+- **Web (TeaVM)**: `dist.zip` — unzip it, then serve it with the static server bundled with the JDK:
 
-> **Platform note**: the bs-ui library itself supports Windows / Linux (macOS untested but should work). The runnable jars in Releases are currently **built and tested on Windows only** — limited development time. Linux users can clone the repo and run `./gradlew :lwjgl3:run` (a single gradle command).
+  ```bash
+  unzip dist.zip -d web && cd web
+  jwebserver -d ./        # bundled since JDK 18; or python -m http.server
+  # open http://127.0.0.1:8000 in a browser
+  ```
 
-> **Web build note**: the Web (TeaVM) build needs to **download a ~20MB asset bundle + wasm** on first load. On a slow connection the first screen may take quite a while (a blank/loading page is normal) — please be patient, or try the desktop build first.
+> **Platform note**: bs-ui supports Windows / Linux / Web (TeaVM, mostly tested; macOS untested but should work). The desktop jars in Releases are currently built and tested on Windows only — Linux users can run from source or build with `./gradlew :lwjgl3:distWinSettings`.
+>
+> **Web build note**: the first load **downloads a ~20MB asset bundle + wasm**. On a slow connection the first screen may take quite a while (a blank/loading page is normal) — please be patient, or try the desktop build first.
 
 > Full guide (Skin init, global font sharing, lifecycle patterns, using your own skin/icons/emoji instead of the bundled ones, common pitfalls) in [docs/getting-started-en.md](./docs/getting-started-en.md).
 
