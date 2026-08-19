@@ -28,7 +28,7 @@
 
 数据看板（图表 / 统计卡 / 表格）：
 
-![dashboard](docs/img/dashboard.png)
+![dashboard](docs/img/ui-show-select.png)
 
 复刻 Win11 设置界面（导航 / 卡片 / 表单控件）：
 
