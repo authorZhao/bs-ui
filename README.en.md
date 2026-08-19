@@ -28,7 +28,7 @@ Core components (90+), Light/Dark themes, FreeType CJK fonts, Skin load/export, 
 
 Data dashboard (charts / stat cards / table):
 
-![dashboard](docs/img/dashboard.png)
+![dashboard](docs/img/ui-show-chart-en.png)
 
 Win11 Settings clone (navigation / cards / form controls):
 
