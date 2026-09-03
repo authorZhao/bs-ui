@@ -56,10 +56,13 @@ public class BsVirtualList<T> extends ScrollPane {
         Actor render(Actor existing, T item, int index);
     }
 
-    /// 内容占位：靠 `getPrefHeight`/`getMinHeight` 报告总高度，让 ScrollPane 滚动范围正确。
+    /// 内容占位：靠 `getPrefHeight`/`getMinHeight` 报告总高度、`getPrefWidth`/`getMinWidth`
+    /// 报告内容宽（setContentWidth 后 >0），让 ScrollPane 滚动范围正确。
     private static final class Spacer extends WidgetGroup {
         float totalH = 0f;
-        @Override public float getPrefWidth() { return 0f; }
+        float totalW = 0f;
+        @Override public float getPrefWidth() { return totalW; }
+        @Override public float getMinWidth() { return totalW; }
         @Override public float getPrefHeight() { return totalH; }
         @Override public float getMinHeight() { return totalH; }
         @Override public void layout() {}
@@ -74,6 +77,7 @@ public class BsVirtualList<T> extends ScrollPane {
     private final List<Actor> pool = new ArrayList<>();           // 回收的空闲 cell
     private BiConsumer<Integer, T> onClick;
     private float overscanRows = 1f;
+    private float contentW = 0f;   // 横向内容宽（0=仅纵向，旧行为）
     private float lastSpacerStageY = Float.NaN;                   // 滚动检测缓存
     private final Vector2 tmpA = new Vector2();
     private final Vector2 tmpB = new Vector2();
@@ -98,7 +102,9 @@ public class BsVirtualList<T> extends ScrollPane {
         this.spacer = (Spacer) getWidget();
         this.renderer = renderer;
         this.itemH = Math.max(1f, itemHeight);
-        setScrollingDisabled(true, false);   // 仅纵向
+        // 横向默认不滚（contentW=0 时 Spacer 宽=0，ScrollPane 拉伸到视口宽，无滚动范围）；
+        // setContentWidth 后内容超宽才出现横向滚动
+        setScrollingDisabled(false, false);
         setFadeScrollBars(false);
     }
 
@@ -111,6 +117,15 @@ public class BsVirtualList<T> extends ScrollPane {
     }
 
     public List<T> getItems() { return items; }
+
+    /// 横向内容宽（px）：超出视口宽时出现横向滚动条。等宽字体场景由业务方按
+    /// 最长行×字宽估算（如内容有富文本标记须先剥掉再量）。cell 宽取 max(视口宽, contentW)。
+    public BsVirtualList<T> setContentWidth(float w) {
+        this.contentW = Math.max(0f, w);
+        this.spacer.totalW = this.contentW;
+        invalidate();   // 重新计算横向滚动范围
+        return this;
+    }
 
     public BsVirtualList<T> setOnClick(BiConsumer<Integer, T> cb) { this.onClick = cb; return this; }
 
@@ -182,7 +197,7 @@ public class BsVirtualList<T> extends ScrollPane {
                 cell.setVisible(true);
                 active.put(i, cell);
             }
-            cell.setBounds(0, totalH - (i + 1) * itemH, viewW, itemH);
+            cell.setBounds(0, totalH - (i + 1) * itemH, Math.max(viewW, contentW), itemH);
         }
     }
 
