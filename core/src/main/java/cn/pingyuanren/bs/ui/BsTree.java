@@ -12,6 +12,7 @@ package cn.pingyuanren.bs.ui;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -178,6 +179,10 @@ public class BsTree extends Table {
             nodeStyle.downFontColor = BsPalette.PRIMARY.getHover();
             TextButton textBtn = new TextButton(n.getText(), nodeStyle);
             textBtn.setProgrammaticChangeEvents(false);
+            // 文字锚左：TextButton 的 Label 默认居中，而行宽随树内最宽行变化（展开出
+            // 更深/更长的节点时整棵树变宽），居中会让所有已见节点跟着左右漂移；
+            // 锚左后文字 x 只取决于自身缩进深度，展开/折叠不再牵动前面的父节点
+            textBtn.getLabel().setAlignment(Align.left);
             textBtn.addListener(new ClickListener() {
                 @Override public void clicked(InputEvent event, float x, float y) {
                     // 文字=选中（IDE 惯例）；展开/折叠只走箭头，避免点文字误塌树
