@@ -41,8 +41,9 @@ import java.util.function.Consumer;
  * }</pre>
  *
  * <p>实现：纵向 {@link Table}，递归遍历可见节点（父折叠则子不渲染），
- * 每行 = 缩进（depth × indentPx）+ 展开/折叠箭头（▸/▾）+ 文字。
- * 箭头和文字都是 {@link TextButton}（事件路径清晰）。</p>
+ * 每行 = 缩进（depth × indentPx）+ 展开/折叠箭头（&gt;/v）+ 文字。
+ * 箭头和文字都是 {@link TextButton}（事件路径清晰）；展开/折叠只认箭头，
+ * 点文字仅触发 onNodeClick（IDE 惯例）。</p>
  * @author authorZhao
  * @since 2026-07-16
  */
@@ -144,8 +145,9 @@ public class BsTree extends Table {
                 // 竖线放在缩进 cell 的左侧（实际 cell 宽度=INDENT_PER_DEPTH，竖线占 1px 居左偏中）
                 row.add(vlineWrap).width(INDENT_PER_DEPTH).padLeft((INDENT_PER_DEPTH - 1f) / 2f);
             }
-            // 箭头：▸（折叠）/ ▾（展开）/ 空（叶子）
-            String arrow = n.isLeaf() ? "  " : (n.isExpanded() ? "▾" : "▸");
+            // 箭头：>（折叠）/ v（展开）/ 空（叶子）。
+            // 不用 ▸/▾（U+25B8/U+25BE）：预烘焙 .fnt 字形表缺这两个码点，渲染为空白
+            String arrow = n.isLeaf() ? "  " : (n.isExpanded() ? "v" : ">");
             // 按深度调箭头字色（独立 style，避免 setColor 无效）
             Color arrowColor = n.isLeaf()
                     ? BsTheme.td()
@@ -178,13 +180,9 @@ public class BsTree extends Table {
             textBtn.setProgrammaticChangeEvents(false);
             textBtn.addListener(new ClickListener() {
                 @Override public void clicked(InputEvent event, float x, float y) {
+                    // 文字=选中（IDE 惯例）；展开/折叠只走箭头，避免点文字误塌树
                     if (onNodeClick != null) {
                         try { onNodeClick.accept(n); } catch (Throwable t) { /* ignore */ }
-                    }
-                    // 点击文字也展开/折叠（如果有子节点）
-                    if (!n.isLeaf()) {
-                        n.setExpanded(!n.isExpanded());
-                        refresh();
                     }
                 }
             });
