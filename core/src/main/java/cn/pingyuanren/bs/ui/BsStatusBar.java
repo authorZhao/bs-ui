@@ -74,10 +74,10 @@ public class BsStatusBar extends Table {
         // dot 用自绘 actor（避免字体不含 ● 导致颜色失效）
         leftDot = new DotActor(idleDotColor(), 5);
 
+        // 状态栏文字用默认字号档（font-sm 偏小看不清；fnt 位图字体不能 scale，会发虚）
         Label.LabelStyle leftStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
-        leftStyle.font = skin.getFont("font-sm");
         leftLabel = new Label("Ready", leftStyle);
-        leftLabel.setColor(new Color(0.3f, 0.3f, 0.32f, 1f));
+        leftLabel.setColor(BsTheme.tm());
 
         leftZone = new Table();
         leftZone.left();
@@ -147,14 +147,13 @@ public class BsStatusBar extends Table {
     public BsStatusBar addLeftSegment(String text) {
         Skin skin = BsUI.getSkin();
         Label.LabelStyle smStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
-        smStyle.font = skin.getFont("font-sm");
         if (leftZone.getChildren().size > 2) {
             Label sep = new Label("│", smStyle);
-            sep.setColor(new Color(0xC0 / 255f, 0xC8 / 255f, 0xD0 / 255f, 1f));
+            sep.setColor(BsTheme.td());
             leftZone.add(sep).padLeft(8).padRight(8);
         }
         Label l = new Label(text, smStyle);
-        l.setColor(new Color(0x49 / 255f, 0x50 / 255f, 0x57 / 255f, 1f));
+        l.setColor(BsTheme.ts());
         leftZone.add(l);
         return this;
     }
@@ -171,14 +170,13 @@ public class BsStatusBar extends Table {
         }
         // 新增段
         Label.LabelStyle smStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
-        smStyle.font = skin.getFont("font-sm");
         if (rightZone.getChildren().size > 0) {
             Label sep = new Label("│", smStyle);
-            sep.setColor(new Color(0xC0 / 255f, 0xC8 / 255f, 0xD0 / 255f, 1f));
+            sep.setColor(BsTheme.td());
             rightZone.add(sep).padLeft(8).padRight(8);
         }
         Label l = new Label(text, smStyle);
-        l.setColor(new Color(0x49 / 255f, 0x50 / 255f, 0x57 / 255f, 1f));
+        l.setColor(BsTheme.ts());
         Container<Label> wrap = new Container<>(l);
         wrap.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
         wrap.addListener(new com.badlogic.gdx.scenes.scene2d.InputListener() {

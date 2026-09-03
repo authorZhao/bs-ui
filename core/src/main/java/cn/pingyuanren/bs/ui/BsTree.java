@@ -11,14 +11,20 @@
 package cn.pingyuanren.bs.ui;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -42,9 +48,9 @@ import java.util.function.Consumer;
  * }</pre>
  *
  * <p>实现：纵向 {@link Table}，递归遍历可见节点（父折叠则子不渲染），
- * 每行 = 缩进（depth × indentPx）+ 展开/折叠箭头（&gt;/v）+ 文字。
- * 箭头和文字都是 {@link TextButton}（事件路径清晰）；展开/折叠只认箭头，
- * 点文字仅触发 onNodeClick（IDE 惯例）。</p>
+ * 每行 = 缩进（depth × indentPx）+ 展开/折叠箭头（&gt;/v）/ 叶子文档图标 + 文字。
+ * 箭头和文字都是 {@link TextButton}（事件路径清晰）；展开/折叠走箭头，
+ * 点非叶子文字同样展开/折叠（并触发 onNodeClick），点叶子文字仅 onNodeClick。</p>
  * @author authorZhao
  * @since 2026-07-16
  */
@@ -53,17 +59,6 @@ public class BsTree extends Table {
     private static final float INDENT_PER_DEPTH = 32f;
     private static final float ROW_PAD = 3f;
     private static final float ROW_HEIGHT = 26f;
-
-    /** 各层级字色：depth=0 一级节点用 textPrimary（最醒目），层级越深越浅。
-     *  V2：颜色从 skin 取，必须传 skin。 */
-    private static Color[] depthColors(Skin skin) {
-        return new Color[] {
-                BsTheme.tp(),  // depth 0 (一级) textPrimary
-                BsTheme.ts(),  // depth 1 (二级) textSecondary
-                BsTheme.tm(),  // depth 2 (三级) textMuted
-                BsTheme.td(),  // depth 3+ 浅灰 textDisabled
-        };
-    }
 
     /** 树节点数据模型。 */
     public static class Node {
@@ -146,34 +141,28 @@ public class BsTree extends Table {
                 // 竖线放在缩进 cell 的左侧（实际 cell 宽度=INDENT_PER_DEPTH，竖线占 1px 居左偏中）
                 row.add(vlineWrap).width(INDENT_PER_DEPTH).padLeft((INDENT_PER_DEPTH - 1f) / 2f);
             }
-            // 箭头：>（折叠）/ v（展开）/ 空（叶子）。
+            // 箭头：>（折叠）/ v（展开）；叶子用生成的文档图标占位（否则左侧空一截突兀）。
             // 不用 ▸/▾（U+25B8/U+25BE）：预烘焙 .fnt 字形表缺这两个码点，渲染为空白
-            String arrow = n.isLeaf() ? "  " : (n.isExpanded() ? "v" : ">");
-            // 按深度调箭头字色（独立 style，避免 setColor 无效）
-            Color arrowColor = n.isLeaf()
-                    ? BsTheme.td()
-                    : depthColors(skin)[Math.min(depth, depthColors(skin).length - 1)];
-            TextButtonStyle arrowStyle = new TextButtonStyle(skin.get("bs-menu-title", TextButtonStyle.class));
-            arrowStyle.fontColor = arrowColor;
-            TextButton arrowBtn = new TextButton(arrow, arrowStyle);
-            arrowBtn.setProgrammaticChangeEvents(false);
-            if (!n.isLeaf()) {
+            if (n.isLeaf()) {
+                Image leaf = new Image(leafDrawable());
+                leaf.setColor(BsTheme.tm());  // 白色形状 + tint = 跟随主题的 muted 灰
+                row.add(leaf).size(13f).padRight(2 + (20f - 13f) / 2f);
+            } else {
+                TextButtonStyle arrowStyle = new TextButtonStyle(skin.get("bs-menu-title", TextButtonStyle.class));
+                arrowStyle.fontColor = BsTheme.tp();
+                TextButton arrowBtn = new TextButton(n.isExpanded() ? "v" : ">", arrowStyle);
+                arrowBtn.setProgrammaticChangeEvents(false);
                 arrowBtn.addListener(new ClickListener() {
                     @Override public void clicked(InputEvent event, float x, float y) {
-                        n.setExpanded(!n.isExpanded());
-                        if (onNodeExpandToggle != null) {
-                            try { onNodeExpandToggle.accept(n); } catch (Throwable t) { /* ignore */ }
-                        }
-                        refresh();
+                        toggle(n);
                     }
                 });
+                row.add(arrowBtn).size(20, ROW_HEIGHT).padRight(2);
             }
-            row.add(arrowBtn).size(20, ROW_HEIGHT).padRight(2);
-            // 文字：每个节点独立 style（按深度设 fontColor），
-            // 因为 TextButton 渲染用 TextButtonStyle.fontColor，Label.setColor 会被覆盖无效
-            Color textColor = depthColors(skin)[Math.min(depth, depthColors(skin).length - 1)];
+            // 文字：节点统一 textPrimary 单色（IDEA 目录树风格，层级感只靠缩进+竖线），
+            // TextButton 渲染用 TextButtonStyle.fontColor（Label.setColor 会被覆盖无效）
             TextButtonStyle nodeStyle = new TextButtonStyle(skin.get("bs-menu-title", TextButtonStyle.class));
-            nodeStyle.fontColor = textColor;
+            nodeStyle.fontColor = BsTheme.tp();
             // hover 时仍用蓝色 overFontColor（保持导航感）—— 走 linkColor token
             nodeStyle.overFontColor = BsPalette.PRIMARY.getHover();
             nodeStyle.downFontColor = BsPalette.PRIMARY.getHover();
@@ -185,7 +174,11 @@ public class BsTree extends Table {
             textBtn.getLabel().setAlignment(Align.left);
             textBtn.addListener(new ClickListener() {
                 @Override public void clicked(InputEvent event, float x, float y) {
-                    // 文字=选中（IDE 惯例）；展开/折叠只走箭头，避免点文字误塌树
+                    // 叶子=选中回调；非叶子=点击文字同样展开/折叠（并触发选中回调，
+                    // 业务方按 isLeaf/expanded 自行取用）
+                    if (!n.isLeaf()) {
+                        toggle(n);
+                    }
                     if (onNodeClick != null) {
                         try { onNodeClick.accept(n); } catch (Throwable t) { /* ignore */ }
                     }
@@ -205,5 +198,46 @@ public class BsTree extends Table {
             p = p.parent;
         }
         return d;
+    }
+
+    /** 展开/折叠切换（箭头与文字点击共用）：更新状态 + 回调 + 重渲染。 */
+    private void toggle(Node n) {
+        n.setExpanded(!n.isExpanded());
+        if (onNodeExpandToggle != null) {
+            try { onNodeExpandToggle.accept(n); } catch (Throwable t) { /* ignore */ }
+        }
+        refresh();
+    }
+
+    // ==================== 叶子文档图标（代码生成，无外部资源依赖） ====================
+
+    /** 白色文档形纹理（懒加载静态复用，16×16 仅 1KB，不释放）；
+     *  Image.setColor 染主题色，主题切换即时生效。 */
+    private static volatile Texture leafTex;
+
+    private static Drawable leafDrawable() {
+        Texture tex = leafTex;
+        if (tex == null) {
+            synchronized (BsTree.class) {
+                if (leafTex == null) {
+                    Pixmap pm = new Pixmap(16, 16, Pixmap.Format.RGBA8888);
+                    pm.setColor(Color.WHITE);
+                    // 轮廓：左边/底边/顶边(左段) + 右上折角
+                    pm.drawLine(4, 1, 9, 1);
+                    pm.drawLine(9, 1, 12, 4);
+                    pm.drawLine(12, 4, 12, 14);
+                    pm.drawLine(4, 14, 12, 14);
+                    pm.drawLine(4, 1, 4, 14);
+                    // 内容横线（文本感）
+                    pm.drawLine(6, 6, 10, 6);
+                    pm.drawLine(6, 9, 10, 9);
+                    pm.drawLine(6, 12, 8, 12);
+                    leafTex = new Texture(pm);
+                    pm.dispose();
+                }
+                tex = leafTex;
+            }
+        }
+        return new TextureRegionDrawable(new TextureRegion(tex));
     }
 }
