@@ -32,11 +32,11 @@ public final class BsLightTheme extends BsAbstractTheme {
         put("text-on-primary",  0xFFFFFF);
         put("text-on-dark",     0xFFFFFF);
         // 背景
-        put("bg-body",          0xF5F6F8);
-        put("bg-surface",       0xFCFCFC);
-        put("bg-elevated",      0xFFFFFF);
-        put("bg-hover",         0xE7F1FF);
-        put("bg-header",        0xF8F9FA);
+        put("bg-body",          0xE8ECF0);   // 柔和暖灰蓝（太白刺眼→加灰调）
+        put("bg-surface",       0xF0F2F5);   // 表面色偏灰
+        put("bg-elevated",      0xF5F7FA);   // 浮层再亮半档
+        put("bg-hover",         0xDDE7F0);   // 悬停淡灰蓝
+        put("bg-header",        0xE0E4EA);   // 表头略深于 body
         // 边框
         put("border",           0xCCCCCC);
         put("border-strong",    0xDEE2E6);

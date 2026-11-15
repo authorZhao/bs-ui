@@ -304,7 +304,9 @@ public final class BsSkinFactory {
         }
 
         putIfAbsent(skin, "bs-menu-title-up", roundRect(bgH, bgH, 4, 0));
-        putIfAbsent(skin, "bs-menu-title-hover", roundRect(secondarySoftBg, secondarySoftBg, 4, 0));
+        // hover 底色用主题 bg-hover（dark 主题下是深蓝色可辨）而非 secondarySoftBg
+        //（后者 = secondary + 88% 向白靠拢，dark 主题下≈白色，白字看不见）
+        putIfAbsent(skin, "bs-menu-title-hover", roundRect(bh, bh, 4, 0));
         putIfAbsent(skin, "bs-menu-title-open", roundRect(bds, bds, 4, 0));
         if (!skin.has("bs-menu-title", TextButtonStyle.class)) {
             TextButtonStyle mt = new TextButtonStyle();
