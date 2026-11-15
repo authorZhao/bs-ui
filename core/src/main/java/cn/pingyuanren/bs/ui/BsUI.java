@@ -86,6 +86,22 @@ public final class BsUI {
         BsSkinLoader.loadAllThemes();
     }
 
+    /**
+     * 分层皮肤注册 builder（0.3.7）：基座 → 内置 augment（只补缺）→ jsonLayer（整对象覆盖）→
+     * augmentLayer（代码层最高优先）。见 {@link BsSkinBuilder}。
+     *
+     * <pre>{@code
+     * BsUI.builder("my-theme")
+     *     .base(myTheme)
+     *     .jsonLayer(Gdx.files.internal("skin/my-overrides.json"))
+     *     .augmentLayer((skin, theme) -> skin.add("my-style", style))
+     *     .register();
+     * }</pre>
+     */
+    public static BsSkinBuilder builder(String themeName) {
+        return new BsSkinBuilder(themeName);
+    }
+
     // =================== 全局 ShapeRenderer ===================
     /**
      * 全局共享 ShapeRenderer（render 线程单线程，组件 draw 时短暂独占 begin/end，安全）。

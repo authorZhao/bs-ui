@@ -30,4 +30,43 @@ public interface ResourcePack {
 
     /** 明文长度；不存在返回 0。 */
     long length(String logicalPath);
+
+    /**
+     * 是否有任一条目位于目录 {@code dir} 下（pak 无目录条目，只有文件路径，按
+     * {@code dir + "/"} 前缀判定）。供 {@link PakFiles} 把 {@code internal("particle")}
+     * 这类<b>目录请求</b>也接进 pak——目录句柄只作 {@code child()} 的前缀载体，child
+     * 拼出全路径后再查 pak，天然命中（散目录从磁盘删除后目录式访问不落空）。
+     *
+     * <p>默认 {@code false}；有索引的实现（{@link FileResourcePack} 等）覆写。</p>
+     *
+     * @since 0.3.7
+     */
+    default boolean hasDir(String dir) {
+        return false;
+    }
+
+    /**
+     * 目录参数归一：反斜杠→正斜杠、折叠连续斜杠、去首尾斜杠。空串/{@code null} → 空串。
+     * {@link #hasDir(String)} 的实现与调用方共用本归一，保证两侧口径一致。
+     *
+     * @since 0.3.7
+     */
+    static String normalizeDir(String dir) {
+        if (dir == null || dir.isEmpty()) return "";
+        String d = dir.replace('\\', '/');
+        StringBuilder sb = new StringBuilder(d.length());
+        boolean prevSlash = true; // 吃掉前导斜杠
+        for (int i = 0; i < d.length(); i++) {
+            char c = d.charAt(i);
+            if (c == '/') {
+                if (prevSlash) continue;
+                prevSlash = true;
+            } else {
+                prevSlash = false;
+            }
+            sb.append(c);
+        }
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == '/') sb.setLength(sb.length() - 1);
+        return sb.toString();
+    }
 }

@@ -110,6 +110,25 @@ public final class FileResourcePack implements ResourcePack {
         return entries.containsKey(logicalPath);
     }
 
+    /** 惰性目录索引（所有条目的祖先目录集合）；首次 {@link #hasDir(String)} 时构建。 */
+    private java.util.Set<String> dirIndex;
+
+    @Override
+    public boolean hasDir(String dir) {
+        if (dirIndex == null) {
+            java.util.Set<String> idx = new java.util.HashSet<>();
+            for (String path : entries.keySet()) {
+                int cut = -1;
+                while ((cut = path.indexOf('/', cut + 1)) > 0) {
+                    idx.add(path.substring(0, cut));
+                }
+            }
+            dirIndex = idx;
+        }
+        String d = ResourcePack.normalizeDir(dir);
+        return !d.isEmpty() && dirIndex.contains(d);
+    }
+
     @Override
     public long length(String logicalPath) {
         PakEntry e = entries.get(logicalPath);

@@ -63,6 +63,13 @@ public class BsSkin extends Skin {
         canLoad = true;
     }
 
+    /** 空 skin（后续 {@link #load(FileHandle)} 分层加载，见 BsSkinBuilder）。字体走全局缓存。 */
+    public BsSkin() {
+        super();
+        this.useCacheFont = true;
+        canLoad = true;
+    }
+
     @Override
     public void load(FileHandle skinFile) {
         if (!canLoad) {

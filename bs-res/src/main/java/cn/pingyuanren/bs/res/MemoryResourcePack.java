@@ -47,6 +47,17 @@ public final class MemoryResourcePack implements ResourcePack {
         return d == null ? 0 : d.length;
     }
 
+    @Override
+    public boolean hasDir(String dir) {
+        String d = ResourcePack.normalizeDir(dir);
+        if (d.isEmpty()) return false;
+        String prefix = d + "/";
+        for (String path : entries.keySet()) {
+            if (path.startsWith(prefix)) return true;
+        }
+        return false;
+    }
+
     /** 条目数（日志/观测用）。 */
     public int size() {
         return entries.size();

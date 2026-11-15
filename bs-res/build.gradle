@@ -13,6 +13,14 @@ dependencies {
 
   compileOnly "org.projectlombok:lombok:$lombokVersion"
   annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+  testImplementation platform('org.junit:junit-bom:6.0.0')
+  testImplementation 'org.junit.jupiter:junit-jupiter'
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+  useJUnitPlatform()
 }
 
 // 发布配置（发布到 mavenLocal；远程仓库见 gradle/publish.gradle 的注释段）
