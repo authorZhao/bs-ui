@@ -76,6 +76,8 @@ public class BsTable extends Table {
     /** LABEL 模式下，勾选列点击回调（参数 = 行索引 0..n-1，即当前页内索引）。 */
     private IntConsumer onCheckToggle;
     private float colWidth = 120f;
+    /** 按列宽覆盖（可空；见 {@link #setColWidths}）。 */
+    private float[] colWidths;
     /** 当前选中行（单选模式，-1 = 无）。 */
     private int selectedRow = -1;
     /** 多选模式下选中的行集合。 */
@@ -120,6 +122,23 @@ public class BsTable extends Table {
     public void setColWidth(float w) {
         this.colWidth = w;
         rebuild();
+    }
+
+    /**
+     * 按列宽：第 i 列取 widths[i]（&lt;=0 或越界未覆盖的列回退 {@link #setColWidth} 的统一值）。
+     * 兼容：不调用本方法时行为与旧版完全一致。
+     */
+    public void setColWidths(float... widths) {
+        this.colWidths = widths;
+        rebuild();
+    }
+
+    /** 列宽取值：按列覆盖优先，否则统一 colWidth。 */
+    private float widthOf(int col) {
+        if (colWidths != null && col >= 0 && col < colWidths.length && colWidths[col] > 0) {
+            return colWidths[col];
+        }
+        return colWidth;
     }
 
     public void setOnRowClick(IntConsumer cb) { this.onRowClick = cb; }
@@ -199,6 +218,8 @@ public class BsTable extends Table {
                 final int col = c;
                 Label h = new Label(headers.get(c), skin);
                 h.setColor(BsTheme.tp());
+                // 显式按列宽时启用省略号：表头不溢出压到邻列
+                if (colWidths != null) h.setEllipsis(true);
                 Container<Label> hw = new Container<>(h);
                 hw.setBackground(skin.getDrawable("bs-menu-bar-bg"));
                 hw.fill();
@@ -213,7 +234,7 @@ public class BsTable extends Table {
                         }
                     });
                 }
-                add(hw).width(colWidth).height(28).pad(0);
+                add(hw).width(widthOf(c)).height(28).pad(0);
             }
             row();
             // 分隔线
@@ -258,12 +279,14 @@ public class BsTable extends Table {
             for (int c = 0; c < cells.size(); c++) {
                 Label cell = new Label(safe(cells, c), skin);
                 cell.setColor(isSelected ? Color.WHITE : BsTheme.tp());
+                // 显式按列宽时启用省略号：长文本（公式等）以 … 截断，不再重叠压到邻列
+                if (colWidths != null) cell.setEllipsis(true);
                 Container<Label> cw = new Container<>(cell);
                 cw.fill();
                 cw.pad(0, 8, 0, 8);
                 cw.left();
                 cw.setBackground(rowBg(isSelected, false));
-                add(cw).width(colWidth).height(28).pad(0);
+                add(cw).width(widthOf(c)).height(28).pad(0);
             }
             row();
 
@@ -389,7 +412,7 @@ public class BsTable extends Table {
                         }
                     }
                 });
-                add(h).width(colWidth).height(28);
+                add(h).width(widthOf(c)).height(28);
             }
             row();
             Container<Label> sep = new Container<>(new Label("", skin));
@@ -427,7 +450,7 @@ public class BsTable extends Table {
                         }
                     }
                 });
-                add(cell).width(colWidth).height(26);
+                add(cell).width(widthOf(c)).height(26);
             }
             row();
         }

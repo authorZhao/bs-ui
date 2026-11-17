@@ -513,8 +513,8 @@ public abstract class BsChart extends Actor {
         font.setColor(unpackColor(oldColor));
     }
 
-    /** 测量 "■" 色块的宽度（依赖字体，可能因字号不同而变化）。 */
-    private float measureBlockWidth() {
+    /** 测量 "■" 色块的宽度（依赖字体，可能因字号不同而变化）。0.3.10 起 protected：子类图例测量须与绘制同口径。 */
+    protected float measureBlockWidth() {
         glyphLayout.setText(font, "■");
         return glyphLayout.width;
     }
@@ -568,6 +568,9 @@ public abstract class BsChart extends Actor {
                 s.color != null ? s.color : Color.GRAY);
     }
 
+    /** tooltip 背景色（深色半透明面板，浅/深主题均可读）。 */
+    private static final Color TOOLTIP_BG = new Color(0.07f, 0.08f, 0.10f, 0.94f);
+
     /** 绘制 tooltip 框（白底 + 边框 + 文字）。 */
     protected void drawTooltipBox(Batch batch, float parentAlpha, String[] lines, Color accent) {
         // 计算最大宽度
@@ -582,12 +585,22 @@ public abstract class BsChart extends Actor {
         // tooltip 位置（hoverLocalX/Y + offset）
         float tx = hoverLocalX + 14;
         float ty = hoverLocalY + 14;
-        // 防止超出右边/上边
+        // 防止超出右边/上边/左边
         if (tx + boxW > getWidth()) tx = hoverLocalX - boxW - 8;
         if (ty + boxH > getHeight()) ty = hoverLocalY - boxH - 8;
+        if (tx < 2) tx = 2;
+        if (ty < 2) ty = 2;
 
-        // 文字（背景框在 shape 阶段画了；这里直接画文字）
-        // 改为：在 batch 中无法画框，简化用文字 + 边距
+        // 背景：batch 阶段用纯色 Drawable 画（深色面板 + accent 左条），
+        // 不再依赖 shape 阶段的空实现 hook——旧版无背景时 tooltip 文字叠在图形上看不清
+        if (accent != null) {
+            BsSkinFactory.drawableOf(TOOLTIP_BG).draw(batch, getX() + tx, getY() + ty, boxW, boxH);
+            BsSkinFactory.drawableOf(new Color(accent.r, accent.g, accent.b, 0.95f))
+                    .draw(batch, getX() + tx, getY() + ty, 2, boxH);
+        } else {
+            BsSkinFactory.drawableOf(TOOLTIP_BG).draw(batch, getX() + tx, getY() + ty, boxW, boxH);
+        }
+
         float oldColor = packColor(font.getColor());
         for (int i = 0; i < lines.length; i++) {
             if (i == 0) {

@@ -11,6 +11,8 @@
 package cn.pingyuanren.bs.ui;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -18,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Bootstrap 风格饼图（PieChart）—— 基于 {@link BsChart}，扇形填充。
@@ -67,6 +70,15 @@ public class BsPieChart extends BsChart {
     /** 每个 slice 的扇形参数 [startDeg, sweepDeg, cx, cy, r]，hover 检测用。 */
     private final List<float[]> sliceRects = new ArrayList<>();
 
+    // ---- 抗锯齿（超采样纹理缓存） ----
+    /** true = 超采样 Pixmap 缓存纹理渲染（边缘平滑）；false = ShapeRenderer 直绘（旧路径）。 */
+    private boolean antialias = true;
+    /** 纵向图例的数值后缀（如耗时 "12.3s" / 步数 "38 步"）；null = 只显示百分比。 */
+    private Function<Float, String> legendValueFormatter;
+    private Texture pieTexture;
+    private int pieTexW, pieTexH;
+    private String pieCacheKey;
+
     public BsPieChart setSlices(Object... labelValuePairs) {
         slices.clear();
         for (int i = 0; i + 1 < labelValuePairs.length; i += 2) {
@@ -85,6 +97,23 @@ public class BsPieChart extends BsChart {
 
     public BsPieChart setDonutHole(float ratio) {
         this.donutHole = Math.max(0, Math.min(0.9f, ratio));
+        return this;
+    }
+
+    /**
+     * 抗锯齿开关（默认开）：开 = 饼图主体画进 2~3 倍超采样 Pixmap 缓存纹理，
+     * 以 Linear 采样缩回显示，扇形/圆边缘平滑无锯齿；关 = ShapeRenderer 直绘（旧行为）。
+     * 纹理按（尺寸/数据/hover/显隐）缓存，静止时零重绘开销。
+     */
+    public BsPieChart setAntialias(boolean v) {
+        this.antialias = v;
+        this.pieCacheKey = null;
+        return this;
+    }
+
+    /** 纵向（LEFT/RIGHT）图例的数值后缀格式器：入参 slice 值，返回展示文本（如 "12.3s"）。 */
+    public BsPieChart setLegendValueFormatter(Function<Float, String> formatter) {
+        this.legendValueFormatter = formatter;
         return this;
     }
 
@@ -151,17 +180,23 @@ public class BsPieChart extends BsChart {
             // 记录稳定的 slice 参数（原始 cx/cy/r，不含外推），用于 hover 检测
             // arc 数学坐标系：startAngleDeg - sweep 是起始角（顺时针）
             sliceRects.add(new float[]{i, startAngleDeg - sweep, sweep});
+            float a1 = startAngleDeg;   // 本 slice 覆盖 [a1-sweep, a1]（CCW）
+            startAngleDeg -= sweep;
+            if (antialias) continue;   // AA 路径：几何进缓存纹理，batch 阶段绘制
             // hover 时扇形稍微外推（不影响 sliceRects 的稳定参数）
             boolean isHovered = (hoverSeriesIdx == i);
             float ox = 0, oy = 0;
             if (isHovered) {
-                float midDeg = (float) Math.toRadians(startAngleDeg - sweep / 2f);
+                float midDeg = (float) Math.toRadians(a1 - sweep / 2f);
                 ox = (float) Math.cos(midDeg) * 6;
                 oy = (float) Math.sin(midDeg) * 6;
             }
             sr.setColor(c);
-            sr.arc(cx + ox, cy + oy, r, startAngleDeg - sweep, sweep, Math.max(6, (int) (sweep / 4)));
-            startAngleDeg -= sweep;
+            sr.arc(cx + ox, cy + oy, r, a1 - sweep, sweep, Math.max(6, (int) (sweep / 4)));
+        }
+        if (antialias) {
+            ensurePieTexture(total, size, cx, cy, r);
+            return;
         }
 
         // 环形：挖空中心
@@ -169,6 +204,123 @@ public class BsPieChart extends BsChart {
             sr.setColor(BsTheme.be());
             sr.circle(cx, cy, r * donutHole);
         }
+    }
+
+    // ========================= 抗锯齿：超采样纹理缓存 =========================
+
+    /**
+     * 饼图主体画进超采样 Pixmap（2~3×）→ Linear 纹理缓存 → drawTextOverlay 阶段整幅贴回。
+     * ShapeRenderer 直绘无边缘 AA，小尺寸扇形锯齿明显；超采样 + 双线性缩回后边缘平滑。
+     * 缓存键 = 尺寸/hover/显隐/数据（值+色），静止时零重绘；绘制在 GL 线程（draw 回调内）。
+     */
+    private void ensurePieTexture(float total, float size, float cx, float cy, float r) {
+        String key = pieCacheKey();
+        if (pieTexture != null && key.equals(pieCacheKey)) return;
+        pieCacheKey = key;
+        int w = Math.max(8, (int) Math.ceil(getWidth()));
+        int h = Math.max(8, (int) Math.ceil(getHeight()));
+        int ss = supersample(w, h);
+        if (pieTexture != null && (pieTexW != w || pieTexH != h)) {
+            pieTexture.dispose();
+            pieTexture = null;
+        }
+        pieTexW = w;
+        pieTexH = h;
+        Pixmap pm = new Pixmap(w * ss, h * ss, Pixmap.Format.RGBA8888);
+        // Pixmap y 轴向下：actor 局部 y 上向 → 纹理行翻转（py = pmH - localY*ss），角度取 -sin
+        float pmCx = cx * ss, pmCy = h * ss - cy * ss;
+        float startAngleDeg = 90f;
+        for (int i = 0; i < slices.size(); i++) {
+            if (hidden.get(i)) continue;
+            Slice s = slices.get(i);
+            float sweep = s.value / total * 360f;
+            float a1 = startAngleDeg;
+            startAngleDeg -= sweep;
+            float ox = 0, oy = 0;
+            if (hoverSeriesIdx == i) {   // hover 外推 6px（与直绘路径一致）
+                float midDeg = (float) Math.toRadians(a1 - sweep / 2f);
+                ox = (float) Math.cos(midDeg) * 6 * ss;
+                oy = -(float) Math.sin(midDeg) * 6 * ss;   // y 翻转
+            }
+            pm.setColor(s.color != null ? s.color : Color.GRAY);
+            fillWedge(pm, pmCx + ox, pmCy + oy, r * ss, a1 - sweep, a1);
+        }
+        if (donutHole > 0) {   // 环形：中心抠透明（背景透出，等价旧路径填底色）
+            pm.setBlending(Pixmap.Blending.None);
+            pm.setColor(0, 0, 0, 0);
+            pm.fillCircle(Math.round(pmCx), Math.round(pmCy), Math.max(1, Math.round(r * donutHole * ss)));
+            pm.setBlending(Pixmap.Blending.SourceOver);
+        }
+        if (pieTexture != null) pieTexture.dispose();
+        pieTexture = new Texture(pm);
+        pieTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        pm.dispose();
+    }
+
+    /** 缓存键：影响像素的全部输入（尺寸/数据/色/hover/显隐/环形）。 */
+    private String pieCacheKey() {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append((int) getWidth()).append('x').append((int) getHeight())
+                .append('#').append(hoverSeriesIdx)
+                .append('/').append(Float.floatToIntBits(donutHole))
+                .append('/').append(hidden.hashCode());
+        for (Slice s : slices) {
+            sb.append('|').append(Float.floatToIntBits(s.value))
+                    .append(',').append(s.color != null ? s.color.toIntBits() : 0);
+        }
+        return sb.toString();
+    }
+
+    /** 超采样倍率：小图 3×、大图 2×（总像素 ≈ ≤1.5M 封顶，GWT 堆友好）。 */
+    private static int supersample(int w, int h) {
+        int ss = 3;
+        while (ss > 1 && (long) w * h * ss * ss > 1_500_000) ss--;
+        return ss;
+    }
+
+    /** 2° 步进三角扇填充扇形（数学角 CCW，y 已翻转）。 */
+    private static void fillWedge(Pixmap pm, float cx, float cy, float r, float a0, float a1) {
+        for (float a = a0; a < a1; a += 2f) {
+            float b = Math.min(a1, a + 2f);
+            pm.fillTriangle(Math.round(cx), Math.round(cy),
+                    Math.round(cx + r * cosDeg(a)), Math.round(cy - r * sinDeg(a)),
+                    Math.round(cx + r * cosDeg(b)), Math.round(cy - r * sinDeg(b)));
+        }
+    }
+
+    private static float cosDeg(float deg) {
+        return (float) Math.cos(Math.toRadians(deg));
+    }
+
+    private static float sinDeg(float deg) {
+        return (float) Math.sin(Math.toRadians(deg));
+    }
+
+    /** AA 路径：饼图纹理在文字层之前绘制（饼在图例/tooltip 之下）。 */
+    @Override
+    protected void drawTextOverlay(Batch batch, float parentAlpha) {
+        if (antialias && pieTexture != null) {
+            batch.setColor(1, 1, 1, parentAlpha);
+            batch.draw(pieTexture, getX(), getY(), getWidth(), getHeight());
+            batch.setColor(1, 1, 1, 1);
+        }
+        super.drawTextOverlay(batch, parentAlpha);
+    }
+
+    /** 从舞台移除（含 stage.clear/Stage.dispose 走 Group.clear → remove）时释放缓存纹理。 */
+    @Override
+    public boolean remove() {
+        disposePieTexture();
+        return super.remove();
+    }
+
+    /** 显式释放缓存纹理（remove 已覆盖常规路径，此方法兜底手动管理场景）。 */
+    public void disposePieTexture() {
+        if (pieTexture != null) {
+            pieTexture.dispose();
+            pieTexture = null;
+        }
+        pieCacheKey = null;
     }
 
     /** 计算饼图直径（让出图例区）。 */
@@ -285,9 +437,36 @@ public class BsPieChart extends BsChart {
         }
         if (total <= 0) return;
         float pct = s.value / total * 100f;
+        // 值文本与图例同口径：有 legendValueFormatter 用它（如 3754ms → "3.754s"），否则裸数值
+        String valTxt = legendValueFormatter != null
+                ? legendValueFormatter.apply(s.value) : fmt(s.value);
         drawTooltipBox(batch, parentAlpha,
-                new String[]{s.label, fmt(s.value) + "  (" + fmt(pct) + "%)"},
+                new String[]{s.label, valTxt + "  (" + fmt(pct) + "%)"},
                 s.color != null ? s.color : Color.GRAY);
+    }
+
+    /**
+     * 纵向图例列宽：与 {@link #drawLegend} 的 labelProvider 同口径测量
+     * （label + 百分比 + {@code legendValueFormatter} 后缀）。
+     * 基类只量 label 会把图例估窄（"F2L" vs "F2L 40.7%  10.324s"），
+     * 饼图按窄图例算直径 → 实际图例画出 actor 右边界外（0.3.10 修复）。
+     */
+    @Override
+    protected float measureLegendColWidth() {
+        float total = 0;
+        for (int i = 0; i < slices.size(); i++) {
+            if (!hidden.get(i)) total += slices.get(i).value;
+        }
+        total = Math.max(0.0001f, total);
+        float max = 0;
+        for (int i = 0; i < slices.size(); i++) {
+            Slice s = slices.get(i);
+            String txt = s.label + " " + fmt(s.value / total * 100) + "%";
+            if (legendValueFormatter != null) txt += "  " + legendValueFormatter.apply(s.value);
+            glyphLayout.setText(font, txt);
+            if (glyphLayout.width > max) max = glyphLayout.width;
+        }
+        return max + measureBlockWidth() + 10;
     }
 
     /** 把 slices 同步到 seriesList，让基类图例能渲染。 */
@@ -319,7 +498,9 @@ public class BsPieChart extends BsChart {
         super.drawLegend(batch, parentAlpha, i -> {
             Slice s = slices.get(i);
             if (horizontal) return s.label;
-            return s.label + " " + fmt(s.value / totalFinal * 100) + "%";
+            String txt = s.label + " " + fmt(s.value / totalFinal * 100) + "%";
+            if (legendValueFormatter != null) txt += "  " + legendValueFormatter.apply(s.value);
+            return txt;
         });
     }
 

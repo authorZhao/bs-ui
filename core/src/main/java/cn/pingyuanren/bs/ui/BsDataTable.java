@@ -328,5 +328,14 @@ public class BsDataTable extends Table {
     }
 
     public BsTable getInnerTable() { return table; }
+
+    /**
+     * 按列宽（透传内部 BsTable）：第 i 列取 widths[i]，&lt;=0 或未覆盖列用统一列宽。
+     * 须在 setHeaders 之后调用（或之后再 setData 也行，rebuild 会重排）。兼容：不调用行为不变。
+     */
+    public BsDataTable setColumnWidths(float... widths) {
+        table.setColWidths(widths);
+        return this;
+    }
     public BsPagination getPagination() { return pagination; }
 }
