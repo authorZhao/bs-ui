@@ -32,7 +32,9 @@ import java.util.function.Supplier;
  * <ul>
  *   <li><b>分页</b>：内置 Pagination，自动按 pageSize 切页</li>
  *   <li><b>排序</b>：点表头列触发排序（业务方可提供 Comparator，或用默认字符串比较）</li>
- *   <li><b>行选择</b>：单选/多选，{@link #setSelected} / {@link #getSelectedIndices}</li>
+
+ *   <li><b>行选择</b>：单选/多选，{@link #setSelected} / {@link #getSelectedIndices}；
+ *       重载 / 翻页 / 排序会清选中，页面跟着选中状态走用 {@link #setOnSelectionChange}</li>
  *   <li><b>空状态</b>：data 为空时自动显示 BsEmpty，避免空白</li>
  *   <li><b>加载态</b>：可选 LoadingOverlay 叠加（业务方控制显示/隐藏）</li>
  * </ul>
@@ -83,6 +85,8 @@ public class BsDataTable extends Table {
     private boolean sortAscending = true;
     private SortCallback onSort;
     private Consumer<Integer> onRowSelect;
+    /** 选中集变化通知（点击 / 程序设置 / 翻页 / 排序 / 重载都会触发；参数 = 当前选中的全量下标，可能为空）。 */
+    private Consumer<List<Integer>> onSelectionChange;
     private Comparator<List<String>> colComparator;
     private final BitSet selected = new BitSet();
 
@@ -116,7 +120,10 @@ public class BsDataTable extends Table {
         pagination = new BsPagination(skin);
         pagination.setOnChange(page -> {
             currentPage = page;
+            // 换页后全量下标指着的是上一页的行：选中集和行高亮一起清（高亮在 BsTable.setData 里清）
+            selected.clear();
             refreshPage();
+            selectionChanged();
         });
         footerRow.add(infoLabel).growX().left();
         footerRow.add(pagination).right();
@@ -151,6 +158,7 @@ public class BsDataTable extends Table {
         pagination.setTotalPages(totalPages);
         pagination.setCurrentPage(currentPage);
         refreshPage();
+        selectionChanged();
         return this;
     }
 
@@ -192,9 +200,9 @@ public class BsDataTable extends Table {
     public boolean isMultiSelect() { return multiSelect; }
 
     /**
-     * 启用「LABEL 模式 + 勾选列」：cell 是纯 Label，最左侧出现勾选列单独切换选中，
-     * 行点击不再自动 toggle 选中（只触发 onRowSelect 回调）。
-     * 勾选列点击会触发 onRowSelect。
+     * 启用「LABEL 模式 + 勾选列」：cell 是纯 Label，最左侧出现勾选列。
+     * 点勾选框和点行身一个语义：切换该行选中，并触发 onRowSelect（参数 = 全量下标；
+     * 取消选中也会回调，当前是否选中用 {@link #getSelectedIndices} 判断）。
      * @param multi 是否多选（true 多选 / false 单选）
      */
     public BsDataTable setLabelModeWithCheckColumn(boolean multi) {
@@ -209,13 +217,7 @@ public class BsDataTable extends Table {
 
     /** 勾选列点击 → 切换 BitSet 并通知回调。 */
     private void handleCheckToggle(int rowInCurrentPage) {
-        int absIdx = (currentPage - 1) * pageSize + rowInCurrentPage;
-        boolean wasSelected = selected.get(absIdx);
-        if (!multiSelect) selected.clear();
-        selected.set(absIdx, !wasSelected);
-        if (onRowSelect != null) {
-            try { onRowSelect.accept(absIdx); } catch (Throwable t) { log.warn("onRowSelect", t); }
-        }
+        handleRowClick(rowInCurrentPage);
     }
 
     public BsDataTable setSelected(int rowIdx, boolean sel) {
@@ -230,6 +232,7 @@ public class BsDataTable extends Table {
         if (onRowSelect != null) {
             try { onRowSelect.accept(rowIdx); } catch (Throwable t) { log.warn("onRowSelect", t); }
         }
+        selectionChanged();
         return this;
     }
 
@@ -247,23 +250,34 @@ public class BsDataTable extends Table {
         return r;
     }
 
-    public BsDataTable clearSelection() { selected.clear(); return this; }
+    /** 清选中集，连内层行高亮 / 勾选一起清。 */
+    public BsDataTable clearSelection() { selected.clear(); table.clearRowSelection(); selectionChanged(); return this; }
 
     public BsDataTable setOnRowSelect(Consumer<Integer> cb) { this.onRowSelect = cb; return this; }
 
+    /** 页面要跟着选中状态走（高亮 ⇔ 自己记的下标）用这个：任何原因让选中集变了都会通知。 */
+    public BsDataTable setOnSelectionChange(Consumer<List<Integer>> cb) { this.onSelectionChange = cb; return this; }
+
+    private void selectionChanged() {
+        if (onSelectionChange != null) {
+            try { onSelectionChange.accept(getSelectedIndices()); } catch (Throwable t) { log.warn("onSelectionChange", t); }
+        }
+    }
+
+    /**
+     * 行身点击（勾选列模式下勾选框点击也走这里）→ 切换该行选中并通知回调。
+     * 内层 BsTable 点击时同步翻自己的行高亮，两份状态在这里对齐。
+     */
     private void handleRowClick(int rowInCurrentPage) {
         // 转成全量 data 的索引
         int absIdx = (currentPage - 1) * pageSize + rowInCurrentPage;
-        // BUTTON 模式 / LABEL 模式无勾选列：行点击切换选中
-        // LABEL 模式 + 勾选列：行点击仅触发回调，不切换选中（让勾选列单独管）
-        if (!useLabelModeWithCheck) {
-            boolean wasSelected = selected.get(absIdx);
-            if (!multiSelect) selected.clear();
-            selected.set(absIdx, !wasSelected);
-        }
+        boolean wasSelected = selected.get(absIdx);
+        if (!multiSelect) selected.clear();
+        selected.set(absIdx, !wasSelected);
         if (onRowSelect != null) {
             try { onRowSelect.accept(absIdx); } catch (Throwable t) { log.warn("onRowSelect", t); }
         }
+        selectionChanged();
     }
 
     // ========================= 排序 =========================
@@ -287,6 +301,8 @@ public class BsDataTable extends Table {
             sortCol = colIdx;
             sortAscending = true;
         }
+        // 排序会重排 data：选中集里的全量下标对着的是旧顺序，连高亮一起清（高亮在 refreshPage → BsTable.setData 里清）
+        selected.clear();
         doSort(colIdx, sortAscending);
         if (onSort != null) {
             try { onSort.onSort(colIdx, sortAscending); } catch (Throwable t) { log.warn("onSort", t); }
@@ -294,6 +310,7 @@ public class BsDataTable extends Table {
         currentPage = 1;
         pagination.setCurrentPage(1);
         refreshPage();
+        selectionChanged();
     }
 
     private void doSort(int colIdx, boolean ascending) {

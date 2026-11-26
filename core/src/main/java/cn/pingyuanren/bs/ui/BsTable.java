@@ -116,6 +116,9 @@ public class BsTable extends Table {
 
     public void setData(List<List<String>> data) {
         this.data = data != null ? data : Collections.emptyList();
+        // 新数据不带旧高亮：行下标对的是新内容，旧选中留着会亮在另一条记录上（重载 / 翻页 / 排序都走这里）
+        selectedRow = -1;
+        selectedRows.clear();
         rebuild();
     }
 
@@ -151,6 +154,13 @@ public class BsTable extends Table {
     }
 
     public int getSelectedRow() { return selectedRow; }
+
+    /** 清掉行高亮（单选的当前行 + 多选的集合）。 */
+    public void clearRowSelection() {
+        selectedRow = -1;
+        selectedRows.clear();
+        rebuild();
+    }
 
     public void setToggleOnClick(boolean t) { this.toggleOnClick = t; }
 
@@ -345,18 +355,13 @@ public class BsTable extends Table {
                 cellActor.clearListeners();
                 cellActor.addListener(new ClickListener() {
                     @Override public void clicked(InputEvent event, float x, float y) {
-                        // 勾选列存在时，行点击仅触发 onRowClick，不切换选中
-                        if (checkedColumnVisible) {
-                            if (onRowClick != null) {
-                                try { onRowClick.accept(row); } catch (Throwable t) { log.warn("row click", t); }
-                            }
-                        } else {
-                            if (selectableRows) {
-                                toggleRowSelection(row);
-                            }
-                            if (onRowClick != null) {
-                                try { onRowClick.accept(row); } catch (Throwable t) { log.warn("row click", t); }
-                            }
+                        // 行身和勾选框一个语义：切换该行选中。有勾选列时原先只回调不切换，
+                        // 结果这里的高亮和 BsDataTable 的选中集对不上（点了行身没高亮）
+                        if (selectableRows) {
+                            toggleRowSelection(row);
+                        }
+                        if (onRowClick != null) {
+                            try { onRowClick.accept(row); } catch (Throwable t) { log.warn("row click", t); }
                         }
                     }
                     @Override public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
