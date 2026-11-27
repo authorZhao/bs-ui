@@ -235,6 +235,10 @@ public class BsTable extends Table {
                 hw.fill();
                 hw.pad(0, 8, 0, 8);
                 hw.left();
+                // 省略号要生效，标签得能被压到格子宽以内：不折行的 Label 向容器报的"最小宽"就是它的自然文字宽，
+                // 容器按最小宽兜底、从不把它压窄——所以 0.3.9 起的省略号其实一直没生效，超宽文字按自然宽画出格子、
+                // 压到右邻上（0.3.12 修复；cube-rubik 录像详情的解法表 2026-11-27 出图才发现）。显式按列宽时放开
+                if (colWidths != null) hw.minWidth(0);
                 // 排序点击
                 if (onHeaderClick != null) {
                     hw.setTouchable(Touchable.enabled);
@@ -295,6 +299,7 @@ public class BsTable extends Table {
                 cw.fill();
                 cw.pad(0, 8, 0, 8);
                 cw.left();
+                if (colWidths != null) cw.minWidth(0);   // 同表头：放开最小宽，省略号才生效（0.3.12）
                 cw.setBackground(rowBg(isSelected, false));
                 add(cw).width(widthOf(c)).height(28).pad(0);
             }
