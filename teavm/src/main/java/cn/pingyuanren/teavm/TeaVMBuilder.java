@@ -136,7 +136,7 @@ public class TeaVMBuilder {
             list.add(cp(iconPre + "bootstrap-icons2.png"));
             list.add(cp(iconPre + "bootstrap-icons3.png"));
 
-            // emoji：彩色 emoji + 头像图集（BsEmoji 加载）
+            // emoji：彩色 emoji + 头像图集（BsIcon.loadEmoji / loadHeads）
             var emojiPre = "cn/pingyuanren/bs/ui/emoji/";
             list.add(cp(emojiPre + "emoji.atlas"));
             list.add(cp(emojiPre + "emoji.png"));

@@ -23,7 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
-import cn.pingyuanren.bs.ui.BsEmoji;
+import cn.pingyuanren.bs.ui.BsIcon;
 import cn.pingyuanren.bs.ui.BsSkinFactory;
 import cn.pingyuanren.bs.ui.BsText;
 import cn.pingyuanren.bs.ui.BsTheme;
@@ -155,19 +155,17 @@ public class WinRow extends Table {
     /**
      * 把 icon 字符串转成 Actor：
      * <ul>
-     *   <li>如果 BsEmoji 已加载且该字符串对应 emoji region → 返回 {@link Image}（彩色 emoji 图标）</li>
+     *   <li>如果 emoji 图集里有这个 emoji 的 region → 返回 {@link Image}（彩色 emoji 图标）</li>
      *   <li>否则 → 返回 {@link BsText}（文字符号，如 ⌂ ⓑ ⊞ ⟳ ⚡）</li>
      * </ul>
      */
     private static Actor emojiOrText(String icon) {
-        if (BsEmoji.isLoaded()) {
-            Drawable emojiD = BsEmoji.get(icon);
-            if (emojiD != null) {
-                Image img = new Image(emojiD);
-                // emoji 32×32 源图，缩放到接近 LG 文字的视觉大小（约 24px）
-                img.setScaling(com.badlogic.gdx.utils.Scaling.fit);
-                return img;
-            }
+        Drawable emojiD = BsIcon.emoji(icon);
+        if (emojiD != null) {
+            Image img = new Image(emojiD);
+            // emoji 32×32 源图，缩放到接近 LG 文字的视觉大小（约 24px）
+            img.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+            return img;
         }
         return new BsText(icon, BsText.Size.LG);
     }

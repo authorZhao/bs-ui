@@ -150,7 +150,7 @@ public class WinSettingsScreen implements Screen, Router {
         nav.defaults().growX().left();
 
         // 头像 + 名字（导航栏最顶）：优先用 emoji 头像图集，否则回退到纯色圆形
-        Drawable avD = cn.pingyuanren.bs.ui.BsEmoji.randomHead();
+        Drawable avD = cn.pingyuanren.bs.ui.BsIcon.randomHead();
         Image avatar;
         if (avD != null) {
             avatar = new Image(avD);
@@ -233,8 +233,7 @@ public class WinSettingsScreen implements Screen, Router {
             this.itemSkin = skin;
             left();
             // 优先用 emoji 图集里的彩色图标；没有则用文字符号（iconSym 首字符）。
-            com.badlogic.gdx.scenes.scene2d.utils.Drawable emojiD =
-                    cn.pingyuanren.bs.ui.BsEmoji.isLoaded() ? cn.pingyuanren.bs.ui.BsEmoji.get(iconSym) : null;
+            com.badlogic.gdx.scenes.scene2d.utils.Drawable emojiD = cn.pingyuanren.bs.ui.BsIcon.emoji(iconSym);
             if (emojiD != null) {
                 setIcon(emojiD);
             } else {

@@ -307,7 +307,6 @@ public class BsSkinApp extends Game {
         super.dispose();
         BsUI.registeredSkins().forEach(Skin::dispose);
         BsSkin.disposeFontCache();
-        cn.pingyuanren.bs.ui.BsEmoji.dispose();
         cn.pingyuanren.bs.ui.BsIcon.dispose();
         if (overlayStage != null) overlayStage.dispose();
         BsUI.dispose();
