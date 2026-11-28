@@ -57,10 +57,10 @@
 
 | 项目 | 要求 |
 |------|------|
-| ☕ **Java** | **25+（必须）** —— 编译与运行都是 |
+| ☕ **Java** | **构建用 JDK 25**；跨平台库 common / core / bs-res 出 Java 17 字节码（安卓可直接引用），demo / lwjgl3 / teavm 等模块是 Java 25 |
 | 🧱 构建工具 | Gradle（仓库自带 wrapper，无需安装） |
 
-> ⚠️ **重要**：本项目基于 **Java 25** 构建（虚拟增强特性 + 最新语法），而 Android 平台官方工具链远未支持到 Java 25，因此 **bs-ui 不支持安卓**，选型时请注意。
+> ℹ️ **说明**：跨平台库 **common / core / bs-res** 按 `release = 17` 编译成 **Java 17 字节码**（安卓 D8 可用），其余模块（demo / lwjgl3 / teavm）按 25 编译；构建请用 JDK 25。
 
 ## 📱 平台支持矩阵
 
@@ -71,7 +71,7 @@
 | 🌐 Web（TeaVM） | ✅ | 基本测试通过 |
 | 🖥️ Native（GraalVM） | 🧪 | 实验性，配置见 `lwjgl3/nativeimage.gradle` |
 | 🍎 macOS | 🧪 | 理论可用，未验证 |
-| 🤖 Android | ❌ | 不支持（Java 25+ 门槛） |
+| 🤖 Android | ✅ | 引用 core / res（Java 17 字节码）即可，cube-rubik 安卓版已在真机验证；demo 不上安卓 |
 | 📲 iOS | ❌ | 不支持 |
 
 ## 🖼️ 效果展示

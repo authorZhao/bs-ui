@@ -57,10 +57,10 @@ Core components (90+), three themes (Light / Dark / Admin), FreeType CJK fonts, 
 
 | Item | Requirement |
 |------|-------------|
-| ☕ **Java** | **25+ (mandatory)** — for both compile and runtime |
+| ☕ **Java** | **JDK 25 to build**; the cross-platform libraries common / core / bs-res are compiled to Java 17 bytecode (Android-ready), demo / lwjgl3 / teavm etc. are Java 25 |
 | 🧱 Build tool | Gradle (wrapper included in the repo, no install needed) |
 
-> ⚠️ **Important**: this project is built on **Java 25** (modern language features + JVM improvements), while the official Android toolchain is far from supporting Java 25. Therefore **bs-ui does not support Android** — please take this into account when choosing.
+> ℹ️ **Note**: the cross-platform libraries **common / core / bs-res** are compiled with `release = 17` to **Java 17 bytecode** (fine for Android's D8); the other modules (demo / lwjgl3 / teavm) are compiled for 25 — build with JDK 25.
 
 ## 📱 Platform support matrix
 
@@ -71,7 +71,7 @@ Core components (90+), three themes (Light / Dark / Admin), FreeType CJK fonts, 
 | 🌐 Web (TeaVM) | ✅ | Mostly tested |
 | 🖥️ Native (GraalVM) | 🧪 | Experimental; config in `lwjgl3/nativeimage.gradle` |
 | 🍎 macOS | 🧪 | Should work, unverified |
-| 🤖 Android | ❌ | Not supported (Java 25+ barrier) |
+| 🤖 Android | ✅ | Consume core / res (Java 17 bytecode); verified on a real device by the cube-rubik Android build — demo itself doesn't target Android |
 | 📲 iOS | ❌ | Not supported |
 
 ## 🖼️ Screenshots

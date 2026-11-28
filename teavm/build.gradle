@@ -6,11 +6,7 @@ sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
 project.ext.mainClassName = "cn.pingyuanren.teavm.TeaVMBuilder"
 eclipse.project.name = appName + "-teavm"
 
-// This must be at least 11, and no higher than the JDK version this project is built with.
-java.targetCompatibility = "25"
-// This should probably be equal to targetCompatibility, above. This only affects the TeaVM module.
-java.sourceCompatibility = "25"
-
+// 字节码版本由根 build.gradle 统一配：本模块 25；跨平台库 common / core / bs-res 是 17
 
 dependencies {
   implementation "com.badlogicgames.gdx:gdx-box2d-gwt:$gdxVersion"

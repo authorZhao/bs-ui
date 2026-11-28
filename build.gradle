@@ -29,10 +29,12 @@ allprojects {
 configure(subprojects) {
   apply plugin: 'java-library'
 
-  compileJava {
+  // 字节码基线分两档：跨平台库 common / core / bs-res（core 对外 api 暴露 common，安卓 D8 只吃到 Java 17）→ release 17；
+  // 其余模块（demo / lwjgl3 / teavm）→ 25。用 release 而不是 source/target：连 API 也卡住，不会误用更高版本的新方法
+  def releaseFor = name in ['common', 'core', 'bs-res'] ? 17 : 25
+  tasks.withType(JavaCompile).configureEach {
     options.incremental = true
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    options.release = releaseFor
   }
 }
 

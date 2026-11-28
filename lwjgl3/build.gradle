@@ -14,11 +14,6 @@ sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
 def mainClassName = project.findProperty('mainClass')?.toString() ?: 'cn.pingyuanren.bs.test.BsControlsLauncher'
 application.setMainClass(mainClassName)
 eclipse.project.name = appName + '-lwjgl3'
-java.sourceCompatibility = JavaVersion.VERSION_25
-java.targetCompatibility = JavaVersion.VERSION_25
-if (JavaVersion.current().isJava9Compatible()) {
-  compileJava.options.release.set(25)
-}
 
 dependencies {
   implementation project(':core')
